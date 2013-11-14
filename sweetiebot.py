@@ -58,6 +58,7 @@ class MUCJabberBot(JabberBot):
 
 
 class Sweetiebot(MUCJabberBot):
+    nickname = 'Sweetiebutt'
     kick_owl_delay = 7200
     last_owl_kick = 0
     id_dic = {"":""}
@@ -73,7 +74,7 @@ class Sweetiebot(MUCJabberBot):
     separator = '\x01'
     stop_word = '\x02'
     target = '<target>'
-    mods = ['Blighty','Princess Luna','Princess Cadence','Rainbow Dash','Twilight Sparkle','Big Macintosh','Fluttershard','Rainbow Dash']
+    mods = ['Blighty','Nyctef','Princess Luna','Princess Cadence','Rainbow Dash','Twilight Sparkle','Big Macintosh','Fluttershard','Rainbow Dash']
     emotes = [':sweetie:',':sweetiecrack:',\
               ':sweetiederp:',':sweetiedust:',\
               ':sweetieglee:',':sweetieidea:',\
@@ -93,7 +94,7 @@ class Sweetiebot(MUCJabberBot):
                     'underneath','unlike','until','up','upon','versus','via','with','within','without']
     def __init__(self, *args, **kwargs):
         
-        super(Sweetiebot, self).__init__(*args,**kwargs)
+        super(Sweetiebot, self).__init__(*args, res=self.nickname, **kwargs)
         self.redis_conn = redis.Redis('localhost')
 
     def remove_dup(self, outfile, infile):
@@ -127,7 +128,7 @@ class Sweetiebot(MUCJabberBot):
         
     def save_action(self, action_str):
         s = action_str.lower()
-        s = s.replace('sweetiebot',self.target)
+        s = s.replace(self.nickname.lower(), self.target)
         f = open('Sweetiebot.actions','a')
         f.write(s)
         f.close()
@@ -175,11 +176,11 @@ class Sweetiebot(MUCJabberBot):
             key = self.separator.join(words[1:] + [next_word])
         return ' '.join(gen_words)
     def fix_ping(self, message):
-        message = message.replace("Sweetiebot: ","")
-        message = message.replace("sweetiebot: ","")
+        message = message.replace(self.nickname+": ","")
+        message = message.replace(self.nickname.lower()+": ","")
         return message
     def is_ping(self, message):
-        if "sweetiebot" in message.lower():
+        if self.nickname.lower() in message.lower():
             return True
         else:
             return False
@@ -204,7 +205,7 @@ class Sweetiebot(MUCJabberBot):
             return
         if not message:
             return
-        if self.get_sender_username(mess)=='Sweetiebot':
+        if self.get_sender_username(mess)==self.nickname:
             return
         if self.jid.bareMatch(jid):
             return
@@ -327,7 +328,7 @@ class Sweetiebot(MUCJabberBot):
         message = mess.getBody()
         #misc stuff here I guess
         reply = ""
-        if self.get_sender_username(mess) == "Sweetiebot":
+        if self.get_sender_username(mess) == self.nickname:
             return
         if ":lunaglee:" in message.lower():
             print self.get_sender_username(mess)
@@ -414,7 +415,7 @@ class Sweetiebot(MUCJabberBot):
             
     @botcmd
     def quiet(self, mess,args):
-        '''I will only respond to mentions of Sweetiebot'''
+        '''I will only respond to pings'''
         self.chattiness = -1
         return self.get_sender_username(mess) + ': Sorry! I\'ll be quiet'
     @botcmd
@@ -527,15 +528,14 @@ if __name__ == '__main__':
     #username = 'sweetiebot@friendshipismagicsquad.com/sweetiebutt'
     username = 'nyctef@friendshipismagicsquad.com/sweetiebutt'
     password = 'stopbeingbadluna' #password here
-    nickname = 'Sweetiebutt'
     chatroom = 'general@conference.friendshipismagicsquad.com'
     #chatroom = 'sweetiebot_playhouse@talk.friendshipismagicsquad.com'
 
-    sweet = Sweetiebot(username, password, only_direct=False, command_prefix='',res='Sweetiebutt')
-    print nickname + ' established!'
+    sweet = Sweetiebot(username, password, only_direct=False, command_prefix='')
+    print sweet.nickname + ' established!'
     print username
     print 'Joining Room:' + chatroom
-    sweet.join_room(chatroom, nickname)
+    sweet.join_room(chatroom, sweet.nickname)
     print 'Joined!'
     sweet.serve_forever()
 
