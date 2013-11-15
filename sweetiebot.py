@@ -251,7 +251,10 @@ class Sweetiebot(MUCJabberBot):
                             best_message = generated
 
                 if len(best_message.split(' ')) > self.min_reply_length:
+                    print "Candidate best message " + best_message
                     messages.append(best_message)
+                else:
+                    print "Best message for " + words + " was " + best_message + ", not long enough"
         
         if messages:
             final = random.choice(messages)
