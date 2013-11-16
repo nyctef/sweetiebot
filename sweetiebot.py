@@ -254,7 +254,7 @@ class Sweetiebot(MUCJabberBot):
                     print "Candidate best message " + best_message
                     messages.append(best_message)
                 else:
-                    print "Best message for " + words + " was " + best_message + ", not long enough"
+                    print "Best message for " + '_'.join(words) + " was " + best_message + ", not long enough"
         
         if messages:
             final = random.choice(messages)
