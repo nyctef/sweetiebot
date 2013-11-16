@@ -92,13 +92,12 @@ class Sweetiebot(MUCJabberBot):
                     'minus','near','of','off','on','onto','opposite','outside','over','past','per','plus',\
                     'regarding','round','save','since','than','through','to','toward','towards','under',\
                     'underneath','unlike','until','up','upon','versus','via','with','within','without']
+
     def __init__(self, *args, **kwargs):
-        
         super(Sweetiebot, self).__init__(*args, res=self.nickname, **kwargs)
         self.redis_conn = redis.Redis('localhost')
 
     def remove_dup(self, outfile, infile):
-    
         lines_seen = set() # holds lines already seen
         in_f = open(infile, "r")
         for line in in_f:
@@ -133,6 +132,7 @@ class Sweetiebot(MUCJabberBot):
         f.write(s)
         f.close()
         self.remove_dup('Sweetiebot.actions','Sweetiebot.actions')
+
     def split_message(self, message):
         # split the incoming message into words, i.e. ['what', 'up', 'bro']
         words = message.split()
@@ -175,15 +175,18 @@ class Sweetiebot(MUCJabberBot):
             # create a new key combining the end of the old one and the next_word
             key = self.separator.join(words[1:] + [next_word])
         return ' '.join(gen_words)
+
     def fix_ping(self, message):
         message = message.replace(self.nickname+": ","")
         message = message.replace(self.nickname.lower()+": ","")
         return message
+
     def is_ping(self, message):
         if self.nickname.lower() in message.lower():
             return True
         else:
             return False
+
     def cuddle(self, mess):
         message = mess.getBody().lower()
         if 'pets' in message:
@@ -193,6 +196,7 @@ class Sweetiebot(MUCJabberBot):
         reply = self.random_line(f)
         reply = reply.replace(self.target,self.get_sender_username(mess).encode('utf-8')) 
         return reply + ' ' + random.choice(self.emotes)
+
     def log_mess(self, mess):
         # speak only when spoken to, or when the spirit moves me
         jid = mess.getFrom()
@@ -267,8 +271,6 @@ class Sweetiebot(MUCJabberBot):
             print 'Quoting instead...'
             return self.quote(mess,'')
 
-
-	
     def callback_message(self, conn, mess):
         ''' Changes the behaviour of the JabberBot in order to allow
         it to answer direct messages. This is used often when it is
@@ -311,7 +313,8 @@ class Sweetiebot(MUCJabberBot):
                 return
             if reply:
                 self.send_simple_reply(mess, reply)
-		return
+        return
+
     def random_line(self,afile):
         try:
             line = next(afile)
@@ -323,9 +326,11 @@ class Sweetiebot(MUCJabberBot):
 
         line = line.replace('\n','')
         return line
+
     def on_ping_timeout(self):
         logging.info('Terminating due to PING timeout.')
         self.quit(1)
+
     def unknown_command(self, mess, cmd, args):
         """Does things"""
         message = mess.getBody()
@@ -357,8 +362,6 @@ class Sweetiebot(MUCJabberBot):
         return self.log_mess(mess)
     
     def get_prices(self, id, system):
-
-
         url = "http://api.eve-central.com/api/marketstat?usesystem=" + \
               str(system) + \
               "&typeid=" + \
@@ -371,8 +374,8 @@ class Sweetiebot(MUCJabberBot):
         sell = '{0:,}'.format(float(sell))
         r = 'buy: ' + buy + ' isk, sell: ' + sell + ' isk'
         return r
-    def id_lookup(self,name):
 
+    def id_lookup(self,name):
         test = name
         test = test.upper()
         reply = None
@@ -399,38 +402,41 @@ class Sweetiebot(MUCJabberBot):
                     i_name = maybe[0]
         return i_id, i_name
 
-#    @botcmd
     def deowl(self, mess, args):
         '''Only kicks :owl, long cooldown'''
         self.kick('general@talk.friendshipismagicsquad.com',':owl', reason=':sweetiestare:')
         return
+
     @botcmd
     def bye(self, mess, args):
         '''Makes me restart! Blighties only!'''
         if self.get_sender_username(mess) == 'Blighty':
             self.quit()
+
 #    @botcmd
     def yell(self, mess, args):
         '''Yells at everyone Blighties only!'''
         if self.get_sender_username(mess) == 'Blighty':
             self.broadcast(args, True)
-   
-            
+          
     @botcmd
     def quiet(self, mess,args):
         '''I will only respond to pings'''
         self.chattiness = -1
         return self.get_sender_username(mess) + ': Sorry! I\'ll be quiet'
+
     @botcmd
     def chat(self, mess, args):
         '''I will chat every once in a while'''
         self.chattiness = .015
         return self.get_sender_username(mess) + ': Ok, I\'ll start chatting again'
+
     @botcmd
     def quote(self, mess, args):
         '''Replays sass'''
         f=open('Sweetiebot.sass','r')
         return self.random_line(f)
+
     @botcmd
     def sass(self, mess, args):
         '''Remembers some sass to say back next time it is mentioned'''
@@ -446,6 +452,7 @@ class Sweetiebot(MUCJabberBot):
         reply = self.get_sender_username(mess) + ': I\'ll remember that!'
         self.remove_dup('Sweetiebot.sass','Sweetiebot.sass')
         return reply
+
     #Karan = 30004306
     #Jita = 30000142
 #    @botcmd
@@ -457,6 +464,7 @@ class Sweetiebot(MUCJabberBot):
         reply = self.get_prices(id,30004306)
         reply = reply = self.get_sender_username(mess) + ': '+name.title() + ' - ' + reply
         return reply
+
     @botcmd
     def jita(self, mess, args):
         '''Looks up Jita Prices, use !jita [ITEM NAME]'''
@@ -466,6 +474,7 @@ class Sweetiebot(MUCJabberBot):
         reply = self.get_prices(id,30000142)
         reply = reply = self.get_sender_username(mess) + ': '+name.title() + ' - ' + reply
         return reply
+
     @botcmd
     def remove (self, mess, args):
         '''kicks! I'm a little drunk right now...hope this works'''
@@ -500,6 +509,7 @@ class Sweetiebot(MUCJabberBot):
             else:
                 reply = reply + " ~ " + new_dice
         return reply
+
 #    @botcmd
     def ban(self, mess, args):
         """Kicks user from muc
@@ -515,7 +525,6 @@ class Sweetiebot(MUCJabberBot):
             item.setTagData('reason', reason)
         self.connect().send(iq)
 
-
     @botcmd
     def date(self, mess, args):
         '''Returns the current date'''
@@ -524,7 +533,6 @@ class Sweetiebot(MUCJabberBot):
         self.send_simple_reply(mess, reply)
 
 if __name__ == '__main__':
-
     logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',filename='sweetiebot.log',level=logging.INFO)
 
     #username = 'blighted@friendshipismagicsquad.com/sweetiebutt'
