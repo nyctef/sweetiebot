@@ -204,7 +204,7 @@ class Sweetiebot(MUCJabberBot):
         message = mess.getBody().lower()
         if 'pets' in message:
             return '/me purrs '+ random.choice(self.emotes)
-        self.save_action(message.replace('\n',' ')+ '\n')
+        #self.save_action(message.replace('\n',' ')+ '\n')
         f = open('Sweetiebot.actions','r')
         reply = self.random_line(f)
         reply = reply.replace(self.target,self.get_sender_username(mess).encode('utf-8')) 
@@ -331,7 +331,8 @@ class Sweetiebot(MUCJabberBot):
     def random_line(self,afile):
         try:
             line = next(afile)
-        except:
+        except Exception as e:
+            print repr(e) + " " + str(e)
             return "/me slaps <target> with a large trout."
         for num, aline in enumerate(afile):
             if random.randrange(num + 2): continue
