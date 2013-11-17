@@ -331,8 +331,7 @@ class Sweetiebot(MUCJabberBot):
     def random_line(self,afile):
         try:
             line = next(afile)
-        except Exception as e:
-            print repr(e) + " " + str(e)
+        except StopException:
             return "/me slaps <target> with a large trout."
         for num, aline in enumerate(afile):
             if random.randrange(num + 2): continue
