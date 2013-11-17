@@ -16,6 +16,18 @@ import redis
 import unicodedata
 import sys
 import logging
+from functools import wraps
+
+
+def logerrors(func):
+    @wraps(func)
+    def logged(self, *args, **kwargs):
+        try: return func(self, *args, **kwargs)
+        except Exception as e: 
+            print 'Error! '+e
+            logging.error(str(e))
+            return "My code is problematic :sweetieoops"
+    return logged
 
 class MUCJabberBot(JabberBot):
 
@@ -409,6 +421,19 @@ class Sweetiebot(MUCJabberBot):
         return
 
     @botcmd
+    @logerrors
+    def hype(self, mess, args):
+        """Get hype! Print time until S4 starts"""
+        #print 'getting hype ..'
+        hypetime = datetime.strptime('03:00PM 2013-11-23', '%I:%M%p %Y-%m-%d')
+        now = datetime.now()
+        diff = hypetime - now
+        message = 'GET HYPE! ONLY {0} DAYS, {1} HOURS, {2} MINUTES AND {3} SECONDS UNTIL SEASON FOUR!'\
+                .format(diff.days, diff.seconds // 3600, (diff.seconds//60)%60, diff.seconds%60)
+        #print message
+        return message
+
+    @botcmd
     def bye(self, mess, args):
         '''Makes me restart! Blighties only!'''
         if self.get_sender_username(mess) == 'Blighty':
@@ -429,7 +454,7 @@ class Sweetiebot(MUCJabberBot):
     @botcmd
     def chat(self, mess, args):
         '''I will chat every once in a while'''
-        self.chattiness = .015
+        self.chattiness = .025
         return self.get_sender_username(mess) + ': Ok, I\'ll start chatting again'
 
     @botcmd
@@ -542,10 +567,12 @@ if __name__ == '__main__':
     password = 'stopbeingbadluna' #password here
     chatroom = 'general@conference.friendshipismagicsquad.com'
     nickname = 'Sweetiebutt'
+    debug = False
 
     import sys
     if '--test' in sys.argv:
         chatroom = 'sweetiebot_playhouse@conference.friendshipismagicsquad.com'
+        debug = True
 
     sweet = Sweetiebot(nickname, username, password, only_direct=False, command_prefix='')
     print sweet.nickname + ' established!'
