@@ -58,7 +58,6 @@ class MUCJabberBot(JabberBot):
 
 
 class Sweetiebot(MUCJabberBot):
-    nickname = 'Sweetiebutt'
     kick_owl_delay = 7200
     last_owl_kick = 0
     id_dic = {"":""}
@@ -93,8 +92,10 @@ class Sweetiebot(MUCJabberBot):
                     'regarding','round','save','since','than','through','to','toward','towards','under',\
                     'underneath','unlike','until','up','upon','versus','via','with','within','without']
 
-    def __init__(self, *args, **kwargs):
-        super(Sweetiebot, self).__init__(*args, res=self.nickname, **kwargs)
+    def __init__(self, nickname='Sweetiebutt', *args, **kwargs):
+        self.nickname = nickname
+        resource = 'sweetiebutt' + ('%08x' % random.randrange(16**8))
+        super(Sweetiebot, self).__init__(*args, res=resource, **kwargs)
         self.redis_conn = redis.Redis('localhost')
 
     def remove_dup(self, outfile, infile):
@@ -537,12 +538,16 @@ if __name__ == '__main__':
 
     #username = 'blighted@friendshipismagicsquad.com/sweetiebutt'
     #username = 'sweetiebot@friendshipismagicsquad.com/sweetiebutt'
-    username = 'nyctef@friendshipismagicsquad.com/sweetiebutt'
+    username = 'nyctef@friendshipismagicsquad.com'
     password = 'stopbeingbadluna' #password here
     chatroom = 'general@conference.friendshipismagicsquad.com'
-    #chatroom = 'sweetiebot_playhouse@talk.friendshipismagicsquad.com'
+    nickname = 'Sweetiebutt'
 
-    sweet = Sweetiebot(username, password, only_direct=False, command_prefix='')
+    import sys
+    if '--test' in sys.argv:
+        chatroom = 'sweetiebot_playhouse@conference.friendshipismagicsquad.com'
+
+    sweet = Sweetiebot(nickname, username, password, only_direct=False, command_prefix='')
     print sweet.nickname + ' established!'
     print username
     print 'Joining Room:' + chatroom
