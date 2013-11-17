@@ -26,7 +26,7 @@ def logerrors(func):
         except Exception as e: 
             print 'Error! '+e
             logging.error(str(e))
-            return "My code is problematic :sweetieoops"
+            return "My code is problematic :sweetieoops:"
     return logged
 
 class MUCJabberBot(JabberBot):
