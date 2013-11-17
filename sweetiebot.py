@@ -417,6 +417,7 @@ class Sweetiebot(MUCJabberBot):
         return i_id, i_name
 
     @botcmd
+    @logerrors
     def deowl(self, mess, args):
         '''Only kicks :owl, long cooldown'''
         if self.last_owl_kick:
