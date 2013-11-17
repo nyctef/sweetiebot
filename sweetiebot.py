@@ -163,6 +163,7 @@ class Sweetiebot(MUCJabberBot):
             for i in range(len(words) - self.chain_length):
                 yield words[i:i + self.chain_length + 1]
 
+    @logerrors
     def generate_message(self, seed):
         key = seed
         
