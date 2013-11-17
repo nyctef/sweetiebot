@@ -422,7 +422,7 @@ class Sweetiebot(MUCJabberBot):
         if self.last_owl_kick:
             if (datetime.now() - self.last_owl_kick).seconds < self.kick_owl_delay:
                 return "I'm tired. Maybe another time?"
-        self.kick('general@talk.friendshipismagicsquad.com',':owl', reason=':sweetiestare:')
+        self.kick('general@conference.friendshipismagicsquad.com',':owl', reason=':sweetiestare:')
         self.last_owl_kick = datetime.now()
         return
 
