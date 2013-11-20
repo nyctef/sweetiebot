@@ -24,7 +24,7 @@ def logerrors(func):
     def logged(self, *args, **kwargs):
         try: return func(self, *args, **kwargs)
         except Exception as e: 
-            print 'Error! '+e
+            print 'Error! '+str(e)
             logging.error(str(e))
             return "My code is problematic :sweetieoops:"
     return logged
@@ -350,30 +350,31 @@ class Sweetiebot(MUCJabberBot):
         message = mess.getBody()
         #misc stuff here I guess
         reply = ""
-        if self.get_sender_username(mess) == self.nickname:
+        sender = self.get_sender_username(mess)
+        if sender == self.nickname:
             return
         if ":lunaglee:" in message.lower():
             print self.get_sender_username(mess)
-            self.kick(chatroom,self.get_sender_username(mess),'Don\'t upset my big sister! :sweetiemad:')
+            self.kick(chatroom,sender,'Don\'t upset my big sister! :sweetiemad:')
             return
         if "c/d" in message.lower():
-            reply = self.get_sender_username(mess) + ": " + random.choice(["c","d"])
+            reply = sender + ": " + random.choice(["c","d"])
             return reply
         if "yiff" in message.lower() and self.is_ping(message):
-            reply = self.get_sender_username(mess) + ": yiff in hell, furfag :sweetiemad:"
+            reply = sender + ": yiff in hell, furfag :sweetiemad:"
             return reply
         if "chain" in message.lower():
-            if self.get_sender_username(mess) == ":owl":
+            if sender == ":owl":
                 self.deowl;
             return
-        if ":lunabeh:" in message.lower() and self.get_sender_username(mess) == ":owl":
+        if ":lunabeh:" in message.lower() and (sender == ":owl" or "luna" in sender.lower()):
             self.lunabeh_count = self.lunabeh_count + 1
             if self.lunabeh_count > self.lunabeh_top:
                 self.lunabeh_top = randint(2,10)
                 self.lunabeh_count = 1
                 reply = ":lunabeh:"
                 return reply
-        if message.lower().strip().endswith(":rdderp:"):
+        if message.lower().strip().endswith(":rdderp:") and self.chattiness:
             return ":rdderp:"
         return self.log_mess(mess)
     
@@ -458,8 +459,13 @@ class Sweetiebot(MUCJabberBot):
     @botcmd
     def quiet(self, mess,args):
         '''I will only respond to pings'''
-        self.chattiness = -1
-        return self.get_sender_username(mess) + ': Sorry! I\'ll be quiet'
+        self.chattiness = 0
+        sender = self.get_sender_username(mess) 
+        if 'rainbow' in sender.lower():
+            return ':rdderp: okay then'
+        if 'luna' in sender.lower():
+            return ':lunabeh: fine'
+        return sender + ': Sorry! I\'ll be quiet'
 
     @botcmd
     def chat(self, mess, args):
