@@ -342,8 +342,8 @@ class Sweetiebot(MUCJabberBot):
         return line
 
     def on_ping_timeout(self):
-        logging.info('Terminating due to PING timeout.')
-        self.quit(1)
+        logging.info('WARNING: ping timeout.')
+        #self.quit(1)
 
     def unknown_command(self, mess, cmd, args):
         """Does things"""
