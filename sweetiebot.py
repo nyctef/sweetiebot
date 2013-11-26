@@ -374,7 +374,7 @@ class Sweetiebot(MUCJabberBot):
                 self.lunabeh_count = 1
                 reply = ":lunabeh:"
                 return reply
-        if message.lower().strip().endswith(":rdderp:") and self.chattiness:
+        if message.lower().strip().endswith(":rdderp:"):
             return ":rdderp:"
         return self.log_mess(mess)
     
