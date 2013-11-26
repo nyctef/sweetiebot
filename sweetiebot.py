@@ -431,7 +431,7 @@ class Sweetiebot(MUCJabberBot):
         self.last_owl_kick = datetime.now()
         return
 
-    @botcmd
+    #@botcmd
     @logerrors
     def hype(self, mess, args):
         """Get hype! Print time until S4 starts"""
