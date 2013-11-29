@@ -24,7 +24,7 @@ def logerrors(func):
     def logged(self, *args, **kwargs):
         try: return func(self, *args, **kwargs)
         except Exception as e: 
-            print 'Error! '+e
+            print 'Error! '+str(e)
             logging.error(str(e))
             return "My code is problematic :sweetieoops:"
     return logged
