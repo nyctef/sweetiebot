@@ -36,7 +36,7 @@ class MUCJabberBot(JabberBot):
 
     flood_protection = 0
     flood_delay = 5
-    PING_FREQUENCY = 10
+    PING_FREQUENCY = 60
     def __init__(self, *args, **kwargs):
         ''' Initialize variables. '''
 
@@ -104,9 +104,12 @@ class Sweetiebot(MUCJabberBot):
                     'regarding','round','save','since','than','through','to','toward','towards','under',\
                     'underneath','unlike','until','up','upon','versus','via','with','within','without']
 
+    def randomstr(self):
+        return ('%08x' % random.randrange(16**8))
+
     def __init__(self, nickname='Sweetiebutt', *args, **kwargs):
         self.nickname = nickname
-        resource = 'sweetiebutt' + ('%08x' % random.randrange(16**8))
+        resource = 'sweetiebutt' + self.randomstr()
         self.redis_conn = kwargs.pop('redis_conn', None) or redis.Redis('localhost')
         super(Sweetiebot, self).__init__(*args, res=resource, **kwargs)
 
@@ -543,6 +546,24 @@ class Sweetiebot(MUCJabberBot):
 
     @botcmd
     @logerrors
+    def listbans(self, mess, args):
+        """List the current bans. Requires admin"""
+        id = 'banlist'+self.randomstr()
+        NS_MUCADMIN = 'http://jabber.org/protocol/muc#admin'
+        item = xmpp.simplexml.Node('item')
+        item.setAttr('affiliation', 'outcast')
+        iq = xmpp.Iq(typ='get', attrs = {"id": id}, queryNS=NS_MUCADMIN, xmlns=None, to=chatroom,
+                payload=set([item]))
+        self.connect().send(iq)
+
+        response = self.connect().WaitForResponse(id, timeout = 5)
+        if response is None:
+            return "timed out waiting for banlist"
+
+        return str(response)
+
+    @botcmd(name='ban')
+    @logerrors
     def ban(self, mess, args):
         '''bans user. Requires admin and a reason
         
@@ -607,21 +628,6 @@ class Sweetiebot(MUCJabberBot):
                 reply = reply + " ~ " + new_dice
         return reply
 
-#    @botcmd
-    def ban(self, mess, args):
-        """Kicks user from muc
-        Works only with sufficient rights."""
-        NS_MUCADMIN = 'http://jabber.org/protocol/muc#admin'
-        item = xmpp.simplexml.Node('item')
-        item.setAttr('nick', nick)
-        item.setAttr('affiliation','outcast')
-        item.setAttr('role', 'none')
-        iq = xmpp.Iq(typ='set', queryNS=NS_MUCADMIN, xmlns=None, to=room,
-                payload=set([item]))
-        if reason is not None:
-            item.setTagData('reason', reason)
-        self.connect().send(iq)
-
     @botcmd
     def date(self, mess, args):
         '''Returns the current date'''
@@ -660,7 +666,7 @@ if __name__ == '__main__':
     if '--test' in sys.argv:
         chatroom = 'sweetiebot_playground@conference.friendshipismagicsquad.com'
         debug = True
-        sweet = Sweetiebot(nickname, username, password, redis_conn=FakeRedis(), only_direct=False, command_prefix='')
+        sweet = Sweetiebot(nickname, username, password, redis_conn=FakeRedis(), only_direct=False, command_prefix='', debug=True)
     else:
         sweet = Sweetiebot(nickname, username, password, only_direct=False, command_prefix='')
 
