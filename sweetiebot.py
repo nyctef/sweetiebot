@@ -520,12 +520,13 @@ class Sweetiebot(MUCJabberBot):
         reply = reply = self.get_sender_username(mess) + ': '+name.title() + ' - ' + reply
         return reply
 
-    def _ban(self, room, nick, reason=None, ban=True):
+    def _ban(self, room, nick=None, jid=None, reason=None, ban=True):
         """Kicks user from muc
         Works only with sufficient rights."""
         NS_MUCADMIN = 'http://jabber.org/protocol/muc#admin'
         item = xmpp.simplexml.Node('item')
-        item.setAttr('nick', nick)
+        if nick is not None: item.setAttr('nick', nick)
+        if jid is not None: item.setAttr('jid', jid)
         item.setAttr('affiliation', 'outcast' if ban else 'none')
         iq = xmpp.Iq(typ='set', queryNS=NS_MUCADMIN, xmlns=None, to=room,
                 payload=set([item]))
@@ -586,6 +587,22 @@ class Sweetiebot(MUCJabberBot):
         if sender in self.mods:
             print("trying to ban "+nick+" with reason "+reason)
             self._ban(chatroom, nick, 'Banned by '+sender +': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y"))
+        else:
+            return "noooooooope."
+
+    @botcmd(name='unban')
+    @logerrors
+    def un(self, mess, args):
+        '''unbans a user. Requires admin and a jid (check listbans)
+        
+        nick can be wrapped in single or double quotes'''
+
+        jid = args
+
+        sender = self.get_sender_username(mess)
+        if sender in self.mods:
+            print("trying to unban "+jid)
+            self._ban(chatroom, jid=jid, ban=False)
         else:
             return "noooooooope."
 
@@ -665,7 +682,7 @@ if __name__ == '__main__':
     #username = 'blighted@friendshipismagicsquad.com/sweetiebutt'
     username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
     #username = 'nyctef@friendshipismagicsquad.com'
-    password = open('password.txt', 'r').read();
+    password = open('password.txt', 'r').read().strip();
     chatroom = 'general@conference.friendshipismagicsquad.com'
     nickname = 'Sweetiebutt'
     debug = False
