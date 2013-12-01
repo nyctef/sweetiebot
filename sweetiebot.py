@@ -85,7 +85,7 @@ class Sweetiebot(MUCJabberBot):
     separator = '\x01'
     stop_word = '\x02'
     target = '<target>'
-    mods = ['Blighty','Nyctef','Princess Luna','Princess Cadence','Rainbow Dash','Twilight Sparkle','Big Macintosh','Fluttershard','Rainbow Dash']
+    mods = ['Blighty','Nyctef','Princess Luna','Luna','LunaNet','Princess Cadence','Rainbow Dash','Twilight Sparkle','Big Macintosh','Fluttershard','Rainbow Dash','Spike']
     emotes = [':sweetie:',':sweetiecrack:',\
               ':sweetiederp:',':sweetiedust:',\
               ':sweetieglee:',':sweetieidea:',\
@@ -517,12 +517,20 @@ class Sweetiebot(MUCJabberBot):
         reply = reply = self.get_sender_username(mess) + ': '+name.title() + ' - ' + reply
         return reply
 
-    @botcmd(name='kick')
-    def remove (self, mess, args):
-        '''kicks user. Requires admin and a reason
-        
-        nick can be wrapped in single or double quotes'''
+    def _ban(self, room, nick, reason=None, ban=True):
+        """Kicks user from muc
+        Works only with sufficient rights."""
+        NS_MUCADMIN = 'http://jabber.org/protocol/muc#admin'
+        item = xmpp.simplexml.Node('item')
+        item.setAttr('nick', nick)
+        item.setAttr('affiliation', 'outcast' if ban else 'none')
+        iq = xmpp.Iq(typ='set', queryNS=NS_MUCADMIN, xmlns=None, to=room,
+                payload=set([item]))
+        if reason is not None:
+            item.setTagData('reason', reason)
+        self.connect().send(iq)
 
+    def get_nick_reason(self, args):
         nick = None
         reason = None
         match = re.match("\s*'([^']*)'(.*)", args) or\
@@ -531,6 +539,35 @@ class Sweetiebot(MUCJabberBot):
         if match:
             nick = match.group(1)
             reason = match.group(2).strip()
+        return nick, reason
+
+    @botcmd
+    @logerrors
+    def ban(self, mess, args):
+        '''bans user. Requires admin and a reason
+        
+        nick can be wrapped in single or double quotes'''
+
+        nick, reason = self.get_nick_reason(args)
+
+        if not len(reason):
+            return "A reason must be provided"
+
+        sender = self.get_sender_username(mess)
+        if sender in self.mods:
+            print("trying to ban "+nick+" with reason "+reason)
+            self._ban(chatroom, nick, 'Banned by '+sender +': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y"))
+        else:
+            return "noooooooope."
+
+    @botcmd(name='kick')
+    @logerrors
+    def remove (self, mess, args):
+        '''kicks user. Requires admin and a reason
+        
+        nick can be wrapped in single or double quotes'''
+
+        nick, reason = self.get_nick_reason(args)
 
         if not len(reason):
             return "A reason must be provided"
