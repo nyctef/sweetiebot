@@ -544,6 +544,9 @@ class Sweetiebot(MUCJabberBot):
             reason = match.group(2).strip()
         return nick, reason
 
+    def chat(self, message):
+        self.send(chatroom, message, message_type='groupchat')
+
     @botcmd
     @logerrors
     def listbans(self, mess, args):
@@ -554,13 +557,18 @@ class Sweetiebot(MUCJabberBot):
         item.setAttr('affiliation', 'outcast')
         iq = xmpp.Iq(typ='get', attrs = {"id": id}, queryNS=NS_MUCADMIN, xmlns=None, to=chatroom,
                 payload=set([item]))
-        self.connect().send(iq)
 
-        response = self.connect().WaitForResponse(id, timeout = 5)
-        if response is None:
-            return "timed out waiting for banlist"
-
-        return str(response)
+        def handleBanlist(session, response):
+            if response is None:
+                return "timed out waiting for banlist"
+            res = ""
+            items = response.getChildren()[0].getChildren()
+            for item in items:
+                res += "\n" + item.getAttr('jid') + ": "+str(item)
+            self.chat( res)
+        
+        self.connect().SendAndCallForResponse(iq, handleBanlist)
+        
 
     @botcmd(name='ban')
     @logerrors
@@ -658,7 +666,7 @@ if __name__ == '__main__':
     username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
     #username = 'nyctef@friendshipismagicsquad.com'
     password = open('password.txt', 'r').read();
-    #chatroom = 'general@conference.friendshipismagicsquad.com'
+    chatroom = 'general@conference.friendshipismagicsquad.com'
     nickname = 'Sweetiebutt'
     debug = False
 
