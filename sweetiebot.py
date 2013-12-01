@@ -517,7 +517,7 @@ class Sweetiebot(MUCJabberBot):
         reply = reply = self.get_sender_username(mess) + ': '+name.title() + ' - ' + reply
         return reply
 
-    @botcmd
+    #@botcmd
     def remove (self, mess, args):
         '''kicks! I'm a little drunk right now...hope this works'''
         if self.get_sender_username(mess) in self.mods:
