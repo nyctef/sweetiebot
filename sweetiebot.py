@@ -578,16 +578,16 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',filename='sweetiebot.log',level=logging.INFO)
 
     #username = 'blighted@friendshipismagicsquad.com/sweetiebutt'
-    #username = 'sweetiebot@friendshipismagicsquad.com/sweetiebutt'
-    username = 'nyctef@friendshipismagicsquad.com'
-    password = 'stopbeingbadluna' #password here
-    chatroom = 'general@conference.friendshipismagicsquad.com'
+    username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
+    #username = 'nyctef@friendshipismagicsquad.com'
+    password = open('password.txt', 'r').read();
+    #chatroom = 'general@conference.friendshipismagicsquad.com'
     nickname = 'Sweetiebutt'
     debug = False
 
     import sys
     if '--test' in sys.argv:
-        chatroom = 'sweetiebot_playhouse@conference.friendshipismagicsquad.com'
+        chatroom = 'sweetiebot_playground@conference.friendshipismagicsquad.com'
         debug = True
 
     sweet = Sweetiebot(nickname, username, password, only_direct=False, command_prefix='')

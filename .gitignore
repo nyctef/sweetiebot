@@ -1,0 +1,5 @@
+build/
+doc/
+env/
+password.txt
+*.log
