@@ -517,12 +517,30 @@ class Sweetiebot(MUCJabberBot):
         reply = reply = self.get_sender_username(mess) + ': '+name.title() + ' - ' + reply
         return reply
 
-    #@botcmd
+    @botcmd(name='kick')
     def remove (self, mess, args):
-        '''kicks! I'm a little drunk right now...hope this works'''
-        if self.get_sender_username(mess) in self.mods:
-            self.kick(chatroom,xmpp.JID(args),'out! :sweetiemad:')
-        return
+        '''kicks user. Requires admin and a reason
+        
+        nick can be wrapped in single or double quotes'''
+
+        nick = None
+        reason = None
+        match = re.match("\s*'([^']*)'(.*)", args) or\
+            re.match("\s*\"([^\"]*)\"(.*)", args) or\
+            re.match("\s*(\S*)(.*)", args)
+        if match:
+            nick = match.group(1)
+            reason = match.group(2).strip()
+
+        if not len(reason):
+            return "A reason must be provided"
+
+        sender = self.get_sender_username(mess)
+        if sender in self.mods:
+            print("trying to kick "+nick+" with reason "+reason)
+            self.kick(chatroom, nick, 'Kicked by '+sender +': '+reason)
+        else:
+            return "noooooooope."
         
     @botcmd
     def roll(self, mess, args):
