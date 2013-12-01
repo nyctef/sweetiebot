@@ -107,8 +107,8 @@ class Sweetiebot(MUCJabberBot):
     def __init__(self, nickname='Sweetiebutt', *args, **kwargs):
         self.nickname = nickname
         resource = 'sweetiebutt' + ('%08x' % random.randrange(16**8))
+        self.redis_conn = kwargs.pop('redis_conn', None) or redis.Redis('localhost')
         super(Sweetiebot, self).__init__(*args, res=resource, **kwargs)
-        self.redis_conn = redis.Redis('localhost')
 
     def remove_dup(self, outfile, infile):
         lines_seen = set() # holds lines already seen
@@ -574,6 +574,22 @@ class Sweetiebot(MUCJabberBot):
         reply = self.get_sender_username(mess) + ': ' + reply
         self.send_simple_reply(mess, reply)
 
+class FakeRedis(object):
+    def __init__(self):
+        self.data = {}
+
+    def srandmember(self, key):
+        try:
+            return random.choice(self.data[key])
+        except KeyError:
+            return None
+
+    def sadd(self, key, value):
+        if key in self.data:
+            self.data[key].append(value)
+        else:
+            self.data[key] = [value]
+
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',filename='sweetiebot.log',level=logging.INFO)
 
@@ -589,8 +605,10 @@ if __name__ == '__main__':
     if '--test' in sys.argv:
         chatroom = 'sweetiebot_playground@conference.friendshipismagicsquad.com'
         debug = True
+        sweet = Sweetiebot(nickname, username, password, redis_conn=FakeRedis(), only_direct=False, command_prefix='')
+    else:
+        sweet = Sweetiebot(nickname, username, password, only_direct=False, command_prefix='')
 
-    sweet = Sweetiebot(nickname, username, password, only_direct=False, command_prefix='')
     print sweet.nickname + ' established!'
     print username
     print 'Joining Room:' + chatroom
