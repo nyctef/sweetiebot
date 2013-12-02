@@ -565,7 +565,8 @@ class Sweetiebot(MUCJabberBot):
             res = ""
             items = response.getChildren()[0].getChildren()
             for item in items:
-                res += "\n" + item.getAttr('jid') + ": "+str(item)
+                if item.getAttr('jid') is not None:
+                    res += "\n" + item.getAttr('jid') + ": "+str(item)
             self.chat( res)
         
         self.connect().SendAndCallForResponse(iq, handleBanlist)
