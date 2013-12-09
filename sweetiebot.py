@@ -511,6 +511,7 @@ class Sweetiebot(MUCJabberBot):
         return reply
 
     @botcmd
+    @logerrors
     def jita(self, mess, args):
         '''Looks up Jita Prices, use !jita [ITEM NAME]'''
         id,name = self.id_lookup(args)
@@ -566,7 +567,7 @@ class Sweetiebot(MUCJabberBot):
             items = response.getChildren()[0].getChildren()
             for item in items:
                 if item.getAttr('jid') is not None:
-                    res += "\n" + item.getAttr('jid') + ": "+str(item)
+                    res += "\n" + item.getAtTR('JID') + ": "+str(item)
             self.chat( res)
         
         self.connect().SendAndCallForResponse(iq, handleBanlist)
