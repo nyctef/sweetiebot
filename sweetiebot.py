@@ -17,6 +17,7 @@ import unicodedata
 import sys
 import logging
 from functools import wraps
+import requests
 
 
 def logerrors(func):
@@ -24,7 +25,7 @@ def logerrors(func):
     def logged(self, *args, **kwargs):
         try: return func(self, *args, **kwargs)
         except Exception as e: 
-            print 'Error! '+str(e)
+            print 'Error in '+func.__name__+'! '+str(e)
             logging.error(str(e))
             return "My code is problematic :sweetieoops:"
     return logged
@@ -85,6 +86,8 @@ class Sweetiebot(MUCJabberBot):
     separator = '\x01'
     stop_word = '\x02'
     target = '<target>'
+    
+    urlregex = re.compile(r"((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w_-]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)")
     mods = ['Blighty','Nyctef','Princess Luna','Luna','LunaNet','Princess Cadence','Rainbow Dash','Twilight Sparkle','Big Macintosh','Fluttershard','Rainbow Dash','Spike']
     emotes = [':sweetie:',':sweetiecrack:',\
               ':sweetiederp:',':sweetiedust:',\
@@ -347,6 +350,24 @@ class Sweetiebot(MUCJabberBot):
     def on_ping_timeout(self):
         logging.info('WARNING: ping timeout.')
         #self.quit(1)
+    
+    @logerrors
+    def get_page_titles(self, message):
+        matches = self.urlregex.findall(message)
+        matches = map(lambda x: x[0], matches)
+        print("found matches: "+" / ".join(matches))
+        results = []
+        from bs4 import BeautifulSoup
+        for match in matches:
+            try:
+                soup = BeautifulSoup(requests.get(match).text)
+                results.append(soup.title.string)
+            except Exception as e:
+                print "error fetching url "+match+" : "+str(e)
+                pass
+        if not len(results):
+            return None
+        return " / ".join(results)
 
     def unknown_command(self, mess, cmd, args):
         """Does things"""
@@ -354,6 +375,11 @@ class Sweetiebot(MUCJabberBot):
         #misc stuff here I guess
         reply = ""
         sender = self.get_sender_username(mess)
+
+        titles = self.get_page_titles(message)
+        if titles:
+            reply = titles + "\n"
+
         if sender == self.nickname:
             return
         if ":lunaglee:" in message.lower():
@@ -372,11 +398,16 @@ class Sweetiebot(MUCJabberBot):
             return
         if ":lunabeh:" in message.lower() and (sender == ":owl" or "luna" in sender.lower()):
             self.lunabeh_count = self.lunabeh_count + 1
-            if self.lunabeh_count > self.lunabeh_top:
-                self.lunabeh_top = randint(2,10)
-                self.lunabeh_count = 1
-                reply = ":lunabeh:"
-                return reply
+
+        if self.lunabeh_count > self.lunabeh_top:
+            self.lunabeh_top = randint(2,10)
+            self.lunabeh_count = 1
+            reply = ":lunabeh:"
+            return reply
+       
+        if len(reply.strip()):
+            return reply.strip()
+       
         #if message.lower().strip().endswith(":rdderp:"):
         #    return ":rdderp:"
         return self.log_mess(mess)
