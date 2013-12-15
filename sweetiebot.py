@@ -358,6 +358,7 @@ class Sweetiebot(MUCJabberBot):
             return None
         matches = self.urlregex.findall(message)
         matches = map(lambda x: x[0], matches)
+        matches = map(self.imgur_filter, matches)
         if matches: print("found matches: "+" / ".join(matches))
         results = []
         from bs4 import BeautifulSoup
@@ -375,6 +376,15 @@ class Sweetiebot(MUCJabberBot):
         if not len(results):
             return None
         return " / ".join(results)
+
+    def imgur_filter(self, link):
+        imgurregex = re.compile(r'^http(s)?://i.imgur.com/([a-zA-Z0-9]*)\..*$')
+        match = imgurregex.match(link)
+        if (match):
+            replacement = 'http://imgur.com/'+match.group(2)
+            print("replacing "+link+" with "+replacement)
+            return replacement
+        return link
 
     def unknown_command(self, mess, cmd, args):
         """Does things"""
