@@ -686,7 +686,7 @@ if __name__ == '__main__':
     #username = 'nyctef@friendshipismagicsquad.com'
     password = open('password.txt', 'r').read().strip();
     chatroom = 'general@conference.friendshipismagicsquad.com'
-    nickname = 'Sweetiebutt'
+    nickname = 'Sweetiebot'
     debug = False
 
     import sys
