@@ -353,14 +353,21 @@ class Sweetiebot(MUCJabberBot):
     
     @logerrors
     def get_page_titles(self, message):
+        # hack!
+        if 'emotes! http://pastebin' in message.lower():
+            return None
         matches = self.urlregex.findall(message)
         matches = map(lambda x: x[0], matches)
-        print("found matches: "+" / ".join(matches))
+        if matches: print("found matches: "+" / ".join(matches))
         results = []
         from bs4 import BeautifulSoup
         for match in matches:
             try:
-                soup = BeautifulSoup(requests.get(match).text)
+                res = requests.get(match, timeout=5)
+                if not 'html' in res.headers['content-type']:
+                    print 'skipping non-html'
+                    break
+                soup = BeautifulSoup(res.text)
                 results.append(soup.title.string)
             except Exception as e:
                 print "error fetching url "+match+" : "+str(e)
