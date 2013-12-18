@@ -348,6 +348,7 @@ class Sweetiebot(MUCJabberBot):
         return line
 
     def on_ping_timeout(self):
+        print("PING TIMEOUT")
         logging.info('WARNING: ping timeout.')
         #self.quit(1)
     
