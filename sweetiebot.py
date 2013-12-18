@@ -212,8 +212,7 @@ class Sweetiebot(MUCJabberBot):
         if 'pets' in message:
             return '/me purrs '+ random.choice(self.emotes)
         #self.save_action(message.replace('\n',' ')+ '\n')
-        f = open('Sweetiebot.actions','r')
-        reply = self.random_line(f)
+        reply = self.random_line('Sweetiebot.actions')
         reply = reply.replace(self.target,self.get_sender_username(mess).encode('utf-8')) 
         return reply + ' ' + random.choice(self.emotes)
 
@@ -335,17 +334,14 @@ class Sweetiebot(MUCJabberBot):
                 self.send_simple_reply(mess, reply)
         return
 
-    def random_line(self,afile):
+    def random_line(self,filename):
         try:
-            line = next(afile)
-        except StopException:
+            with open(filename, 'r') as f:
+                lines = filter(None, (line.strip() for line in f))
+                return random.choice(lines)
+        except Exception as e:
+            print("failed to read file "+filename+": "+str(e))
             return "/me slaps <target> with a large trout."
-        for num, aline in enumerate(afile):
-            if random.randrange(num + 2): continue
-            line = aline
-
-        line = line.replace('\n','')
-        return line
 
     def on_ping_timeout(self):
         print("PING TIMEOUT")
@@ -528,8 +524,7 @@ class Sweetiebot(MUCJabberBot):
     @botcmd
     def quote(self, mess, args):
         '''Replays sass'''
-        f=open('Sweetiebot.sass','r')
-        return self.random_line(f)
+        return self.random_line('Sweetiebot.sass')
 
     @botcmd
     def sass(self, mess, args):
