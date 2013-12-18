@@ -1,4 +1,4 @@
-﻿0=#System
+0=#System
 2=Corporation
 3=Region
 4=Constellation

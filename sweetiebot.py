@@ -25,8 +25,7 @@ def logerrors(func):
     def logged(self, *args, **kwargs):
         try: return func(self, *args, **kwargs)
         except Exception as e: 
-            print 'Error in '+func.__name__+'! '+str(e)
-            logging.error(str(e))
+            logging.exception('Error in '+func.__name__)
             return "My code is problematic :sweetieoops:"
     return logged
 
@@ -443,6 +442,7 @@ class Sweetiebot(MUCJabberBot):
     def id_lookup(self,name):
         test = name
         test = test.upper()
+        test = test.encode('utf-8')
         reply = None
         i_id = None
         i_name = None
@@ -451,17 +451,19 @@ class Sweetiebot(MUCJabberBot):
             line = f.readline()
             line = line.replace("\n","")
             while(len(line) > 0):
-                key, item_name = line.split('=',1)
-                self.id_dic[item_name] = int(key)
+                typeid, item_name = line.split('=',1)
+                self.id_dic[unicode(item_name, 'utf-8').upper()] = int(typeid)
                 line = f.readline().replace("\n","")
             f.close()
 
+        logging.debug('looking for '+test+' in id_dic')
         if test in list(self.id_dic.keys()):
+            logging.debug('.. found')
             reply = self.id_dic[test]
         else:
             maybe = difflib.get_close_matches(test,list(self.id_dic.keys()),1)
             if len(maybe) > 0:
-                print ("maybe meant "+ maybe[0])
+                logging.debug("maybe meant "+ maybe[0])
                 if maybe[0] in list(self.id_dic.keys()):
                     i_id = self.id_dic[maybe[0]]
                     i_name = maybe[0]
@@ -723,7 +725,8 @@ class FakeRedis(object):
             self.data[key] = [value]
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',filename='sweetiebot.log',level=logging.INFO)
+    logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',filename='sweetiebot.log',level=logging.DEBUG)
+    logging.getLogger().addHandler(logging.StreamHandler()) 
 
     #username = 'blighted@friendshipismagicsquad.com/sweetiebutt'
     username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
