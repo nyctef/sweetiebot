@@ -369,9 +369,15 @@ class Sweetiebot(MUCJabberBot):
             except Exception as e:
                 print "error fetching url "+match+" : "+str(e)
                 pass
+        results = filter(self.title_filter, results)
         if not len(results):
             return None
         return " / ".join(results)
+
+    def title_filter(self, result):
+        if (result.strip() == 'imgur: the simple image sharer'):
+            return False
+        return True
 
     def imgur_filter(self, link):
         imgurregex = re.compile(r'^http(s)?://i.imgur.com/([a-zA-Z0-9]*)\..*$')
