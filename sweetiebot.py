@@ -533,6 +533,12 @@ class Sweetiebot(MUCJabberBot):
             return ':rdderp: okay then'
         if 'luna' in sender.lower():
             return ':lunabeh: fine'
+        if 'shard' in sender.lower():
+            return "I'll be quiet if you make more emotes for me :sweetiedust:"
+        if 'sparkle' in sender.lower():
+            return "Yes, my princess :sweetiepleased:"
+        if 'spike' in sender.lower():
+            return "Oh my! A dragon! :sweetie: Of course I'll be quiet"
         return sender + ': Sorry! I\'ll be quiet'
 
     @botcmd
