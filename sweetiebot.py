@@ -456,6 +456,8 @@ class Sweetiebot(MUCJabberBot):
 
         select typeID || '=' || typeName from invTypes;
         '''
+        if name.lower() == 'plex' or name.lower() == '30 day':
+            return 29668, name
         test = name
         test = test.upper()
         test = test.encode('utf-8')
