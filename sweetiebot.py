@@ -436,6 +436,7 @@ class Sweetiebot(MUCJabberBot):
               str(system) + \
               "&typeid=" + \
               str(id)
+        logging.debug('asking for prices at '+url)
         root = ET.parse(urllib.urlopen(url)).getroot()
         
         buy = root[0][0][0][2].text # top buy
@@ -446,6 +447,15 @@ class Sweetiebot(MUCJabberBot):
         return r
 
     def id_lookup(self,name):
+        ''' Lookup a typeid in typeid.txt 
+        
+        To generate this file, open a recent sqlite data dump with sqlite3
+        and run 
+
+        .output typeid.txt
+
+        select typeID || '=' || typeName from invTypes;
+        '''
         test = name
         test = test.upper()
         test = test.encode('utf-8')
@@ -466,6 +476,8 @@ class Sweetiebot(MUCJabberBot):
         if test in list(self.id_dic.keys()):
             logging.debug('.. found')
             reply = self.id_dic[test]
+            logging.debug(' .. sending '+test+', '+str(reply))
+            return reply, test
         else:
             maybe = difflib.get_close_matches(test,list(self.id_dic.keys()),1)
             if len(maybe) > 0:
