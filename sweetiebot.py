@@ -711,7 +711,9 @@ class Sweetiebot(MUCJabberBot):
                 return "Too many variables in possibilty space, abort!"
             if sides > 20000000:
                 return "Sides of dice too small, can't see what face is upright!"
-            if sides < 2:
+            if sides == 1:
+                return "Oh look, they all came up ones. Are you suprised? I'm suprised."
+            if sides < 1:
                 return "How do you make a dice with less than two sides?"
             if dice < 1:
                 return "You want me to roll...less than one dice?"
