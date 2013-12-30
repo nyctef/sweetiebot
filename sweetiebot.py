@@ -491,6 +491,47 @@ class Sweetiebot(MUCJabberBot):
                     i_name = maybe[0]
         return i_id, i_name
 
+    def youtube_search(self, keyword, channel):
+        import gdata.youtube
+        import gdata.youtube.service
+
+        client = gdata.youtube.service.YouTubeService()
+        query = gdata.youtube.service.YouTubeVideoQuery()
+
+        query.vq = keyword
+        query.max_results = 1
+        query.start_index = 1
+        query.racy = 'include'
+        query.orderby = 'relevance'
+        if (channel):
+            query.author = channel
+        feed = client.YouTubeQuery(query)
+
+        from pprint import pformat
+        for result in feed.entry:
+            return result.title.text + ' - ' + result.GetHtmlLink().href
+        return "No results found, sorry"
+
+    @botcmd
+    @logerrors
+    def nerd3(self, mess, args):
+        '''Search for a video by NerdCubed'''
+        return self.youtube_search(args, 'OfficialNerdCubed')
+
+    
+    @botcmd
+    @logerrors
+    def tb(self, mess, args):
+        '''Search for a video by TotalBiscuit'''
+        return self.youtube_search(args, 'TotalHalibut')
+
+
+    @botcmd
+    @logerrors
+    def yt(self, mess, args):
+        '''Search for a video on youtube'''
+        return self.youtube_search(args, None)
+
     @botcmd
     @logerrors
     def deowl(self, mess, args):
