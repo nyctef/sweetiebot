@@ -374,6 +374,14 @@ class Sweetiebot(MUCJabberBot):
             return None
         return " / ".join(results)
 
+    @botcmd
+    @logerrors
+    def argue(self, message, args):
+        '''Start a tumblr argument courtesy of lokaltog.github.io/tumblr-argument-generator'''
+        res = requests.get('http://tumblraas.azurewebsites.net/', timeout=5)
+        return res.text.strip()
+
+    
     def title_filter(self, result):
         if (result.strip() == 'imgur: the simple image sharer'):
             return False
