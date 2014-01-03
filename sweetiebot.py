@@ -381,6 +381,14 @@ class Sweetiebot(MUCJabberBot):
         res = requests.get('http://tumblraas.azurewebsites.net/', timeout=5)
         return res.text.strip()
 
+
+    @botcmd
+    @logerrors
+    def rant(self, message, args):
+        '''Rant for a while, courtesy of lokaltog.github.io/tumblr-argument-generator'''
+        res = requests.get('http://tumblraas.azurewebsites.net/rant', timeout=5)
+        return res.text.strip()
+
     
     def title_filter(self, result):
         if (result.strip() == 'imgur: the simple image sharer'):
