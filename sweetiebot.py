@@ -85,6 +85,8 @@ class Sweetiebot(MUCJabberBot):
     separator = '\x01'
     stop_word = '\x02'
     target = '<target>'
+    sass_responses = None
+    sass_index = -1
     
     urlregex = re.compile(r"((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w_-]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)")
     mods = ['Blighty','Nyctef','Princess Luna','Luna','LunaNet','Princess Cadence','Rainbow Dash','Twilight Sparkle','Big Macintosh','Fluttershard','Rainbow Dash','Spike']
@@ -611,7 +613,14 @@ class Sweetiebot(MUCJabberBot):
     @botcmd
     def quote(self, mess, args):
         '''Replays sass'''
-        return self.random_line('Sweetiebot.sass')
+        if not self.sass_responses:
+            print("reading sass file..")
+            with open('Sweetiebot.sass', 'r') as f:
+                self.sass_responses = [line.strip() for line in f.readlines()]
+                random.shuffle(self.sass_responses)
+            self.sass_index = -1
+        self.sass_index += 1
+        return self.sass_responses[self.sass_index]
 
     @botcmd
     def sass(self, mess, args):
@@ -627,6 +636,7 @@ class Sweetiebot(MUCJabberBot):
         f.close()
         reply = self.get_sender_username(mess) + ': I\'ll remember that!'
         self.remove_dup('Sweetiebot.sass','Sweetiebot.sass')
+        self.sass_responses = None
         return reply
 
     #Karan = 30004306
