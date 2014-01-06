@@ -575,7 +575,7 @@ class Sweetiebot(MUCJabberBot):
         #print message
         return message
 
-    @botcmd
+    #@botcmd
     def bye(self, mess, args):
         '''Makes me restart! Blighties only!'''
         if self.get_sender_username(mess) == 'Blighty':
