@@ -5,7 +5,6 @@
 from jabberbot import JabberBot, botcmd
 from datetime import datetime
 import re
-import time
 import urllib
 import xmpp
 from xml.etree import ElementTree as ET
@@ -13,7 +12,6 @@ import random
 from random import randint
 import difflib
 import redis
-import unicodedata
 import sys
 import logging
 from functools import wraps
@@ -24,7 +22,7 @@ def logerrors(func):
     @wraps(func)
     def logged(self, *args, **kwargs):
         try: return func(self, *args, **kwargs)
-        except Exception as e: 
+        except Exception: 
             logging.exception('Error in '+func.__name__)
             return "My code is problematic :sweetieoops:"
     return logged
@@ -223,7 +221,6 @@ class Sweetiebot(MUCJabberBot):
         props = mess.getProperties()
         message = mess.getBody()
         message_true = mess.getBody()
-        message_weight = 0
         say_something = False
         if xmpp.NS_DELAY in props:
             return
@@ -525,7 +522,6 @@ class Sweetiebot(MUCJabberBot):
             query.author = channel
         feed = client.YouTubeQuery(query)
 
-        from pprint import pformat
         for result in feed.entry:
             return result.title.text + ' - ' + result.GetHtmlLink().href
         return "No results found, sorry"
@@ -604,8 +600,8 @@ class Sweetiebot(MUCJabberBot):
             return "Oh my! A dragon! :sweetie: Of course I'll be quiet"
         return sender + ': Sorry! I\'ll be quiet'
 
-    @botcmd
-    def chat(self, mess, args):
+    @botcmd(name='chat')
+    def unquiet(self, mess, args):
         '''I will chat every once in a while'''
         self.chattiness = .025
         return self.get_sender_username(mess) + ': Ok, I\'ll start chatting again'
@@ -833,7 +829,6 @@ if __name__ == '__main__':
     nickname = 'Sweetiebot'
     debug = False
 
-    import sys
     if '--test' in sys.argv:
         chatroom = 'sweetiebot_playground@conference.friendshipismagicsquad.com'
         debug = True
