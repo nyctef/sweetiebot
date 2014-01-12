@@ -626,9 +626,11 @@ class Sweetiebot(MUCJabberBot):
     def sass(self, mess, args):
         '''Remembers some sass to say back next time it is mentioned'''
         if len(args) > 400:
-            return
+            return "Sass too long :sweetiedust"
         if args.isspace():
             return
+        if ":owl:" in sass or self.get_sender_username(mess) == ':owl':
+            return "No owls allowed! :sweetiedust:"
         f = open('Sweetiebot.sass','a')
 
         clean_args = args.replace('\n',' ')
