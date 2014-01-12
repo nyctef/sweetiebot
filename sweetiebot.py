@@ -22,7 +22,7 @@ def logerrors(func):
     @wraps(func)
     def logged(self, *args, **kwargs):
         try: return func(self, *args, **kwargs)
-        except Exception: 
+        except Exception:
             logging.exception('Error in '+func.__name__)
             return "My code is problematic :sweetieoops:"
     return logged
@@ -40,7 +40,7 @@ class MUCJabberBot(JabberBot):
 
         # answer only direct messages or not?
         self.only_direct = kwargs.get('only_direct', False)
-        
+
         try:
             del kwargs['only_direct']
         except KeyError:
@@ -58,7 +58,7 @@ class MUCJabberBot(JabberBot):
         ''' Changes the behaviour of the JabberBot in order to allow
         it to answer direct messages. This is used often when it is
         connected in MUCs (multiple users chatroom). '''
-        
+
         message = mess.getBody()
         if self.direct_message_re.match(message):
             mess.setBody(' '.join(message.split(' ', 1)[1:]))
@@ -85,7 +85,7 @@ class Sweetiebot(MUCJabberBot):
     target = '<target>'
     sass_responses = None
     sass_index = -1
-    
+
     urlregex = re.compile(r"((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w_-]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)")
     mods = ['Blighty','Nyctef','Princess Luna','Luna','LunaNet','Princess Cadence','Rainbow Dash','Twilight Sparkle','Big Macintosh','Fluttershard','Rainbow Dash','Spike']
     emotes = [':sweetie:',':sweetiecrack:',\
@@ -121,7 +121,7 @@ class Sweetiebot(MUCJabberBot):
         for line in in_f:
             if line not in lines_seen and not ":lunaglee:" in line: # not a duplicate
                 if not any(i in line for i in ('#','/','\\')):
-                    lines_seen.add(line)		
+                    lines_seen.add(line)
         in_f.close()
         out_f = open(outfile, "w")
         out_f.writelines(sorted(lines_seen))
@@ -130,19 +130,19 @@ class Sweetiebot(MUCJabberBot):
 
     def make_key(self, k):
         return '-'.join((self.prefix, k))
-    
+
     def sanitize_message(self, message):
         if "http" in message:
             return ""
         if "####" in message:
             return ""
-        
+
         return re.sub('[\"\']', '', message.lower())
 
     def roll_prim(self,dice = 1, sides = 6):
         try: return [randint(1,sides) for i in range(dice)]
         except: return []
-        
+
     def save_action(self, action_str):
         s = action_str.lower()
         s = s.replace(self.nickname.lower(), self.target)
@@ -154,14 +154,14 @@ class Sweetiebot(MUCJabberBot):
     def split_message(self, message):
         # split the incoming message into words, i.e. ['what', 'up', 'bro']
         words = message.split()
-        
+
         # if the message is any shorter, it won't lead anywhere
         if len(words) > self.chain_length:
-            
+
             # add some stop words onto the message
             # ['what', 'up', 'bro', '\x02']
             words.append(self.stop_word)
-            
+
             # len(words) == 4, so range(4-2) == range(2) == 0, 1, meaning
             # we return the following slices: [0:3], [1:4]
             # or ['what', 'up', 'bro'], ['up', 'bro', '\x02']
@@ -171,26 +171,26 @@ class Sweetiebot(MUCJabberBot):
     @logerrors
     def generate_message(self, seed):
         key = seed
-        
+
         # keep a list of words we've seen
         gen_words = []
-        
+
         # only follow the chain so far, up to <max words>
         for i in xrange(self.max_words):
-            
+
             # split the key on the separator to extract the words -- the key
             # might look like "this\x01is" and split out into [ 'this', 'is']
             words = key.split(self.separator)
-            
+
             # add the word to the list of words in our generated message
             gen_words.append(words[0])
-            
+
             # get a new word that lives at this key -- if none are present we've
             # reached the end of the chain and can bail
             next_word = self.redis_conn.srandmember(self.make_key(key))
             if not next_word:
                 break
-            
+
             # create a new key combining the end of the old one and the next_word
             key = self.separator.join(words[1:] + [next_word])
         return ' '.join(gen_words)
@@ -212,7 +212,7 @@ class Sweetiebot(MUCJabberBot):
             return '/me purrs '+ random.choice(self.emotes)
         #self.save_action(message.replace('\n',' ')+ '\n')
         reply = self.random_line('Sweetiebot.actions')
-        reply = reply.replace(self.target,self.get_sender_username(mess).encode('utf-8')) 
+        reply = reply.replace(self.target,self.get_sender_username(mess).encode('utf-8'))
         return reply + ' ' + random.choice(self.emotes)
 
     def log_mess(self, mess):
@@ -234,7 +234,7 @@ class Sweetiebot(MUCJabberBot):
             say_something = True
         if not say_something:
             say_something = random.random() < self.chattiness
-                
+
         messages = []
         # use a convenience method to strip out the "ping" portion of a message
         if self.is_ping(message):
@@ -268,7 +268,7 @@ class Sweetiebot(MUCJabberBot):
                         best_message = generated
                         break
                     if len(generated) > len(best_message):
-                        if not generated.split(' ')[-1] in self.banned_endings: 
+                        if not generated.split(' ')[-1] in self.banned_endings:
                             best_message = generated
 
                 if len(best_message.split(' ')) > self.min_reply_length:
@@ -276,7 +276,7 @@ class Sweetiebot(MUCJabberBot):
                     messages.append(best_message)
                 else:
                     print "Best message for " + '_'.join(words) + " was " + best_message + ", not long enough"
-        
+
         if messages:
             final = random.choice(messages)
             try:
@@ -345,7 +345,7 @@ class Sweetiebot(MUCJabberBot):
         print("PING TIMEOUT")
         logging.info('WARNING: ping timeout.')
         #self.quit(1)
-    
+
     @logerrors
     def get_page_titles(self, message):
         # hack!
@@ -388,7 +388,7 @@ class Sweetiebot(MUCJabberBot):
         res = requests.get('http://tumblraas.azurewebsites.net/rant', timeout=5)
         return res.text.strip()
 
-    
+
     def title_filter(self, result):
         if (result.strip() == 'imgur: the simple image sharer'):
             return False
@@ -440,14 +440,14 @@ class Sweetiebot(MUCJabberBot):
             self.lunabeh_count = 1
             reply = ":lunabeh:"
             return reply
-       
+
         if len(reply.strip()):
             return reply.strip()
-       
+
         #if message.lower().strip().endswith(":rdderp:"):
         #    return ":rdderp:"
         return self.log_mess(mess)
-    
+
     def get_prices(self, id, system):
         url = "http://api.eve-central.com/api/marketstat?usesystem=" + \
               str(system) + \
@@ -455,7 +455,7 @@ class Sweetiebot(MUCJabberBot):
               str(id)
         logging.debug('asking for prices at '+url)
         root = ET.parse(urllib.urlopen(url)).getroot()
-        
+
         buy = root[0][0][0][2].text # top buy
         sell = root[0][0][1][3].text # low sell
         buy = '{0:,}'.format(float(buy))
@@ -464,10 +464,10 @@ class Sweetiebot(MUCJabberBot):
         return r
 
     def id_lookup(self,name):
-        ''' Lookup a typeid in typeid.txt 
-        
+        ''' Lookup a typeid in typeid.txt
+
         To generate this file, open a recent sqlite data dump with sqlite3
-        and run 
+        and run
 
         .output typeid.txt
 
@@ -532,7 +532,7 @@ class Sweetiebot(MUCJabberBot):
         '''Search for a video by NerdCubed'''
         return self.youtube_search(args, 'OfficialNerdCubed')
 
-    
+
     @botcmd
     @logerrors
     def tb(self, mess, args):
@@ -577,17 +577,17 @@ class Sweetiebot(MUCJabberBot):
         if self.get_sender_username(mess) == 'Blighty':
             self.quit()
 
-#    @botcmd
+    #@botcmd
     def yell(self, mess, args):
         '''Yells at everyone Blighties only!'''
         if self.get_sender_username(mess) == 'Blighty':
             self.broadcast(args, True)
-          
+
     @botcmd
     def quiet(self, mess,args):
         '''I will only respond to pings'''
         self.chattiness = 0
-        sender = self.get_sender_username(mess) 
+        sender = self.get_sender_username(mess)
         if 'rainbow' in sender.lower():
             return ':rdderp: okay then'
         if 'luna' in sender.lower():
@@ -639,7 +639,7 @@ class Sweetiebot(MUCJabberBot):
 
     #Karan = 30004306
     #Jita = 30000142
-#    @botcmd
+    #@botcmd
     def karan(self, mess, args):
         '''Looks up Karan Prices, use !karan [ITEM NAME]'''
         id,name = self.id_lookup(args)
@@ -708,15 +708,15 @@ class Sweetiebot(MUCJabberBot):
                 if item.getAttr('jid') is not None:
                     res += "\n" + item.getAtTR('JID') + ": "+str(item)
             self.chat( res)
-        
+
         self.connect().SendAndCallForResponse(iq, handleBanlist)
-        
+
 
     @botcmd(name='ban')
     @logerrors
     def ban(self, mess, args):
         '''bans user. Requires admin and a reason
-        
+
         nick can be wrapped in single or double quotes'''
 
         nick, reason = self.get_nick_reason(args)
@@ -735,7 +735,7 @@ class Sweetiebot(MUCJabberBot):
     @logerrors
     def un(self, mess, args):
         '''unbans a user. Requires admin and a jid (check listbans)
-        
+
         nick can be wrapped in single or double quotes'''
 
         jid = args
@@ -751,7 +751,7 @@ class Sweetiebot(MUCJabberBot):
     @logerrors
     def remove (self, mess, args):
         '''kicks user. Requires admin and a reason
-        
+
         nick can be wrapped in single or double quotes'''
 
         nick, reason = self.get_nick_reason(args)
@@ -765,13 +765,13 @@ class Sweetiebot(MUCJabberBot):
             self.kick(chatroom, nick, 'Kicked by '+sender +': '+reason)
         else:
             return "noooooooope."
-        
+
     @botcmd
     def roll(self, mess, args):
         '''Accepts rolls in the form of 'roll 1d6' and similar -- max 25 dice'''
         brup = args.split(' ')
         reply = ''
-        for args in brup: 
+        for args in brup:
             try:
               dice, sides = map(int,args.split('d',1))
             except:
@@ -821,7 +821,7 @@ class FakeRedis(object):
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',filename='sweetiebot.log',level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler()) 
+    logging.getLogger().addHandler(logging.StreamHandler())
 
     #username = 'blighted@friendshipismagicsquad.com/sweetiebutt'
     username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
