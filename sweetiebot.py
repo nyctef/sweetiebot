@@ -625,7 +625,7 @@ class Sweetiebot(MUCJabberBot):
             return "Sass too long :sweetiedust"
         if args.isspace():
             return
-        if ":owl:" in sass or self.get_sender_username(mess) == ':owl':
+        if ":owl:" in args or self.get_sender_username(mess) == ':owl':
             return "No owls allowed! :sweetiedust:"
         f = open('Sweetiebot.sass','a')
 
