@@ -113,15 +113,15 @@ class Sweetiebot(MUCJabberBot):
         'regarding', 'round', 'save', 'since', 'than', 'through', 'to', 'toward', 'towards', 'under',
         'underneath', 'unlike', 'until', 'up', 'upon', 'versus', 'via', 'with', 'within', 'without']
 
-    def randomstr(self):
-        return ('%08x' % random.randrange(16**8))
-
     def __init__(self, nickname='Sweetiebutt', *args, **kwargs):
         self.nickname = nickname
         resource = 'sweetiebutt' + self.randomstr()
         self.redis_conn = kwargs.pop(
             'redis_conn', None) or redis.Redis('localhost')
         super(Sweetiebot, self).__init__(*args, res=resource, **kwargs)
+
+    def randomstr(self):
+        return ('%08x' % random.randrange(16**8))
 
     def remove_dup(self, outfile, infile):
         lines_seen = set()  # holds lines already seen
