@@ -6,3 +6,4 @@ password.txt
 sb_account_key.txt
 *.swp
 .ropeproject
+*.pyc
