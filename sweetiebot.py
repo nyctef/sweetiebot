@@ -61,16 +61,48 @@ class MUCJabberBot(JabberBot):
         ''' Changes the behaviour of the JabberBot in order to allow
         it to answer direct messages. This is used often when it is
         connected in MUCs (multiple users chatroom). '''
-
+        # fuck you unicode
         message = mess.getBody()
-        if self.direct_message_re.match(message):
-            mess.setBody(' '.join(message.split(' ', 1)[1:]))
-            return super(MUCJabberBot, self).callback_message(conn, mess)
-        elif not self.only_direct:
-            return super(MUCJabberBot, self).callback_message(conn, mess)
+        props = mess.getProperties()
+        jid = mess.getFrom()
+        try:
+            if self.direct_message_re.match(message):
+                mess.setBody(' '.join(message.split(' ', 1)[1:]))
+                super(Sweetiebot, self).callback_message(conn, mess)
+        except TypeError:
+            return
+        if not message:
+            return
+        if xmpp.NS_DELAY in props:
+            return
+        if self.jid.bareMatch(jid):
+            return
+        if self.is_ping(message):
+            np_message = self.fix_ping(message)
+        else:
+            np_message = message
+        if ' ' in np_message:
+            command, args = np_message.split(' ', 1)
+        else:
+            command, args = np_message, ''
+
+        cmd = command.lower()
+        if cmd in self.commands:
+            if self.is_ping(message):
+                mess.setBody(np_message)
+                super(Sweetiebot, self).callback_message(conn, mess)
+            else:
+                return
+        else:
+            reply = self.unknown_command(mess, cmd, args)
+            if reply is None:
+                return
+            if reply:
+                self.send_simple_reply(mess, reply)
+        return
 
 
-class Sweetiebot(MUCJabberBot):
+class Sweetiebot():
     kick_owl_delay = 7200
     last_owl_kick = 0
     id_dic = {"": ""}
@@ -118,7 +150,7 @@ class Sweetiebot(MUCJabberBot):
         resource = 'sweetiebutt' + self.randomstr()
         self.redis_conn = kwargs.pop(
             'redis_conn', None) or redis.Redis('localhost')
-        super(Sweetiebot, self).__init__(*args, res=resource, **kwargs)
+        self.bot = MUCJabberBot(*args, res=resource, **kwargs)
 
     def randomstr(self):
         return ('%08x' % random.randrange(16**8))
@@ -302,50 +334,6 @@ class Sweetiebot(MUCJabberBot):
         elif self.is_ping(message_true):
             print 'Quoting instead...'
             return self.quote(mess, '')
-
-    def callback_message(self, conn, mess):
-        ''' Changes the behaviour of the JabberBot in order to allow
-        it to answer direct messages. This is used often when it is
-        connected in MUCs (multiple users chatroom). '''
-        # fuck you unicode
-        message = mess.getBody()
-        props = mess.getProperties()
-        jid = mess.getFrom()
-        try:
-            if self.direct_message_re.match(message):
-                mess.setBody(' '.join(message.split(' ', 1)[1:]))
-                super(Sweetiebot, self).callback_message(conn, mess)
-        except TypeError:
-            return
-        if not message:
-            return
-        if xmpp.NS_DELAY in props:
-            return
-        if self.jid.bareMatch(jid):
-            return
-        if self.is_ping(message):
-            np_message = self.fix_ping(message)
-        else:
-            np_message = message
-        if ' ' in np_message:
-            command, args = np_message.split(' ', 1)
-        else:
-            command, args = np_message, ''
-
-        cmd = command.lower()
-        if cmd in self.commands:
-            if self.is_ping(message):
-                mess.setBody(np_message)
-                super(Sweetiebot, self).callback_message(conn, mess)
-            else:
-                return
-        else:
-            reply = self.unknown_command(mess, cmd, args)
-            if reply is None:
-                return
-            if reply:
-                self.send_simple_reply(mess, reply)
-        return
 
     def random_line(self, filename):
         try:
