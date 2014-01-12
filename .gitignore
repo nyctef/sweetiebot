@@ -4,4 +4,5 @@ env/
 password.txt
 *.log
 sb_account_key.txt
+*.swp
 
