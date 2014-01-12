@@ -16,7 +16,7 @@ import sys
 import logging
 from functools import wraps
 import requests
-
+import utils
 
 def logerrors(func):
     @wraps(func)
@@ -75,7 +75,7 @@ class MUCJabberBot(JabberBot):
             return
         if self.jid.bareMatch(jid):
             return
-        if self.is_ping(message):
+        if utils.is_ping(self.nickname, message):
             np_message = self.fix_ping(message)
         else:
             np_message = message
@@ -86,7 +86,7 @@ class MUCJabberBot(JabberBot):
 
         cmd = command.lower()
         if cmd in self.commands:
-            if self.is_ping(message):
+            if utils.is_ping(self.nickname, message):
                 mess.setBody(np_message)
                 super(MUCJabberBot, self).callback_message(conn, mess)
             else:
@@ -106,12 +106,6 @@ class MUCJabberBot(JabberBot):
                 name = getattr(value, '_jabberbot_command_name')
                 self.log.info('Registered command: %s' % name)
                 self.commands[name] = value
-
-    def is_ping(self, message):
-        if self.nickname.lower() in message.lower():
-            return True
-        else:
-            return False
 
     def fix_ping(self, message):
         message = message.replace(self.nickname+": ", "")
@@ -181,12 +175,6 @@ class Sweetiebot():
 
     def randomstr(self):
         return ('%08x' % random.randrange(16**8))
-
-    def is_ping(self, message):
-        if self.nickname.lower() in message.lower():
-            return True
-        else:
-            return False
 
     def remove_dup(self, outfile, infile):
         lines_seen = set()  # holds lines already seen
@@ -297,18 +285,18 @@ class Sweetiebot():
             return
         if self.jid.bareMatch(jid):
             return
-        if self.is_ping(message):
+        if utils.is_ping(self.nickname, message):
             say_something = True
         if not say_something:
             say_something = random.random() < self.chattiness
 
         messages = []
         # use a convenience method to strip out the "ping" portion of a message
-        if self.is_ping(message):
+        if utils.is_ping(self.nickname, message):
             message = self.fix_ping(message)
 
         if message_true.startswith('/'):
-            if message_true.startswith('/me ') and self.is_ping(message_true):
+            if message_true.startswith('/me ') and utils.is_ping(self.nickname, message_true):
                 return self.cuddle(mess)
             return
 
@@ -353,7 +341,7 @@ class Sweetiebot():
             return final
         # If was pinged but couldn't think of something relevant, reply with
         # something generic.
-        elif self.is_ping(message_true):
+        elif utils.is_ping(self.nickname, message_true):
             print 'Quoting instead...'
             return self.quote(mess, '')
 
@@ -451,7 +439,7 @@ class Sweetiebot():
         if "c/d" in message.lower():
             reply = sender + ": " + random.choice(["c", "d"])
             return reply
-        if "yiff" in message.lower() and self.is_ping(message):
+        if "yiff" in message.lower() and utils.is_ping(self.nickname, message):
             reply = sender + ": yiff in hell, furfag :sweetiemad:"
             return reply
         if "chain" in message.lower():
