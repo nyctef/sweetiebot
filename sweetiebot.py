@@ -31,17 +31,15 @@ def logerrors(func):
 
 class MUCJabberBot(JabberBot):
 
-    ''' Add features in JabberBot to allow it to handle specific
-    caractheristics of multiple users chatroom (MUC). '''
-
     flood_protection = 0
     flood_delay = 5
     PING_FREQUENCY = 60
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, nickname, *args, **kwargs):
         ''' Initialize variables. '''
 
         # answer only direct messages or not?
+        self.nickname = nickname
         self.only_direct = kwargs.get('only_direct', False)
 
         try:
@@ -68,7 +66,7 @@ class MUCJabberBot(JabberBot):
         try:
             if self.direct_message_re.match(message):
                 mess.setBody(' '.join(message.split(' ', 1)[1:]))
-                super(Sweetiebot, self).callback_message(conn, mess)
+                super(MUCJabberBot, self).callback_message(conn, mess)
         except TypeError:
             return
         if not message:
@@ -90,7 +88,7 @@ class MUCJabberBot(JabberBot):
         if cmd in self.commands:
             if self.is_ping(message):
                 mess.setBody(np_message)
-                super(Sweetiebot, self).callback_message(conn, mess)
+                super(MUCJabberBot, self).callback_message(conn, mess)
             else:
                 return
         else:
@@ -100,6 +98,25 @@ class MUCJabberBot(JabberBot):
             if reply:
                 self.send_simple_reply(mess, reply)
         return
+
+    def load_commands_from(self, target):
+        import inspect
+        for name, value in inspect.getmembers(target, inspect.ismethod):
+            if getattr(value, '_jabberbot_command', False):
+                name = getattr(value, '_jabberbot_command_name')
+                self.log.info('Registered command: %s' % name)
+                self.commands[name] = value
+
+    def is_ping(self, message):
+        if self.nickname.lower() in message.lower():
+            return True
+        else:
+            return False
+
+    def fix_ping(self, message):
+        message = message.replace(self.nickname+": ", "")
+        message = message.replace(self.nickname.lower()+": ", "")
+        return message
 
 
 class Sweetiebot():
@@ -150,10 +167,26 @@ class Sweetiebot():
         resource = 'sweetiebutt' + self.randomstr()
         self.redis_conn = kwargs.pop(
             'redis_conn', None) or redis.Redis('localhost')
-        self.bot = MUCJabberBot(*args, res=resource, **kwargs)
+        self.bot = MUCJabberBot(nickname, *args, res=resource, **kwargs)
+        self.bot.load_commands_from(self)
+
+    def join_room(self, room, nick):
+        self.bot.join_room(room, nick)
+
+    def serve_forever(self):
+        self.bot.serve_forever()
+
+    def get_sender_username(self, message):
+        return self.bot.get_sender_username(message)
 
     def randomstr(self):
         return ('%08x' % random.randrange(16**8))
+
+    def is_ping(self, message):
+        if self.nickname.lower() in message.lower():
+            return True
+        else:
+            return False
 
     def remove_dup(self, outfile, infile):
         lines_seen = set()  # holds lines already seen
@@ -238,17 +271,6 @@ class Sweetiebot():
             # next_word
             key = self.separator.join(words[1:] + [next_word])
         return ' '.join(gen_words)
-
-    def fix_ping(self, message):
-        message = message.replace(self.nickname+": ", "")
-        message = message.replace(self.nickname.lower()+": ", "")
-        return message
-
-    def is_ping(self, message):
-        if self.nickname.lower() in message.lower():
-            return True
-        else:
-            return False
 
     def cuddle(self, mess):
         message = mess.getBody().lower()
@@ -694,7 +716,7 @@ class Sweetiebot():
         return nick, reason
 
     def chat(self, message):
-        self.send(chatroom, message, message_type='groupchat')
+        self.bot.send(chatroom, message, message_type='groupchat')
 
     @botcmd
     @logerrors
@@ -810,8 +832,7 @@ class Sweetiebot():
         '''Returns the current date'''
         reply = datetime.now().strftime('%Y-%m-%d')
         reply = self.get_sender_username(mess) + ': ' + reply
-        self.send_simple_reply(mess, reply)
-
+        return reply
 
 class FakeRedis(object):
 
