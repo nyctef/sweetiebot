@@ -2,6 +2,7 @@ from jabberbot import JabberBot
 import utils
 import re
 import xmpp
+import logging
 
 class MUCJabberBot(JabberBot):
 
@@ -28,6 +29,9 @@ class MUCJabberBot(JabberBot):
         user, domain = str(self.jid).split('@')
         self.direct_message_re = re.compile('^%s(@%s)?[^\w]? '
                                             % (user, domain))
+
+        self.unknown_command_callback = None
+
 
     def callback_message(self, conn, mess):
         ''' Changes the behaviour of the JabberBot in order to allow
@@ -86,3 +90,8 @@ class MUCJabberBot(JabberBot):
         message = message.replace(self.nickname.lower()+": ", "")
         return message
 
+    def unknown_command(self, mess, cmd, args):
+        logging.debug('unknown_command')
+        if self.unknown_command_callback is not None:
+            logging.debug('sending callback')
+            return self.unknown_command_callback(self, mess, cmd, args)

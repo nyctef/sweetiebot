@@ -18,6 +18,7 @@ import requests
 import utils
 from utils import logerrors
 from MUCJabberBot import MUCJabberBot
+from ResponsesFile import ResponsesFile
 
 class Sweetiebot():
     kick_owl_delay = 7200
@@ -63,12 +64,15 @@ class Sweetiebot():
         'underneath', 'unlike', 'until', 'up', 'upon', 'versus', 'via', 'with', 'within', 'without']
 
     def __init__(self, nickname='Sweetiebutt', *args, **kwargs):
+        self.actions = ResponsesFile('Sweetiebot.actions')
+        self.sass = ResponsesFile('Sweetiebot.sass')
         self.nickname = nickname
         resource = 'sweetiebutt' + self.randomstr()
         self.redis_conn = kwargs.pop(
             'redis_conn', None) or redis.Redis('localhost')
         self.bot = MUCJabberBot(nickname, *args, res=resource, **kwargs)
         self.bot.load_commands_from(self)
+        self.bot.unknown_command_callback = self.unknown_command
 
     def join_room(self, room, nick):
         self.bot.join_room(room, nick)
@@ -81,20 +85,6 @@ class Sweetiebot():
 
     def randomstr(self):
         return ('%08x' % random.randrange(16**8))
-
-    def remove_dup(self, outfile, infile):
-        lines_seen = set()  # holds lines already seen
-        in_f = open(infile, "r")
-        for line in in_f:
-            # not a duplicate
-            if line not in lines_seen and not ":lunaglee:" in line:
-                if not any(i in line for i in ('#', '/', '\\')):
-                    lines_seen.add(line)
-        in_f.close()
-        out_f = open(outfile, "w")
-        out_f.writelines(sorted(lines_seen))
-        out_f.close()
-        return
 
     def make_key(self, k):
         return '-'.join((self.prefix, k))
@@ -114,12 +104,7 @@ class Sweetiebot():
             return []
 
     def save_action(self, action_str):
-        s = action_str.lower()
-        s = s.replace(self.nickname.lower(), self.target)
-        f = open('Sweetiebot.actions', 'a')
-        f.write(s)
-        f.close()
-        self.remove_dup('Sweetiebot.actions', 'Sweetiebot.actions')
+        self.actions.add_to_file(action_str)
 
     def split_message(self, message):
         # split the incoming message into words, i.e. ['what', 'up', 'bro']
@@ -167,16 +152,16 @@ class Sweetiebot():
         return ' '.join(gen_words)
 
     def cuddle(self, mess):
+        logging.debug('cuddle')
         message = mess.getBody().lower()
         if 'pets' in message:
             return '/me purrs ' + random.choice(self.emotes)
         #self.save_action(message.replace('\n',' ')+ '\n')
-        reply = self.random_line('Sweetiebot.actions')
-        reply = reply.replace(
-            self.target, self.get_sender_username(mess).encode('utf-8'))
-        return reply + ' ' + random.choice(self.emotes)
+        action = self.actions.get_next()
+        action = action.replace('<target>', self.get_sender_username(mess))
+        return action + ' ' + random.choice(self.emotes)
 
-    def log_mess(self, mess):
+    def log_mess(self, mess, bot):
         # speak only when spoken to, or when the spirit moves me
         jid = mess.getFrom()
         props = mess.getProperties()
@@ -189,7 +174,7 @@ class Sweetiebot():
             return
         if self.get_sender_username(mess) == self.nickname:
             return
-        if self.jid.bareMatch(jid):
+        if bot.jid.bareMatch(jid):
             return
         if utils.is_ping(self.nickname, message):
             say_something = True
@@ -199,7 +184,8 @@ class Sweetiebot():
         messages = []
         # use a convenience method to strip out the "ping" portion of a message
         if utils.is_ping(self.nickname, message):
-            message = self.fix_ping(message)
+            logging.warning('fixing ping again?')
+            message = bot.fix_ping(message)
 
         if message_true.startswith('/'):
             if message_true.startswith('/me ') and utils.is_ping(self.nickname, message_true):
@@ -250,15 +236,6 @@ class Sweetiebot():
         elif utils.is_ping(self.nickname, message_true):
             print 'Quoting instead...'
             return self.quote(mess, '')
-
-    def random_line(self, filename):
-        try:
-            with open(filename, 'r') as f:
-                lines = filter(None, (line.strip() for line in f))
-                return random.choice(lines)
-        except Exception as e:
-            print("failed to read file "+filename+": "+str(e))
-            return "/me slaps <target> with a large trout."
 
     def on_ping_timeout(self):
         print("PING TIMEOUT")
@@ -324,7 +301,7 @@ class Sweetiebot():
             return replacement
         return link
 
-    def unknown_command(self, mess, cmd, args):
+    def unknown_command(self, bot, mess, cmd, args):
         """Does things"""
         message = mess.getBody()
         # misc stuff here I guess
@@ -366,7 +343,7 @@ class Sweetiebot():
 
         # if message.lower().strip().endswith(":rdderp:"):
         #    return ":rdderp:"
-        return self.log_mess(mess)
+        return self.log_mess(mess, bot)
 
     def get_prices(self, id, system):
         url = "http://api.eve-central.com/api/marketstat?usesystem=" + \
@@ -529,14 +506,7 @@ class Sweetiebot():
     @botcmd
     def quote(self, mess, args):
         '''Replays sass'''
-        if not self.sass_responses:
-            print("reading sass file..")
-            with open('Sweetiebot.sass', 'r') as f:
-                self.sass_responses = [line.strip() for line in f.readlines()]
-                random.shuffle(self.sass_responses)
-            self.sass_index = -1
-        self.sass_index += 1
-        return self.sass_responses[self.sass_index]
+        return self.sass.get_next()
 
     @botcmd
     def sass(self, mess, args):
@@ -547,14 +517,8 @@ class Sweetiebot():
             return "What do you want me to remember?"
         if ":owl:" in args or self.get_sender_username(mess) == ':owl':
             return "No owls allowed! :sweetiedust:"
-        f = open('Sweetiebot.sass', 'a')
-
-        clean_args = args.replace('\n', ' ')
-        f.write(clean_args + '\n')
-        f.close()
         reply = self.get_sender_username(mess) + ': I\'ll remember that!'
-        self.remove_dup('Sweetiebot.sass', 'Sweetiebot.sass')
-        self.sass_responses = None
+        self.sass.add_to_file(args)
         return reply
 
     #Karan = 30004306
