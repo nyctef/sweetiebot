@@ -36,8 +36,6 @@ class Sweetiebot():
     separator = '\x01'
     stop_word = '\x02'
     target = '<target>'
-    sass_responses = None
-    sass_index = -1
 
     urlregex = re.compile(
         r"((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w_-]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)")
