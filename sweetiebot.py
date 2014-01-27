@@ -80,9 +80,6 @@ class Sweetiebot():
     def get_sender_username(self, message):
         return self.bot.get_sender_username(message)
 
-    def make_key(self, k):
-        return '-'.join((self.prefix, k))
-
     def sanitize_message(self, message):
         if "http" in message:
             return ""
@@ -136,7 +133,7 @@ class Sweetiebot():
 
             # get a new word that lives at this key -- if none are present we've
             # reached the end of the chain and can bail
-            next_word = self.redis_conn.srandmember(self.make_key(key))
+            next_word = self.get_next_word(key)
             if not next_word:
                 break
 
@@ -195,10 +192,7 @@ class Sweetiebot():
         # the size of the chain, e.g. ['what', 'up', 'bro'], ['up', 'bro',
         # '\x02']
         for words in self.split_message(self.sanitize_message(message)):
-            # grab everything but the last word
-            key = self.separator.join(words[:-1])
-            # add the last word to the set
-            self.redis_conn.sadd(self.make_key(key), words[-1])
+            key = self.store_chain(words)
             # if we should say something, generate some messages based on what
             # was just said and select the longest, then add it to the list
             if say_something:
