@@ -330,7 +330,7 @@ class Sweetiebot():
             self.lunabeh_count = self.lunabeh_count + 1
 
         if self.lunabeh_count > self.lunabeh_top:
-            self.lunabeh_top = randint(2, 10)
+            self.lunabeh_top = randint(7, 15)
             self.lunabeh_count = 1
             reply = ":lunabeh:"
             return reply
