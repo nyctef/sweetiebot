@@ -296,6 +296,9 @@ class Sweetiebot():
         return link
 
     def unknown_command(self, bot, mess, cmd, args):
+        self.random_chat(bot, mess, cmd, args)
+
+    def random_chat(self, bot, mess, cmd, args):
         """Does things"""
         message = mess.getBody()
         # misc stuff here I guess
