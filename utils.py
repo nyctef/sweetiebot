@@ -1,4 +1,5 @@
 import logging
+import random
 
 def is_ping(nickname, message):
     if nickname.lower() in message.lower():
@@ -17,4 +18,7 @@ def logerrors(func):
             logging.exception('Error in '+func.__name__)
             return "My code is problematic :sweetieoops:"
     return logged
+
+def randomstr():
+    return ('%08x' % random.randrange(16**8))
 

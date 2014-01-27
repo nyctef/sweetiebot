@@ -15,10 +15,11 @@ import redis
 import sys
 import logging
 import requests
+from utils import logerrors, randomstr
 import utils
-from utils import logerrors
 from MUCJabberBot import MUCJabberBot
 from ResponsesFile import ResponsesFile
+from SweetieAdmin import SweetieAdmin
 
 class Sweetiebot():
     kick_owl_delay = 7200
@@ -39,9 +40,6 @@ class Sweetiebot():
 
     urlregex = re.compile(
         r"((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w_-]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)")
-    mods = [
-        'Blighty', 'Nyctef', 'Princess Luna', 'Luna', 'LunaNet', 'Princess Cadence',
-        'Rainbow Dash', 'Twilight Sparkle', 'Big Macintosh', 'Fluttershard', 'Rainbow Dash', 'Spike']
     emotes = [':sweetie:', ':sweetiecrack:',
               ':sweetiederp:', ':sweetiedust:',
               ':sweetieglee:', ':sweetieidea:',
@@ -65,11 +63,12 @@ class Sweetiebot():
         self.actions = ResponsesFile('Sweetiebot.actions')
         self.sass = ResponsesFile('Sweetiebot.sass')
         self.nickname = nickname
-        resource = 'sweetiebutt' + self.randomstr()
+        resource = 'sweetiebutt' + randomstr()
         self.redis_conn = kwargs.pop(
             'redis_conn', None) or redis.Redis('localhost')
         self.bot = MUCJabberBot(nickname, *args, res=resource, **kwargs)
         self.bot.load_commands_from(self)
+        self.admin = SweetieAdmin(self.bot, chatroom)
         self.bot.unknown_command_callback = self.unknown_command
 
     def join_room(self, room, nick):
@@ -80,9 +79,6 @@ class Sweetiebot():
 
     def get_sender_username(self, message):
         return self.bot.get_sender_username(message)
-
-    def randomstr(self):
-        return ('%08x' % random.randrange(16**8))
 
     def make_key(self, k):
         return '-'.join((self.prefix, k))
@@ -543,117 +539,6 @@ class Sweetiebot():
         reply = reply = self.get_sender_username(
             mess) + ': '+name.title() + ' - ' + reply
         return reply
-
-    def _ban(self, room, nick=None, jid=None, reason=None, ban=True):
-        """Kicks user from muc
-        Works only with sufficient rights."""
-        logging.debug('rm:{} nk{} jid{} rsn{} isBan{}'.format(
-            room, nick, jid, reason, ban))
-        NS_MUCADMIN = 'http://jabber.org/protocol/muc#admin'
-        item = xmpp.simplexml.Node('item')
-        if nick is not None:
-            item.setAttr('nick', nick)
-        if jid is not None:
-            item.setAttr('jid', jid)
-        item.setAttr('affiliation', 'outcast' if ban else 'none')
-        iq = xmpp.Iq(typ='set', queryNS=NS_MUCADMIN, xmlns=None, to=room,
-                     payload=set([item]))
-        if reason is not None:
-            item.setTagData('reason', reason)
-        self.bot.connect().send(iq)
-
-    def get_nick_reason(self, args):
-        nick = None
-        reason = None
-        match = re.match("\s*'([^']*)'(.*)", args) or\
-            re.match("\s*\"([^\"]*)\"(.*)", args) or\
-            re.match("\s*(\S*)(.*)", args)
-        if match:
-            nick = match.group(1)
-            reason = match.group(2).strip()
-        return nick, reason
-
-    def chat(self, message):
-        self.bot.send(chatroom, message, message_type='groupchat')
-
-    @botcmd
-    @logerrors
-    def listbans(self, mess, args):
-        """List the current bans. Requires admin"""
-        id = 'banlist'+self.randomstr()
-        NS_MUCADMIN = 'http://jabber.org/protocol/muc#admin'
-        item = xmpp.simplexml.Node('item')
-        item.setAttr('affiliation', 'outcast')
-        iq = xmpp.Iq(
-            typ='get', attrs={"id": id}, queryNS=NS_MUCADMIN, xmlns=None, to=chatroom,
-            payload=set([item]))
-
-        def handleBanlist(session, response):
-            if response is None:
-                return "timed out waiting for banlist"
-            res = ""
-            items = response.getChildren()[0].getChildren()
-            for item in items:
-                if item.getAttr('jid') is not None:
-                    res += "\n" + item.getAttr('jid') + ": "+str(item.getChildren()[0].getData())
-            self.chat(res)
-
-        self.bot.connect().SendAndCallForResponse(iq, handleBanlist)
-
-    @botcmd(name='ban')
-    @logerrors
-    def ban(self, mess, args):
-        '''bans user. Requires admin and a reason
-
-        nick can be wrapped in single or double quotes'''
-
-        nick, reason = self.get_nick_reason(args)
-
-        if not len(reason):
-            return "A reason must be provided"
-
-        sender = self.get_sender_username(mess)
-        if sender in self.mods:
-            print("trying to ban "+nick+" with reason "+reason)
-            self._ban(chatroom, nick, None, 'Banned by '+sender +
-                      ': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y"))
-        else:
-            return "noooooooope."
-
-    @botcmd(name='unban')
-    @logerrors
-    def un(self, mess, args):
-        '''unbans a user. Requires admin and a jid (check listbans)
-
-        nick can be wrapped in single or double quotes'''
-
-        jid = args
-
-        sender = self.get_sender_username(mess)
-        if sender in self.mods:
-            print("trying to unban "+jid)
-            self._ban(chatroom, jid=jid, ban=False)
-        else:
-            return "noooooooope."
-
-    @botcmd(name='kick')
-    @logerrors
-    def remove(self, mess, args):
-        '''kicks user. Requires admin and a reason
-
-        nick can be wrapped in single or double quotes'''
-
-        nick, reason = self.get_nick_reason(args)
-
-        if not len(reason):
-            return "A reason must be provided"
-
-        sender = self.get_sender_username(mess)
-        if sender in self.mods:
-            print("trying to kick "+nick+" with reason "+reason)
-            self.bot.kick(chatroom, nick, 'Kicked by '+sender + ': '+reason)
-        else:
-            return "noooooooope."
 
     @botcmd
     def roll(self, mess, args):
