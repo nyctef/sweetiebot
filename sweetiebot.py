@@ -558,7 +558,7 @@ class Sweetiebot():
                      payload=set([item]))
         if reason is not None:
             item.setTagData('reason', reason)
-        self.connect().send(iq)
+        self.bot.connect().send(iq)
 
     def get_nick_reason(self, args):
         nick = None
@@ -593,10 +593,10 @@ class Sweetiebot():
             items = response.getChildren()[0].getChildren()
             for item in items:
                 if item.getAttr('jid') is not None:
-                    res += "\n" + item.getAtTR('JID') + ": "+str(item)
+                    res += "\n" + item.getAttr('jid') + ": "+str(item)
             self.chat(res)
 
-        self.connect().SendAndCallForResponse(iq, handleBanlist)
+        self.bot.connect().SendAndCallForResponse(iq, handleBanlist)
 
     @botcmd(name='ban')
     @logerrors
