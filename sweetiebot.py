@@ -314,7 +314,7 @@ class Sweetiebot():
             return
         if ":lunaglee:" in message.lower():
             print self.get_sender_username(mess)
-            self.kick(chatroom, sender,
+            self.bot.kick(chatroom, sender,
                       'Don\'t upset my big sister! :sweetiemad:')
             return
         if "c/d" in message.lower():
@@ -448,7 +448,7 @@ class Sweetiebot():
             if (datetime.now() - self.last_owl_kick).seconds < self.kick_owl_delay:
                 return "I'm tired. Maybe another time?"
         print "trying to kick owl ..."
-        self.kick('general@conference.friendshipismagicsquad.com',
+        self.bot.kick('general@conference.friendshipismagicsquad.com',
                   ':owl', reason=':sweetiestare:')
         self.last_owl_kick = datetime.now()
         return
@@ -649,7 +649,7 @@ class Sweetiebot():
         sender = self.get_sender_username(mess)
         if sender in self.mods:
             print("trying to kick "+nick+" with reason "+reason)
-            self.kick(chatroom, nick, 'Kicked by '+sender + ': '+reason)
+            self.bot.kick(chatroom, nick, 'Kicked by '+sender + ': '+reason)
         else:
             return "noooooooope."
 
