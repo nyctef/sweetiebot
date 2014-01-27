@@ -547,6 +547,8 @@ class Sweetiebot():
     def _ban(self, room, nick=None, jid=None, reason=None, ban=True):
         """Kicks user from muc
         Works only with sufficient rights."""
+        logging.debug('rm:{} nk{} jid{} rsn{} isBan{}'.format(
+            room, nick, jid, reason, ban))
         NS_MUCADMIN = 'http://jabber.org/protocol/muc#admin'
         item = xmpp.simplexml.Node('item')
         if nick is not None:
@@ -593,7 +595,7 @@ class Sweetiebot():
             items = response.getChildren()[0].getChildren()
             for item in items:
                 if item.getAttr('jid') is not None:
-                    res += "\n" + item.getAttr('jid') + ": "+str(item)
+                    res += "\n" + item.getAttr('jid') + ": "+str(item.getChildren()[0].getData())
             self.chat(res)
 
         self.bot.connect().SendAndCallForResponse(iq, handleBanlist)
@@ -613,7 +615,7 @@ class Sweetiebot():
         sender = self.get_sender_username(mess)
         if sender in self.mods:
             print("trying to ban "+nick+" with reason "+reason)
-            self._ban(chatroom, nick, 'Banned by '+sender +
+            self._ban(chatroom, nick, None, 'Banned by '+sender +
                       ': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y"))
         else:
             return "noooooooope."
