@@ -1,3 +1,4 @@
+import logging
 
 def is_ping(nickname, message):
     if nickname.lower() in message.lower():
