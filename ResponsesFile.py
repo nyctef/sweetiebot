@@ -43,8 +43,10 @@ class ResponsesFile(object):
             print("reading sass file..")
             with open(self.filename, 'r') as f:
                 self.responses = [line.strip() for line in f.readlines()]
+                print(".. read {} responses".format(len(self.responses)))
                 random.shuffle(self.responses)
             self.sass_index = -1
         self.sass_index += 1
         response = self.responses[self.sass_index]
+        print("returning response {}: {}".format(self.sass_index, response))
         return response

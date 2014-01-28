@@ -1,5 +1,9 @@
 class SweetieRedis():
 
+    separator = '\x01'
+    stop_word = '\x02'
+    prefix = 'jab'
+
     def __init__(self, conn):
         self.redis_conn = conn
 
