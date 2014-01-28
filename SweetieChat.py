@@ -3,6 +3,7 @@ import re
 import xmpp
 import utils
 import random
+import requests
 from utils import logerrors, randomstr
 from jabberbot import botcmd
 from SweetieRedis import SweetieRedis
@@ -31,8 +32,6 @@ class SweetieChat():
         'regarding', 'round', 'save', 'since', 'than', 'through', 'to', 'toward', 'towards', 'under',
         'underneath', 'unlike', 'until', 'up', 'upon', 'versus', 'via', 'with', 'within', 'without']
 
-    id_dic = {"": ""}
-    id_list = {}
     chain_length = 2
     min_reply_length = 3
     chattiness = .02
@@ -61,11 +60,6 @@ class SweetieChat():
 
         return re.sub('[\"\']', '', message.lower())
 
-    def roll_prim(self, dice=1, sides=6):
-        try:
-            return [randint(1, sides) for i in range(dice)]
-        except:
-            return []
 
     def save_action(self, action_str):
         self.actions.add_to_file(action_str)
