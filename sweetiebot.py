@@ -20,6 +20,7 @@ import utils
 from MUCJabberBot import MUCJabberBot
 from ResponsesFile import ResponsesFile
 from SweetieAdmin import SweetieAdmin
+from SweetieRedis import SweetieRedis
 
 class Sweetiebot():
     kick_owl_delay = 7200
