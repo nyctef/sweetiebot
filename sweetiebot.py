@@ -64,11 +64,12 @@ class Sweetiebot():
         self.sass = ResponsesFile('Sweetiebot.sass')
         self.nickname = nickname
         resource = 'sweetiebutt' + randomstr()
-        self.redis_conn = kwargs.pop(
+        redis_conn = kwargs.pop(
             'redis_conn', None) or redis.Redis('localhost')
         self.bot = MUCJabberBot(nickname, *args, res=resource, **kwargs)
         self.bot.load_commands_from(self)
         self.admin = SweetieAdmin(self.bot, chatroom)
+        self.redis = SweetieRedis(redis_conn)
         self.bot.unknown_command_callback = self.unknown_command
 
     def join_room(self, room, nick):
@@ -133,7 +134,7 @@ class Sweetiebot():
 
             # get a new word that lives at this key -- if none are present we've
             # reached the end of the chain and can bail
-            next_word = self.get_next_word(key)
+            next_word = self.redis.get_next_word(key)
             if not next_word:
                 break
 
@@ -192,7 +193,7 @@ class Sweetiebot():
         # the size of the chain, e.g. ['what', 'up', 'bro'], ['up', 'bro',
         # '\x02']
         for words in self.split_message(self.sanitize_message(message)):
-            key = self.store_chain(words)
+            key = self.redis.store_chain(words)
             # if we should say something, generate some messages based on what
             # was just said and select the longest, then add it to the list
             if say_something:
