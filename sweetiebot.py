@@ -53,11 +53,6 @@ class Sweetiebot():
     def get_sender_username(self, message):
         return self.bot.get_sender_username(message)
 
-    def on_ping_timeout(self):
-        print("PING TIMEOUT")
-        logging.info('WARNING: ping timeout.')
-        # self.quit(1)
-
     def unknown_command(self, bot, mess, cmd, args):
         return self.chat.random_chat(bot, mess, cmd, args)
 
