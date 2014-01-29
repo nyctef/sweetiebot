@@ -95,3 +95,8 @@ class MUCJabberBot(JabberBot):
         if self.unknown_command_callback is not None:
             logging.debug('sending callback')
             return self.unknown_command_callback(self, mess, cmd, args)
+    def on_ping_timeout(self):
+        print("PING TIMEOUT")
+        logging.info('WARNING: ping timeout.')
+        # self.quit(1)
+
