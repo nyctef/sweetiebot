@@ -195,9 +195,6 @@ class SweetieChat():
 
     @logerrors
     def get_page_titles(self, message):
-        # hack!
-        if 'emotes! http://pastebin' in message.lower():
-            return None
         matches = self.urlregex.findall(message)
         matches = map(lambda x: x[0], matches)
         matches = map(self.imgur_filter, matches)
