@@ -63,6 +63,10 @@ class MUCJabberBot(JabberBot):
         else:
             command, args = np_message, ''
 
+        if mess.getSubject():
+            logging.debug('ignoring subject..')
+            return
+
         cmd = command.lower()
         if cmd in self.commands:
             if utils.is_ping(self.nickname, message):
