@@ -7,8 +7,13 @@ from datetime import datetime
 
 class SweetieAdmin():
     mods = [
-        'Blighty', 'Nyctef', 'Princess Luna', 'Luna', 'LunaNet', 'Princess Cadence',
-        'Rainbow Dash', 'Twilight Sparkle', 'Big Macintosh', 'Fluttershard', 'Rainbow Dash', 'Spike']
+        "luna@friendshipismagicsquad.com",
+        "gielnor@friendshipismagicsquad.com",
+        "xyyxshard@friendshipismagicsquad.com",
+        "sykedoc@friendshipismagicsquad.com",
+        "twilight_sparkle@friendshipismagicsquad.com",
+        "nyctef@friendshipismagicsquad.com",
+    ]
 
     def __init__(self, bot, chatroom):
         self.bot = bot
@@ -17,6 +22,9 @@ class SweetieAdmin():
 
     def get_sender_username(self, message):
         return self.bot.get_sender_username(message)
+
+    def nick_is_mod(self, nick):
+        return self.bot.get_jid_from_nick(nick) in self.mods
 
     def _ban(self, room, nick=None, jid=None, reason=None, ban=True):
         """Kicks user from muc
@@ -87,7 +95,7 @@ class SweetieAdmin():
             return "A reason must be provided"
 
         sender = self.get_sender_username(mess)
-        if sender in self.mods:
+        if self.nick_is_mod(sender):
             print("trying to ban "+nick+" with reason "+reason)
             self._ban(self.chatroom, nick, None, 'Banned by '+sender +
                       ': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y"))
@@ -104,7 +112,7 @@ class SweetieAdmin():
         jid = args
 
         sender = self.get_sender_username(mess)
-        if sender in self.mods:
+        if self.nick_is_mod(sender):
             print("trying to unban "+jid)
             self._ban(self.chatroom, jid=jid, ban=False)
         else:
@@ -123,9 +131,14 @@ class SweetieAdmin():
             return "A reason must be provided"
 
         sender = self.get_sender_username(mess)
-        if sender in self.mods:
+        if self.nick_is_mod(sender):
             print("trying to kick "+nick+" with reason "+reason)
             self.bot.kick(self.chatroom, nick, 'Kicked by '+sender + ': '+reason)
         else:
             return "noooooooope."
 
+    #@botcmd()
+    #@logerrors
+    #def debug(self, mess, args):
+    #    # what could possibly go wrong
+    #    return str(eval(args))
