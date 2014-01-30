@@ -196,6 +196,9 @@ class SweetieChat():
 
     @logerrors
     def get_page_titles(self, message):
+        if 'shitty octavia memes' in message.lower():
+            logging.warn('hack: ignoring topic')
+            return
         matches = self.urlregex.findall(message)
         matches = map(lambda x: x[0], matches)
         matches = map(self.imgur_filter, matches)
