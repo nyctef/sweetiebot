@@ -107,9 +107,7 @@ class MUCJabberBot(JabberBot):
         return message
 
     def unknown_command(self, mess, cmd, args):
-        logging.debug('unknown_command')
         if self.unknown_command_callback is not None:
-            logging.debug('sending callback')
             return self.unknown_command_callback(self, mess, cmd, args)
     def on_ping_timeout(self):
         print("PING TIMEOUT")

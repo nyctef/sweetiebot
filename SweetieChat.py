@@ -3,6 +3,7 @@ import re
 import xmpp
 import utils
 import random
+from random import randint
 import requests
 from utils import logerrors, randomstr
 from jabberbot import botcmd
@@ -195,6 +196,9 @@ class SweetieChat():
 
     @logerrors
     def get_page_titles(self, message):
+        if 'shitty octavia memes' in message.lower():
+            logging.warn('hack: ignoring topic')
+            return
         matches = self.urlregex.findall(message)
         matches = map(lambda x: x[0], matches)
         matches = map(self.imgur_filter, matches)
