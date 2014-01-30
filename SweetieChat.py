@@ -3,6 +3,7 @@ import re
 import xmpp
 import utils
 import random
+from random import randint
 import requests
 from utils import logerrors, randomstr
 from jabberbot import botcmd
