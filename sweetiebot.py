@@ -42,6 +42,7 @@ class Sweetiebot():
         self.bot.unknown_command_callback = self.unknown_command
         sredis = SweetieRedis(redis_conn)
         self.chat = SweetieChat(self.bot, sredis, actions, sass, chatroom)
+        self.chatroom = chatroom
         self.lookup = SweetieLookup(self.bot)
 
     def join_room(self, room, nick):
@@ -64,8 +65,7 @@ class Sweetiebot():
             if (datetime.now() - self.last_owl_kick).seconds < self.kick_owl_delay:
                 return "I'm tired. Maybe another time?"
         print "trying to kick owl ..."
-        self.bot.kick('general@conference.friendshipismagicsquad.com',
-                  ':owl', reason=':sweetiestare:')
+        self.bot.kick(self.chatroom, ':owl', reason=':sweetiestare:')
         self.last_owl_kick = datetime.now()
         return
 
