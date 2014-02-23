@@ -22,7 +22,13 @@ class SweetieChat():
               ':sweetiescheme:', ':sweetieshake:',
               ':sweetieshrug:', ':sweetiesmug:',
               ':sweetiestare:', ':sweetietwitch:',
-              ':egstare:', ':sweetiesiren:']
+              ':egstare:', ':sweetiesiren:',
+              ':sweetieskeptical:', ':sweetiedesk:',
+              ':sweetiesalute:', ':sweetieawesome:',
+              ':sweetiecreep:', ':sweetieeyes:',
+              ':sweetiefsjal:', ':sweetielod:',
+              ':sweetienom:', ':sweetieohyou:',
+              ]
     preferred_endings = ['.', '~', '!']
     banned_endings = [
         'and', 'or', 'aboard', 'about', 'above', 'across', 'after', 'against', 'along', 'amid', 'among',
