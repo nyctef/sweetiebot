@@ -92,16 +92,15 @@ class SweetieAdmin():
 
         nick, reason = self.get_nick_reason(args)
 
+        if not self.nick_is_mod(sender):
+            return "nooope"
         if not len(reason):
             return "A reason must be provided"
 
         sender = self.get_sender_username(mess)
-        if self.nick_is_mod(sender):
-            print("trying to ban "+nick+" with reason "+reason)
-            self._ban(self.chatroom, nick, None, 'Banned by '+sender +
-                      ': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y"))
-        else:
-            return "noooooooope."
+        print("trying to ban "+nick+" with reason "+reason)
+        self._ban(self.chatroom, nick, None, 'Banned by '+sender +
+                    ': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y"))
 
     @botcmd(name='unban')
     @logerrors
