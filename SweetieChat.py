@@ -42,13 +42,14 @@ class SweetieChat():
     lunabeh_count = 0
     target = '<target>'
 
-    def __init__(self, bot, redis, actions, sass):
+    def __init__(self, bot, redis, actions, sass, chatroom):
         self.bot = bot
         self.bot.load_commands_from(self)
         self.redis = redis
         self.nickname = self.bot.nickname
         self.actions = actions
         self.sass = sass
+        self.chatroom = chatroom
 
     def get_sender_username(self, mess):
         return self.bot.get_sender_username(mess)
@@ -253,7 +254,7 @@ class SweetieChat():
             return
         if ":lunaglee:" in message.lower():
             print self.get_sender_username(mess)
-            self.bot.kick(chatroom, sender,
+            self.bot.kick(self.chatroom, sender,
                       'Don\'t upset my big sister! :sweetiemad:')
             return
         if "c/d" in message.lower():
@@ -263,9 +264,10 @@ class SweetieChat():
             reply = sender + ": yiff in hell, furfag :sweetiemad:"
             return reply
         if "chain" in message.lower():
-            if sender == ":owl":
-                self.deowl
-            return
+            pass
+            #if sender == ":owl":
+            #    self.deowl
+            #return
         if ":lunabeh:" in message.lower() and (sender == ":owl" or "luna" in sender.lower()):
             self.lunabeh_count = self.lunabeh_count + 1
 

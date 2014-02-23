@@ -41,7 +41,7 @@ class Sweetiebot():
         self.admin = SweetieAdmin(self.bot, chatroom)
         self.bot.unknown_command_callback = self.unknown_command
         sredis = SweetieRedis(redis_conn)
-        self.chat = SweetieChat(self.bot, sredis, actions, sass)
+        self.chat = SweetieChat(self.bot, sredis, actions, sass, chatroom)
         self.lookup = SweetieLookup(self.bot)
 
     def join_room(self, room, nick):
