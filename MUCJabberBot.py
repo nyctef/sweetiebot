@@ -85,9 +85,7 @@ class MUCJabberBot(JabberBot):
     def callback_presence(self, conn, presence):
         super(MUCJabberBot, self).callback_presence(conn, presence)
         nick = presence.getFrom().getResource()
-        logging.debug(str(presence))
         if presence.getJid() is not None:
-            logging.debug(nick + ' / ' + presence.getJid())
             self.nicks_to_jids[nick] = xmpp.JID(presence.getJid()).getStripped()
 
     def get_jid_from_nick(self, nick):
