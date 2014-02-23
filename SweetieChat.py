@@ -5,9 +5,8 @@ import utils
 import random
 from random import randint
 import requests
-from utils import logerrors, randomstr
 from jabberbot import botcmd
-from SweetieRedis import SweetieRedis
+from utils import logerrors
 
 
 class SweetieChat():
