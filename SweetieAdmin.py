@@ -132,9 +132,6 @@ class SweetieAdmin():
         if not self.nick_is_mod(sender):
             return "noooooooope."
 
-        if not len(reason):
-            return "A reason must be provided"
-
         print("trying to kick "+nick+" with reason "+reason)
         self.bot.kick(self.chatroom, nick, 'Kicked by '+sender + ': '+reason)
 
