@@ -4,19 +4,11 @@
 
 from jabberbot import botcmd
 from datetime import datetime
-import re
-import urllib
-import xmpp
-from xml.etree import ElementTree as ET
 import random
-from random import randint
-import difflib
 import redis
 import sys
 import logging
-import requests
 from utils import logerrors, randomstr
-import utils
 from MUCJabberBot import MUCJabberBot
 from ResponsesFile import ResponsesFile
 from SweetieAdmin import SweetieAdmin
@@ -27,25 +19,29 @@ from SweetieLookup import SweetieLookup
 class Sweetiebot():
     kick_owl_delay = 7200
     last_owl_kick = 0
-
+    admin = None
+    chat = None
+    chatroom = None
 
     def __init__(self, nickname='Sweetiebutt', *args, **kwargs):
-        actions = ResponsesFile('Sweetiebot.actions')
-        sass = ResponsesFile('Sweetiebot.sass')
         self.nickname = nickname
         resource = 'sweetiebutt' + randomstr()
-        redis_conn = kwargs.pop(
+        self.redis_conn = kwargs.pop(
             'redis_conn', None) or redis.Redis('localhost')
         self.bot = MUCJabberBot(nickname, *args, res=resource, **kwargs)
         self.bot.load_commands_from(self)
-        self.admin = SweetieAdmin(self.bot, chatroom)
         self.bot.unknown_command_callback = self.unknown_command
-        sredis = SweetieRedis(redis_conn)
-        self.chat = SweetieChat(self.bot, sredis, actions, sass, chatroom)
-        self.chatroom = chatroom
         self.lookup = SweetieLookup(self.bot)
 
     def join_room(self, room, nick):
+        if self.admin is None:
+            self.admin = SweetieAdmin(self.bot, room)
+        if self.chat is None:
+            actions = ResponsesFile('Sweetiebot.actions')
+            sass = ResponsesFile('Sweetiebot.sass')
+            sredis = SweetieRedis(self.redis_conn)
+            self.chat = SweetieChat(self.bot, sredis, actions, sass, room)
+        self.chatroom = room
         self.bot.join_room(room, nick)
 
     def serve_forever(self):
