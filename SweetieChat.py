@@ -5,9 +5,8 @@ import utils
 import random
 from random import randint
 import requests
-from utils import logerrors, randomstr
 from jabberbot import botcmd
-from SweetieRedis import SweetieRedis
+from utils import logerrors
 
 
 class SweetieChat():
@@ -22,7 +21,13 @@ class SweetieChat():
               ':sweetiescheme:', ':sweetieshake:',
               ':sweetieshrug:', ':sweetiesmug:',
               ':sweetiestare:', ':sweetietwitch:',
-              ':egstare:', ':sweetiesiren:']
+              ':egstare:', ':sweetiesiren:',
+              ':sweetieskeptical:', ':sweetiedesk:',
+              ':sweetiesalute:', ':sweetieawesome:',
+              ':sweetiecreep:', ':sweetieeyes:',
+              ':sweetiefsjal:', ':sweetielod:',
+              ':sweetienom:', ':sweetieohyou:',
+              ]
     preferred_endings = ['.', '~', '!']
     banned_endings = [
         'and', 'or', 'aboard', 'about', 'above', 'across', 'after', 'against', 'along', 'amid', 'among',
