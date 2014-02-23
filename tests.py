@@ -40,6 +40,7 @@ chatroom = 'sweetiebot_playground@conference.friendshipismagicsquad.com'
 
 def stay_awhile_and_listen():
     import time
+    #TODO: replace any usage of this function with something that spins on a condition or actually waits for a specific message id
     time.sleep(1)
 
 def bot_connects_to_chat():
@@ -85,6 +86,7 @@ def run_tests():
     #user_connects_to_chat()
 
     sweetie.bot.conn.Process(100)
+    #TODO: make an attribute that logs method names automatically when they are run
     print("initial processing done")
     print("pinging bot")
     when_bot_is_pinged(admin)
