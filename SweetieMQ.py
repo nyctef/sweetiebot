@@ -1,4 +1,5 @@
 from azure.servicebus import ServiceBusService, Message
+import logging
 
 class SweetieMQ:
 
@@ -13,6 +14,7 @@ class SweetieMQ:
         self.topic = 'chat-general'
 
     def send(self, message):
+        logging.debug('Sending message '+message)
         msg = Message(message)
         try:
             self.bus_service.send_topic_message(self.topic, msg)
