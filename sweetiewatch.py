@@ -43,11 +43,9 @@ class SweetieWatch(JabberBot):
 
 
 if __name__ == '__main__':
-    account_key = open('sb_account_key.txt', 'r').read().strip()
     username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
     password = open('password.txt', 'r').read().strip();
-    issuer = 'owner'
-    sweetiewatch = SweetieWatch('Sweetiebutt', SweetieMQ(account_key, issuer),\
+    sweetiewatch = SweetieWatch('Sweetiebutt', SweetieMQ(),\
             username, password)
     sweetiewatch.join_room('general@conference.friendshipismagicsquad.com', \
             'Sweetiebot')
