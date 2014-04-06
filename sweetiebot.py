@@ -8,6 +8,7 @@ import random
 import redis
 import sys
 import logging
+import json
 from utils import logerrors, randomstr
 from MUCJabberBot import MUCJabberBot
 from ResponsesFile import ResponsesFile
@@ -15,6 +16,7 @@ from SweetieAdmin import SweetieAdmin
 from SweetieRedis import SweetieRedis
 from SweetieChat import SweetieChat
 from SweetieLookup import SweetieLookup
+from SweetieMQ import SweetieMQ
 
 class Sweetiebot():
     kick_owl_delay = 7200
@@ -32,6 +34,7 @@ class Sweetiebot():
         self.bot.load_commands_from(self)
         self.bot.unknown_command_callback = self.unknown_command
         self.lookup = SweetieLookup(self.bot)
+        self.mq = SweetieMQ()
 
     def join_room(self, room, nick):
         if self.admin is None:
@@ -56,13 +59,27 @@ class Sweetiebot():
     @botcmd
     @logerrors
     def deowl(self, mess, args):
+
+        speaker = mess.getFrom()
+        timestamp = datetime.utcnow()
+        mq_message = {
+            'deowl':True,
+            'room':speaker.getNode(),
+            'server':speaker.getDomain(),
+            'speaker': speaker.getResource(),
+            'timestamp': timestamp.isoformat(' ')
+            }
         '''Only kicks :owl, long cooldown'''
         if self.last_owl_kick:
             if (datetime.now() - self.last_owl_kick).seconds < self.kick_owl_delay:
+                mq_message['success'] = False
+                self.mq.send(json.dumps(mq_message))
                 return "I'm tired. Maybe another time?"
         print "trying to kick owl ..."
         self.bot.kick(self.chatroom, ':owl', reason=':sweetiestare:')
         self.last_owl_kick = datetime.now()
+        mq_message['success'] = True
+        self.mq.send(json.dumps(mq_message))
         return
 
     #@botcmd
