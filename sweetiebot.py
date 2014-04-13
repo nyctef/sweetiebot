@@ -16,31 +16,22 @@ from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, SweetieRedis,\
 class Sweetiebot():
     kick_owl_delay = 7200
     last_owl_kick = 0
-    admin = None
-    chat = None
-    chatroom = None
 
-    def __init__(self, nickname='Sweetiebutt', *args, **kwargs):
+    def __init__(self, nickname, bot, lookup, mq, admin, chat):
         self.nickname = nickname
-        resource = 'sweetiebutt' + randomstr()
-        self.redis_conn = kwargs.pop(
-            'redis_conn', None) or redis.Redis('localhost')
-        self.bot = MUCJabberBot(nickname, *args, res=resource, **kwargs)
+        self.bot = bot
         self.bot.load_commands_from(self)
         self.bot.unknown_command_callback = self.unknown_command
-        self.lookup = SweetieLookup(self.bot)
-        self.mq = SweetieMQ()
+        self.lookup = lookup
+        self.mq = mq
+        self.admin = admin
+        self.chat = chat
+
+        return
 
     def join_room(self, room, nick):
-        if self.admin is None:
-            self.admin = SweetieAdmin(self.bot, room)
-        if self.chat is None:
-            actions = ResponsesFile('Sweetiebot.actions')
-            sass = ResponsesFile('Sweetiebot.sass')
-            sredis = SweetieRedis(self.redis_conn)
-            self.chat = SweetieChat(self.bot, sredis, actions, sass, room)
-        self.chatroom = room
         self.bot.join_room(room, nick)
+        self.chatroom = room
 
     def serve_forever(self):
         self.bot.serve_forever()
@@ -127,15 +118,26 @@ if __name__ == '__main__':
     nickname = 'Sweetiebot'
     debug = False
 
+    resource = 'sweetiebutt' + randomstr()
+    debug = False
     if '--test' in sys.argv:
         chatroom = 'sweetiebot_playground@conference.friendshipismagicsquad.com'
+        redis_conn = FakeRedis()
         debug = True
-        sweet = Sweetiebot(
-            nickname, username, password, redis_conn=FakeRedis(),
-            only_direct=False, command_prefix='', debug=True)
     else:
-        sweet = Sweetiebot(nickname, username, password,
-                           only_direct=False, command_prefix='')
+        redis_conn = redis.Redis('localhost')
+
+    bot = MUCJabberBot(nickname, username, password, res=resource,
+                       only_direct=False, command_prefix='', debug=debug)
+    lookup = SweetieLookup(bot)
+    admin = SweetieAdmin(bot, chatroom)
+    mq = SweetieMQ()
+    actions = ResponsesFile('Sweetiebot.actions')
+    sass = ResponsesFile('Sweetiebot.sass')
+    sredis = SweetieRedis(redis_conn)
+    chat = SweetieChat(bot, sredis, actions, sass, chatroom)
+
+    sweet = Sweetiebot(nickname, bot, lookup, mq, admin, chat)
 
     print sweet.nickname + ' established!'
     print username
