@@ -1,4 +1,4 @@
-from sweetiebot import Sweetiebot, FakeRedis
+from sweetiebot import Sweetiebot, FakeRedis, build_sweetiebot
 from MUCJabberBot import MUCJabberBot
 
 '''
@@ -47,9 +47,7 @@ def bot_connects_to_chat():
     nickname = 'Sweetiebot'
     username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
     password = open('password.txt', 'r').read().strip()
-    sweet = Sweetiebot(
-        nickname, username, password, redis_conn=FakeRedis(),
-        only_direct=False, command_prefix='', debug=True)
+    sweet, _ = build_sweetiebot()
     sweet.join_room(chatroom, nickname)
     stay_awhile_and_listen()
     return sweet
