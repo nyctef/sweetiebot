@@ -27,8 +27,6 @@ class Sweetiebot():
         self.admin = admin
         self.chat = chat
 
-        return
-
     def join_room(self, room, nick):
         self.bot.join_room(room, nick)
         self.chatroom = room
