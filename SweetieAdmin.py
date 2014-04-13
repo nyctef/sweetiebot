@@ -61,6 +61,10 @@ class SweetieAdmin():
         self.bot.send(self.chatroom, message, message_type='groupchat')
 
     @botcmd
+    def banlist(self, mess, args):
+        return self.listbans(mess, args)
+
+    @botcmd
     @logerrors
     def listbans(self, mess, args):
         """List the current bans. Requires admin"""
