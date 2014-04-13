@@ -10,13 +10,8 @@ import sys
 import logging
 import json
 from utils import logerrors, randomstr
-from MUCJabberBot import MUCJabberBot
-from ResponsesFile import ResponsesFile
-from SweetieAdmin import SweetieAdmin
-from SweetieRedis import SweetieRedis
-from SweetieChat import SweetieChat
-from SweetieLookup import SweetieLookup
-from SweetieMQ import SweetieMQ
+from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, SweetieRedis,\
+    SweetieChat, SweetieLookup, SweetieMQ
 
 class Sweetiebot():
     kick_owl_delay = 7200
