@@ -106,21 +106,18 @@ class FakeRedis(object):
             self.data[key] = [value]
 
 
-def build_sweetiebot():
+def build_sweetiebot(debug=True):
     #username = 'blighted@friendshipismagicsquad.com/sweetiebutt'
     username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
     #username = 'nyctef@friendshipismagicsquad.com'
     password = open('password.txt', 'r').read().strip()
     chatroom = 'general@conference.friendshipismagicsquad.com'
     nickname = 'Sweetiebot'
-    debug = False
 
     resource = 'sweetiebutt' + randomstr()
-    debug = False
-    if '--test' in sys.argv:
+    if debug:
         chatroom = 'sweetiebot_playground@conference.friendshipismagicsquad.com'
         redis_conn = FakeRedis()
-        debug = True
     else:
         redis_conn = redis.Redis('localhost')
 
@@ -142,7 +139,7 @@ if __name__ == '__main__':
         format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', filename='sweetiebot.log', level=logging.DEBUG)
     logging.getLogger().addHandler(logging.StreamHandler())
 
-    sweet, chatroom = build_sweetiebot()
+    sweet, chatroom = build_sweetiebot('--test' in sys.argv)
 
     print sweet.nickname + ' established!'
     print 'Joining Room:' + chatroom
