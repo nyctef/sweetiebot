@@ -105,11 +105,8 @@ class FakeRedis(object):
         else:
             self.data[key] = [value]
 
-if __name__ == '__main__':
-    logging.basicConfig(
-        format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', filename='sweetiebot.log', level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler())
 
+def build_sweetiebot():
     #username = 'blighted@friendshipismagicsquad.com/sweetiebutt'
     username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
     #username = 'nyctef@friendshipismagicsquad.com'
@@ -138,9 +135,16 @@ if __name__ == '__main__':
     chat = SweetieChat(bot, sredis, actions, sass, chatroom)
 
     sweet = Sweetiebot(nickname, bot, lookup, mq, admin, chat)
+    return sweet, chatroom
+
+if __name__ == '__main__':
+    logging.basicConfig(
+        format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', filename='sweetiebot.log', level=logging.DEBUG)
+    logging.getLogger().addHandler(logging.StreamHandler())
+
+    sweet, chatroom = build_sweetiebot()
 
     print sweet.nickname + ' established!'
-    print username
     print 'Joining Room:' + chatroom
     sweet.join_room(chatroom, sweet.nickname)
     print 'Joined!'
