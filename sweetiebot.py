@@ -67,6 +67,10 @@ class Sweetiebot():
         return
 
     @botcmd
+    def deoctavia(self, mess, args):
+        self.detavi(mess, args)
+
+    @botcmd
     @logerrors
     def detavi(self, mess, args):
         speaker = mess.getFrom().getResource()
