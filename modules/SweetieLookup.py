@@ -70,7 +70,7 @@ class SweetieLookup():
         i_id = None
         i_name = None
         if len(self.id_dic) <= 1:
-            f = open('typeid.txt')
+            f = open('data/typeid.txt')
             line = f.readline()
             line = line.replace("\n", "")
             while(len(line) > 0):

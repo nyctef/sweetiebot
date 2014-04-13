@@ -126,8 +126,8 @@ def build_sweetiebot(debug=True):
     lookup = SweetieLookup(bot)
     admin = SweetieAdmin(bot, chatroom)
     mq = SweetieMQ()
-    actions = ResponsesFile('Sweetiebot.actions')
-    sass = ResponsesFile('Sweetiebot.sass')
+    actions = ResponsesFile('data/Sweetiebot.actions')
+    sass = ResponsesFile('data/Sweetiebot.sass')
     sredis = SweetieRedis(redis_conn)
     chat = SweetieChat(bot, sredis, actions, sass, chatroom)
 

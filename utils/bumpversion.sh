@@ -4,5 +4,5 @@ if [ -z "$1" ]
     exit
 fi
 
-echo $1 > version.txt
+echo $1 > ../version.txt
 git commit -am "bump version"
