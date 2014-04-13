@@ -4,7 +4,7 @@ import os
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.sys.path.insert(0,parentdir)
 
-from sweetiebot import Sweetiebot, FakeRedis, build_sweetiebot
+from sweetiebot import build_sweetiebot
 from MUCJabberBot import MUCJabberBot
 
 '''
@@ -51,8 +51,8 @@ def stay_awhile_and_listen():
 
 def bot_connects_to_chat():
     nickname = 'Sweetiebot'
-    username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
-    password = open('password.txt', 'r').read().strip()
+    #username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
+    #password = open('password.txt', 'r').read().strip()
     sweet, _ = build_sweetiebot()
     sweet.join_room(chatroom, nickname)
     stay_awhile_and_listen()
@@ -101,7 +101,7 @@ def run_tests():
     bot_responds_with_sass(admin)
 
     admin_disconnects(admin)
-    bot_disconnects(bot)
+    bot_disconnects(sweetie)
 
 
 
