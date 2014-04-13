@@ -1,3 +1,9 @@
+# add parent dir to path since we're not using any fancy frameworks for
+# these tests
+import os
+parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.sys.path.insert(0,parentdir)
+
 from sweetiebot import Sweetiebot, FakeRedis, build_sweetiebot
 from MUCJabberBot import MUCJabberBot
 
