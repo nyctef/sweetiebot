@@ -82,6 +82,14 @@ class Sweetiebot():
         self.mq.send(json.dumps(mq_message))
         return
 
+    @botcmd
+    @logerrors
+    def detavi(self, mess, args):
+        speaker = mess.getFrom().getResource()
+        print "trying to kick "+speaker
+        self.bot.kick(self.chatroom, speaker, reason=':lyraahem:')
+        return
+
     #@botcmd
     def bye(self, mess, args):
         '''Makes me restart! Blighties only!'''
