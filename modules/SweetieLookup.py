@@ -150,18 +150,7 @@ class SweetieLookup():
             .format(diff.days, diff.seconds // 3600, (diff.seconds//60) % 60, diff.seconds % 60)
         # print message
         return message
-
-    #@botcmd
-    def karan(self, mess, args):
-        '''Looks up Karan Prices, use !karan [ITEM NAME]'''
-        id, name = self.id_lookup(args)
-        if id is None:
-            return ''
-        reply = self.get_prices(id, 30004306)
-        reply = reply = self.get_sender_username(
-            mess) + ': '+name.title() + ' - ' + reply
-        return reply
-
+    
     @botcmd
     @logerrors
     def jita(self, mess, args):
