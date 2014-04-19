@@ -52,6 +52,18 @@ class SweetieLookup():
         r = 'buy: ' + buy + ' isk, sell: ' + sell + ' isk'
         return r
 
+    def read_ids(self):
+        f = open('data/typeid.txt')
+        line = f.readline()
+        line = line.replace("\n", "")
+        id_dic = {}
+        while(len(line) > 0):
+            typeid, item_name = line.split('=', 1)
+            id_dic[unicode(item_name, 'utf-8').upper()] = int(typeid)
+            line = f.readline().replace("\n", "")
+        f.close()
+        return id_dic
+
     def id_lookup(self, name):
         ''' Lookup a typeid in typeid.txt
 
@@ -71,14 +83,7 @@ class SweetieLookup():
         i_id = None
         i_name = None
         if len(self.id_dic) <= 1:
-            f = open('data/typeid.txt')
-            line = f.readline()
-            line = line.replace("\n", "")
-            while(len(line) > 0):
-                typeid, item_name = line.split('=', 1)
-                self.id_dic[unicode(item_name, 'utf-8').upper()] = int(typeid)
-                line = f.readline().replace("\n", "")
-            f.close()
+            self.id_dic = self.read_ids()
 
         logging.debug('looking for '+test+' in id_dic')
         if test in list(self.id_dic.keys()):
@@ -90,7 +95,7 @@ class SweetieLookup():
             maybe = difflib.get_close_matches(
                 test, list(self.id_dic.keys()), 1)
             if len(maybe) > 0:
-                logging.debug("maybe meant " + maybe[0])
+                logging.debug("maybe meant " + str(maybe))
                 if maybe[0] in list(self.id_dic.keys()):
                     i_id = self.id_dic[maybe[0]]
                     i_name = maybe[0]
