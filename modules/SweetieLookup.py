@@ -168,7 +168,7 @@ class SweetieLookup():
         '''Looks up Jita Prices, use !jita [ITEM NAME]'''
         id, name = self.id_lookup(args)
         if id is None:
-            return ''
+            return 'Couldn\'t find any matches'
         reply = self.get_prices(id, 30000142)
         reply = reply = self.get_sender_username(
             mess) + ': '+name.title() + ' - ' + reply
