@@ -72,7 +72,7 @@ class SweetieLookup():
 
         .output typeid.txt
 
-        select typeID || '=' || typeName from invTypes;
+        select typeID || '=' || typeName from invTypes where published = 1;
         '''
         if name.lower() == 'plex' or name.lower() == '30 day':
             return 29668, name
