@@ -1,14 +1,11 @@
 from jabberbot import botcmd
 from datetime import datetime
-import re
 import urllib
-import xmpp
 import requests
 import logging
-import utils
 import difflib
 from xml.etree import ElementTree as ET
-from utils import logerrors, randomstr
+from utils import logerrors
 from random import randint
 
 class SweetieLookup():
