@@ -6,6 +6,7 @@ import xmpp
 import requests
 import logging
 import utils
+import difflib
 from xml.etree import ElementTree as ET
 from utils import logerrors, randomstr
 from random import randint
