@@ -43,7 +43,11 @@ class SweetieLookup():
               "&typeid=" + \
               str(id)
         logging.debug('asking for prices at '+url)
-        root = ET.parse(urllib.urlopen(url)).getroot()
+        apiresult = urllib.urlopen(url).read()
+        try:
+            root = ET.parse(apiresult).getroot()
+        except:
+            return "EveCentral is unhappy: "+apiresult[:200]
 
         buy = root[0][0][0][2].text  # top buy
         sell = root[0][0][1][3].text  # low sell
