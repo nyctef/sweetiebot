@@ -62,6 +62,7 @@ class Sweetiebot():
         print "trying to kick owl ..."
         self.bot.kick(self.chatroom, ':owl', reason=':sweetiestare:')
         self.last_owl_kick = datetime.now()
+        self.kick_owl_delay = random.gauss(2*60*60, 20*60)
         mq_message['success'] = True
         self.mq.send(json.dumps(mq_message))
         return
