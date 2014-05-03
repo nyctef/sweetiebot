@@ -112,3 +112,6 @@ class MUCJabberBot(JabberBot):
         logging.info('WARNING: ping timeout.')
         # self.quit(1)
 
+    def send_iq(self, iq, callback):
+        self.connect().SendAndCallForResponse(iq, callback)
+

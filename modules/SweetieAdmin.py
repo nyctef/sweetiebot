@@ -86,7 +86,7 @@ class SweetieAdmin():
                     res += "\n" + item.getAttr('jid') + ": "+str(item.getChildren()[0].getData())
             self.chat(res)
 
-        self.bot.connect().SendAndCallForResponse(iq, handleBanlist)
+        self.bot.send_iq(iq, handleBanlist)
 
     @botcmd(name='ban')
     @logerrors
