@@ -40,24 +40,26 @@ class SweetieAdmin():
             item.setAttr('nick', nick)
         if jid is not None:
             item.setAttr('jid', jid)
-        affiliation = ('none' if kickban_type is SweetieAdmin._kick else
-                       'none' if kickban_type is SweetieAdmin._unban else
-                       'outcast')
 
-        item.setAttr('affiliation', affiliation)
+        if kickban_type is SweetieAdmin._kick:
+            item.setAttr('role', 'none')
+        if kickban_type is SweetieAdmin._ban:
+            item.setAttr('affiliation', 'outcast')
+        if kickban_type is SweetieAdmin._unban:
+            item.setAttr('affiliation', 'none')
+
         iq = xmpp.Iq(typ='set', queryNS=NS_MUCADMIN, xmlns=None, to=room,
                      payload=set([item]))
         if reason is not None:
             item.setTagData('reason', reason)
         return iq
 
-    def _ban(self, room, nick=None, jid=None, reason=None, ban=True):
+    def _kickban(self, room, nick=None, jid=None, reason=None,
+                 kickban_type=None):
         """Kicks user from muc
         Works only with sufficient rights."""
         logging.debug('rm:{} nk{} jid{} rsn{} isBan{}'.format(
-            room, nick, jid, reason, ban))
-
-        kickban_type = self._ban if ban else self._unban
+            room, nick, jid, reason, kickban_type))
 
         iq = SweetieAdmin.iq_for_kickban(room, nick, jid, reason, kickban_type)
 
@@ -121,8 +123,9 @@ class SweetieAdmin():
             return "A reason must be provided"
 
         print("trying to ban "+nick+" with reason "+reason)
-        self._ban(self.chatroom, nick, None, 'Banned by '+sender +
-                    ': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y"))
+        self._kickban(self.chatroom, nick, None, 'Banned by '+sender +
+                    ': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y"),
+                      kickban_type=self._ban)
 
     @botcmd(name='unban')
     @logerrors
@@ -136,7 +139,7 @@ class SweetieAdmin():
         sender = self.get_sender_username(mess)
         if self.nick_is_mod(sender):
             print("trying to unban "+jid)
-            self._ban(self.chatroom, jid=jid, ban=False)
+            self._kickban(self.chatroom, jid=jid, kickban_type=self._unban)
         else:
             return "noooooooope."
 
@@ -154,7 +157,8 @@ class SweetieAdmin():
             return "noooooooope."
 
         print("trying to kick "+nick+" with reason "+reason)
-        self.bot.kick(self.chatroom, nick, 'Kicked by '+sender + ': '+reason)
+        self._kickban(self.chatroom, nick=nick, reason=reason,
+                      kickban_type=self._kick)
 
     #@botcmd()
     #@logerrors
