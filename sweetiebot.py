@@ -60,7 +60,7 @@ class Sweetiebot():
                 self.mq.send(json.dumps(mq_message))
                 return "I'm tired. Maybe another time?"
         print "trying to kick owl ..."
-        self.bot.kick(self.chatroom, ':owl', reason=':sweetiestare:')
+        self.admin.kick(':owl', ':sweetiestare:')
         self.last_owl_kick = datetime.now()
         self.kick_owl_delay = random.gauss(2*60*60, 20*60)
         mq_message['success'] = True
@@ -76,7 +76,7 @@ class Sweetiebot():
     def detavi(self, mess, args):
         speaker = mess.getFrom().getResource()
         print "trying to kick "+speaker
-        self.bot.kick(self.chatroom, speaker, reason=':lyraahem:')
+        self.admin.kick(speaker, ':lyraahem:')
         return
 
     #@botcmd

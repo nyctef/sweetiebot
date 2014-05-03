@@ -178,6 +178,10 @@ class SweetieAdmin():
         self._kickban(self.chatroom, nick=nick, reason=reason,
                       kickban_type=self._kick)
 
+    def kick(self, nick, reason):
+        self._kickban(self.chatroom, nick=nick, reason=reason,
+                      kickban_type=self._kick)
+
     #@botcmd()
     #@logerrors
     #def debug(self, mess, args):
