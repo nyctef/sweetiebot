@@ -17,6 +17,10 @@ class SweetieAdmin():
         "nyctef@friendshipismagicsquad.com",
     ]
 
+    _kick = "kick"
+    _ban = "ban"
+    _unban = "unban"
+
     def __init__(self, bot, chatroom):
         self.bot = bot
         self.bot.load_commands_from(self)
@@ -29,14 +33,18 @@ class SweetieAdmin():
         return self.bot.get_jid_from_nick(nick) in self.mods
 
     @staticmethod
-    def iq_for_ban(room, nick, jid, reason, unban):
+    def iq_for_kickban(room, nick, jid, reason, kickban_type):
         NS_MUCADMIN = 'http://jabber.org/protocol/muc#admin'
         item = xmpp.simplexml.Node('item')
         if nick is not None:
             item.setAttr('nick', nick)
         if jid is not None:
             item.setAttr('jid', jid)
-        item.setAttr('affiliation', 'none' if unban else 'outcast')
+        affiliation = ('none' if kickban_type is SweetieAdmin._kick else
+                       'none' if kickban_type is SweetieAdmin._unban else
+                       'outcast')
+
+        item.setAttr('affiliation', affiliation)
         iq = xmpp.Iq(typ='set', queryNS=NS_MUCADMIN, xmlns=None, to=room,
                      payload=set([item]))
         if reason is not None:
@@ -49,7 +57,9 @@ class SweetieAdmin():
         logging.debug('rm:{} nk{} jid{} rsn{} isBan{}'.format(
             room, nick, jid, reason, ban))
 
-        iq = SweetieAdmin.iq_for_ban(room, nick, jid, reason, not ban)
+        kickban_type = self._ban if ban else self._unban
+
+        iq = SweetieAdmin.iq_for_kickban(room, nick, jid, reason, kickban_type)
 
         self.bot.send_iq(iq)
 
