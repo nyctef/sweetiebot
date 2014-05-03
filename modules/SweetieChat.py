@@ -224,6 +224,7 @@ class SweetieChat():
                 print "error fetching url "+match+" : "+str(e)
                 pass
         results = filter(self.title_filter, results)
+        results = map(self.remove_extra_whitespace, results)
         if not len(results):
             return None
         return " / ".join(results)
@@ -234,6 +235,13 @@ class SweetieChat():
         if (result.strip() == 'Error - Test Forums Please Ignore'):
             return False
         return True
+
+    def remove_extra_whitespace(self, result):
+        result = result.replace('\n', '')
+        result = result.replace('\r', '')
+        result = re.sub('\s\s', ' ', result)
+        return result
+
 
     def imgur_filter(self, link):
         imgurregex = re.compile(r'^http(s)?://i.imgur.com/([a-zA-Z0-9]*)\..*$')
