@@ -44,7 +44,7 @@ class SweetieAdmin():
                      payload=set([item]))
         if reason is not None:
             item.setTagData('reason', reason)
-        self.bot.connect().send(iq)
+        self.bot.send_iq(iq)
 
     def get_nick_reason(self, args):
         nick = None
