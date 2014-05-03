@@ -63,7 +63,25 @@ class SweetieAdmin():
 
         iq = SweetieAdmin.iq_for_kickban(room, nick, jid, reason, kickban_type)
 
-        self.bot.send_iq(iq)
+        self.bot.send_iq(iq, self._kickban_response_handler())
+
+    def _kickban_response_handler(self):
+        def handler(session, response):
+            if response is None:
+                self.chat("Did that work? I timed out for a moment there")
+                return
+            error = response.getTag('error')
+            if error is not None:
+                not_allowed = error.getTag('not-allowed')
+                if not_allowed is not None:
+                    self.chat('Sorry, that\'s above my paygrade..')
+                    return
+                text = error.getTag('text')
+                if text is None:
+                    self.chat('Something\'s fucky...')
+                    return
+                self.chat(str(text))
+        return handler
 
     def get_nick_reason(self, args):
         nick = None
