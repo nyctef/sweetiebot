@@ -28,23 +28,30 @@ class SweetieAdmin():
     def nick_is_mod(self, nick):
         return self.bot.get_jid_from_nick(nick) in self.mods
 
-    def _ban(self, room, nick=None, jid=None, reason=None, ban=True):
-        """Kicks user from muc
-        Works only with sufficient rights."""
-        logging.debug('rm:{} nk{} jid{} rsn{} isBan{}'.format(
-            room, nick, jid, reason, ban))
+    @staticmethod
+    def iq_for_ban(room, nick, jid, reason, unban):
         NS_MUCADMIN = 'http://jabber.org/protocol/muc#admin'
         item = xmpp.simplexml.Node('item')
         if nick is not None:
             item.setAttr('nick', nick)
         if jid is not None:
             item.setAttr('jid', jid)
-        item.setAttr('affiliation', 'outcast' if ban else 'none')
+        item.setAttr('affiliation', 'none' if unban else 'outcast')
         iq = xmpp.Iq(typ='set', queryNS=NS_MUCADMIN, xmlns=None, to=room,
                      payload=set([item]))
         if reason is not None:
             item.setTagData('reason', reason)
-        self.bot.connect().send(iq)
+        return iq
+
+    def _ban(self, room, nick=None, jid=None, reason=None, ban=True):
+        """Kicks user from muc
+        Works only with sufficient rights."""
+        logging.debug('rm:{} nk{} jid{} rsn{} isBan{}'.format(
+            room, nick, jid, reason, ban))
+
+        iq = SweetieAdmin.iq_for_ban(room, nick, jid, reason, not ban)
+
+        self.bot.send_iq(iq)
 
     def get_nick_reason(self, args):
         nick = None
@@ -86,7 +93,7 @@ class SweetieAdmin():
                     res += "\n" + item.getAttr('jid') + ": "+str(item.getChildren()[0].getData())
             self.chat(res)
 
-        self.bot.connect().SendAndCallForResponse(iq, handleBanlist)
+        self.bot.send_iq(iq, handleBanlist)
 
     @botcmd(name='ban')
     @logerrors
