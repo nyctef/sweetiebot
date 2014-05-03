@@ -242,7 +242,6 @@ class SweetieChat():
         result = re.sub('\s\s', ' ', result)
         return result
 
-
     def imgur_filter(self, link):
         imgurregex = re.compile(r'^http(s)?://i.imgur.com/([a-zA-Z0-9]*)\..*$')
         match = imgurregex.match(link)
