@@ -28,9 +28,11 @@ class ResponsesFile(object):
             return "/me slaps <target> with a large trout."
 
     def add_to_file(self, args):
-        with open(self.filename, 'a') as f:
+        with open(self.filename, 'ab') as f:
             clean_args = args.replace('\n', ' ')
-            f.write(clean_args + '\n')
+            print(args)
+            print(args.__class__)
+            f.write((clean_args + '\n').encode('utf-8'))
         self._remove_dup()
 
     def get_next(self):
