@@ -56,7 +56,7 @@ class SweetieMarkov(object):
         return self.bot.get_sender_username(mess)
 
     def split_message(self, message):
-        return re.findall(r"[\w'-]+|:[\w]:|[.,!?;]", message)
+        return re.findall(r"[\w'-]+|:[\w]:|[.,!~?;]", message)
 
     def split_message_into_subsequences(self, message):
         # split the incoming message into words, i.e. ['what', 'up', 'bro']
