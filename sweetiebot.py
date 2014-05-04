@@ -77,16 +77,6 @@ class Sweetiebot():
         self.admin.kick(speaker, ':lyraahem:')
         return
 
-    def bye(self, mess, args):
-        '''Makes me restart! Blighties only!'''
-        if self.get_sender_username(mess) == 'Blighty':
-            self.quit()
-
-    def yell(self, mess, args):
-        '''Yells at everyone Blighties only!'''
-        if self.get_sender_username(mess) == 'Blighty':
-            self.broadcast(args, True)
-
 
 def build_sweetiebot(debug=True):
     #username = 'blighted@friendshipismagicsquad.com/sweetiebutt'
