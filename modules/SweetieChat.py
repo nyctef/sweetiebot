@@ -238,7 +238,7 @@ class SweetieChat():
     def remove_extra_whitespace(self, result):
         result = result.replace('\n', '')
         result = result.replace('\r', '')
-        result = re.sub('\s\s', ' ', result)
+        result = re.sub('\s+', ' ', result)
         return result
 
     def imgur_filter(self, link):
