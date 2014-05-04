@@ -43,11 +43,9 @@ class SweetieWatch(JabberBot):
 
 
 if __name__ == '__main__':
-    username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
-    password = open('password.txt', 'r').read().strip();
-    sweetiewatch = SweetieWatch('Sweetiebutt', SweetieMQ(),\
-            username, password)
-    sweetiewatch.join_room('general@conference.friendshipismagicsquad.com', \
-            'Sweetiebot')
+    import config
+    sweetiewatch = SweetieWatch(config.nickname, SweetieMQ(),\
+            config.username, config.password)
+    sweetiewatch.join_room(config.chatroom, config.nickname)
     sweetiewatch.serve_forever()
 
