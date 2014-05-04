@@ -10,13 +10,13 @@ import logging
 import json
 from utils import logerrors, randomstr
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, SweetieRedis,\
-    SweetieChat, SweetieLookup, SweetieMQ, FakeRedis
+    SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette
 
 class Sweetiebot():
     kick_owl_delay = 7200
     last_owl_kick = 0
 
-    def __init__(self, nickname, bot, lookup, mq, admin, chat):
+    def __init__(self, nickname, bot, lookup, mq, admin, chat, roulette):
         self.nickname = nickname
         self.bot = bot
         self.bot.load_commands_from(self)
@@ -25,6 +25,7 @@ class Sweetiebot():
         self.mq = mq
         self.admin = admin
         self.chat = chat
+        self.roulette = roulette
 
     def join_room(self, room, nick):
         self.bot.join_room(room, nick)
@@ -102,8 +103,9 @@ def build_sweetiebot(debug=True):
     sass = ResponsesFile('data/Sweetiebot.sass')
     sredis = SweetieRedis(redis_conn)
     chat = SweetieChat(bot, sredis, actions, sass, chatroom)
+    roulette = SweetieRoulette(bot, admin)
 
-    sweet = Sweetiebot(nickname, bot, lookup, mq, admin, chat)
+    sweet = Sweetiebot(nickname, bot, lookup, mq, admin, chat, roulette)
     return sweet, chatroom
 
 if __name__ == '__main__':
