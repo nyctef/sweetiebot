@@ -4,7 +4,6 @@ import xmpp
 import utils
 import random
 from random import randint
-import requests
 from jabberbot import botcmd
 from utils import logerrors
 
@@ -219,6 +218,7 @@ class SweetieChat():
 
     def get_page_title(self, url):
         from bs4 import BeautifulSoup
+        import requests
         try:
             res = requests.get(url, timeout=5)
             if not 'html' in res.headers['content-type']:
