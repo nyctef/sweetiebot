@@ -220,7 +220,8 @@ class SweetieChat():
         from bs4 import BeautifulSoup
         import requests
         try:
-            res = requests.get(url, timeout=5)
+            headers = { 'user-agent': 'sweetiebot' }
+            res = requests.get(url, timeout=5, headers=headers)
             if not 'html' in res.headers['content-type']:
                 return
             soup = BeautifulSoup(res.text)
