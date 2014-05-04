@@ -8,18 +8,15 @@ class ResponsesFile(object):
 
     def _remove_dup(self):
         lines_seen = set()  # holds lines already seen
-        in_f = open(self.filename, "r")
-        for line in in_f:
-            # not a duplicate
-            if line not in lines_seen and not ":lunaglee:" in line:
-                if not any(i in line for i in ('#', '/', '\\')):
-                    lines_seen.add(line)
-        in_f.close()
-        out_f = open(self.filename, "w")
-        out_f.writelines(sorted(lines_seen))
-        out_f.close()
+        with open(self.filename, "r") as in_f:
+            for line in in_f:
+                # not a duplicate
+                if line not in lines_seen and not ":lunaglee:" in line:
+                    if not any(i in line for i in ('#', '/', '\\')):
+                        lines_seen.add(line)
+        with open(self.filename, "w") as out_f:
+            out_f.writelines(sorted(lines_seen))
         return
-
 
     def random_line(self):
         try:
@@ -31,11 +28,9 @@ class ResponsesFile(object):
             return "/me slaps <target> with a large trout."
 
     def add_to_file(self, args):
-        f = open(self.filename, 'a')
-
-        clean_args = args.replace('\n', ' ')
-        f.write(clean_args + '\n')
-        f.close()
+        with open(self.filename, 'a') as f:
+            clean_args = args.replace('\n', ' ')
+            f.write(clean_args + '\n')
         self._remove_dup()
 
     def get_next(self):
