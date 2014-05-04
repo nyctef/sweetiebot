@@ -1,6 +1,6 @@
 from jabberbot import JabberBot
 from datetime import datetime
-from SweetieMQ import SweetieMQ
+from modules import SweetieMQ
 import json
 import random
 import xmpp
@@ -44,7 +44,7 @@ class SweetieWatch(JabberBot):
 
 if __name__ == '__main__':
     import config
-    sweetiewatch = SweetieWatch(config.nickname, SweetieMQ(),\
+    sweetiewatch = SweetieWatch(config.nickname, SweetieMQ(config),\
             config.username, config.password)
     sweetiewatch.join_room(config.chatroom, config.nickname)
     sweetiewatch.serve_forever()
