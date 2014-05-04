@@ -6,26 +6,15 @@ import re
 from datetime import datetime
 
 class SweetieAdmin():
-    mods = [
-        "luna@friendshipismagicsquad.com",
-        "gielnor@friendshipismagicsquad.com",
-        "xyyxshard@friendshipismagicsquad.com",
-        "sykedoc@friendshipismagicsquad.com",
-        "twilight_sparkle@friendshipismagicsquad.com",
-        "princess_cadence@friendshipismagicsquad.com",
-        "seven@friendshipismagicsquad.com",
-        "big_macintosh@friendshipismagicsquad.com",
-        "nyctef@friendshipismagicsquad.com",
-    ]
-
     _kick = "kick"
     _ban = "ban"
     _unban = "unban"
 
-    def __init__(self, bot, chatroom):
+    def __init__(self, bot, chatroom, mods):
         self.bot = bot
         self.bot.load_commands_from(self)
         self.chatroom = chatroom
+        self.mods = mods
 
     def get_sender_username(self, message):
         return self.bot.get_sender_username(message)

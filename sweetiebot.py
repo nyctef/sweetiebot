@@ -91,7 +91,7 @@ def build_sweetiebot(config=None):
     bot = MUCJabberBot(config.nickname, config.username, config.password, res=resource,
                        only_direct=False, command_prefix='', debug=config.debug)
     lookup = SweetieLookup(bot)
-    admin = SweetieAdmin(bot, config.chatroom)
+    admin = SweetieAdmin(bot, config.chatroom, config.mods)
     mq = SweetieMQ(config)
     actions = ResponsesFile('data/Sweetiebot.actions')
     sass = ResponsesFile('data/Sweetiebot.sass')
