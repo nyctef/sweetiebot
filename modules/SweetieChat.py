@@ -207,6 +207,7 @@ class SweetieChat():
         matches = self.urlregex.findall(message)
         matches = map(lambda x: x[0], matches)
         matches = map(self.imgur_filter, matches)
+        matches = map(self.deviantart_filter, matches)
         if matches:
             print("found matches: "+" / ".join(matches))
         results = map(self.get_page_title, matches)
@@ -218,6 +219,9 @@ class SweetieChat():
         return " / ".join(results)
 
     def get_page_title(self, url):
+        if 'oembed' in url:
+            return self.get_oembed_page_title(url)
+
         from bs4 import BeautifulSoup
         import requests
         try:
@@ -227,6 +231,18 @@ class SweetieChat():
                 return
             soup = BeautifulSoup(res.text)
             return soup.title.string
+        except Exception as e:
+            print "error fetching url "+url+" : "+str(e)
+
+    def get_oembed_page_title(self, url):
+        import json
+        import requests
+        try:
+            headers = { 'user-agent': 'sweetiebot' }
+            res = requests.get(url, timeout=5, headers=headers)
+            result = json.loads(res.text)
+            print(result)
+            return result['title'] + ' by ' +result['author_name']
         except Exception as e:
             print "error fetching url "+url+" : "+str(e)
 
@@ -248,6 +264,15 @@ class SweetieChat():
         match = imgurregex.match(link)
         if (match):
             replacement = 'http://imgur.com/'+match.group(2)
+            print("replacing "+link+" with "+replacement)
+            return replacement
+        return link
+
+    def deviantart_filter(self, link):
+        devartregex = re.compile(r'^http(s)?://\w+\.deviantart\.[\w/]+-(\w+)\.\w+$')
+        match = devartregex.match(link)
+        if (match):
+            replacement = 'http://backend.deviantart.com/oembed?url=http://www.deviantart.com/gallery/%23/'+match.group(2)
             print("replacing "+link+" with "+replacement)
             return replacement
         return link
