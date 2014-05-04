@@ -51,15 +51,18 @@ class SweetieMarkov(object):
         return key
 
     def store_message(self, message):
-        for words in self.split_message(message):
+        for words in self.split_message_into_subsequences(message):
             self.store_chain(words)
 
     def get_sender_username(self, mess):
         return self.bot.get_sender_username(mess)
 
     def split_message(self, message):
+        return re.findall(r"[\w'-]+|:[\w]:|[.,!?;]", message)
+
+    def split_message_into_subsequences(self, message):
         # split the incoming message into words, i.e. ['what', 'up', 'bro']
-        words = re.findall(r"[\w'-]+|:[\w]:|[.,!?;]", message)
+        words = self.split_message(message)
         #print(words)
 
         # if the message is any shorter, it won't lead anywhere
@@ -74,14 +77,24 @@ class SweetieMarkov(object):
             for i in range(len(words) - self.chain_length):
                 yield words[i:i + self.chain_length + 1]
 
+    def is_subset(self, smaller, larger):
+        return set(smaller) <= set(larger)
+
+    def is_submessage(self, generated, original):
+        """return if the generated message is just a subset of the input"""
+        return self.is_subset(self.split_message(generated),
+                              self.split_message(original))
+
     @logerrors
     def get_message(self, seed):
         messages = []
-        for words in self.split_message(seed):
+        for words in self.split_message_into_subsequences(seed):
             key = self.make_key(words[:-1])
             best_message = ''
             for i in range(self.messages_to_generate):
                 generated = self.get_message_from_key(key)
+                if self.is_submessage(generated, seed):
+                    continue
                 if generated[-1] in self.preferred_endings:
                     best_message = generated
                     break
@@ -124,6 +137,9 @@ class SweetieMarkov(object):
             # next_word
             key = self.make_key(words[1:] + [next_word])
 
+        return self.build_message(gen_words)
+
+    def build_message(self, gen_words):
         result = ''
         for word in gen_words:
             if word not in ".,!?;": # is not punctuation
