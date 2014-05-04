@@ -24,14 +24,35 @@ class SweetieMarkov(object):
     max_words = 30
     messages_to_generate = 100
 
+    separator = '\x01'
+    stop_word = '\x02'
+    prefix = 'jab'
+
     def __init__(self, bot, nickname, redis):
         self.bot = bot
         self.redis = redis
         self.nickname = nickname
 
+    def make_key(self, words):
+        return self.separator.join(words)
+
+    def _make_key(self, k):
+        # todo rename
+        return self.separator.join((self.prefix, k))
+
+    def get_next_word(self, key):
+        return self.redis.srandmember(self._make_key(key))
+
+    def store_chain(self, words):
+        # grab everything but the last word
+        key = self.make_key(words[:-1])
+        # add the last word to the set
+        self.redis.sadd(self._make_key(key), words[-1])
+        return key
+
     def store_message(self, message):
         for words in self.split_message(message):
-            self.redis.store_chain(words)
+            self.store_chain(words)
 
     def get_sender_username(self, mess):
         return self.bot.get_sender_username(mess)
@@ -45,7 +66,7 @@ class SweetieMarkov(object):
         if len(words) > self.chain_length:
             # add some stop words onto the message
             # ['what', 'up', 'bro', '\x02']
-            words.append(self.redis.stop_word)
+            words.append(self.stop_word)
 
             # len(words) == 4, so range(4-2) == range(2) == 0, 1, meaning
             # we return the following slices: [0:3], [1:4]
@@ -57,7 +78,7 @@ class SweetieMarkov(object):
     def get_message(self, seed):
         messages = []
         for words in self.split_message(seed):
-            key = self.redis.make_key(words[:-1])
+            key = self.make_key(words[:-1])
             best_message = ''
             for i in range(self.messages_to_generate):
                 generated = self.get_message_from_key(key)
@@ -88,20 +109,20 @@ class SweetieMarkov(object):
 
             # split the key on the separator to extract the words -- the key
             # might look like "this\x01is" and split out into [ 'this', 'is']
-            words = key.split(self.redis.separator)
+            words = key.split(self.separator)
 
             # add the word to the list of words in our generated message
             gen_words.append(words[0])
 
             # get a new word that lives at this key -- if none are present we've
             # reached the end of the chain and can bail
-            next_word = self.redis.get_next_word(key)
+            next_word = self.get_next_word(key)
             if not next_word:
                 break
 
             # create a new key combining the end of the old one and the
             # next_word
-            key = self.redis.make_key(words[1:] + [next_word])
+            key = self.make_key(words[1:] + [next_word])
 
         result = ''
         for word in gen_words:

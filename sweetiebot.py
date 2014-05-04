@@ -9,7 +9,7 @@ import sys
 import logging
 import json
 from utils import logerrors, randomstr
-from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, SweetieRedis,\
+from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
     RestartException, SweetieMarkov
 
@@ -95,8 +95,7 @@ def build_sweetiebot(config=None):
     mq = SweetieMQ(config)
     actions = ResponsesFile('data/Sweetiebot.actions')
     sass = ResponsesFile('data/Sweetiebot.sass')
-    sredis = SweetieRedis(redis_conn)
-    markov = SweetieMarkov(bot, config.nickname, sredis)
+    markov = SweetieMarkov(bot, config.nickname, redis_conn)
     chat = SweetieChat(bot, actions, sass, config.chatroom, markov)
     roulette = SweetieRoulette(bot, admin)
 
