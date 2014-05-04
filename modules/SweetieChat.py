@@ -11,7 +11,7 @@ from utils import logerrors
 class SweetieChat():
 
     urlregex = re.compile(
-        r"((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w_-]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)")
+        r"((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w_-]*)?\??(?:[-\+=&:\/;%@.\w_]*)#?(?:[\w]*))?)")
     emotes = [':sweetie:', ':sweetiecrack:',
               ':sweetiederp:', ':sweetiedust:',
               ':sweetieglee:', ':sweetieidea:',
