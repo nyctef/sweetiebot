@@ -210,24 +210,23 @@ class SweetieChat():
         matches = map(self.imgur_filter, matches)
         if matches:
             print("found matches: "+" / ".join(matches))
-        results = []
-        from bs4 import BeautifulSoup
-        for match in matches:
-            try:
-                res = requests.get(match, timeout=5)
-                if not 'html' in res.headers['content-type']:
-                    print 'skipping non-html'
-                    break
-                soup = BeautifulSoup(res.text)
-                results.append(soup.title.string)
-            except Exception as e:
-                print "error fetching url "+match+" : "+str(e)
-                pass
+        results = map(self.get_page_title, matches)
         results = filter(self.title_filter, results)
         results = map(self.remove_extra_whitespace, results)
         if not len(results):
             return None
         return " / ".join(results)
+
+    def get_page_title(self, url):
+        from bs4 import BeautifulSoup
+        try:
+            res = requests.get(url, timeout=5)
+            if not 'html' in res.headers['content-type']:
+                return
+            soup = BeautifulSoup(res.text)
+            return soup.title.string
+        except Exception as e:
+            print "error fetching url "+url+" : "+str(e)
 
     def title_filter(self, result):
         if (result.strip() == 'imgur: the simple image sharer'):
