@@ -39,7 +39,7 @@ class SweetieMarkov(object):
         return None
 
     def store_message(self, message):
-        print("storing message: "+message)
+        pass #print("storing message: "+message)
 
     def get_sender_username(self, mess):
         return self.bot.get_sender_username(mess)

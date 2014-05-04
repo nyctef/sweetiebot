@@ -7,3 +7,4 @@ env/
 *.pyc
 *log.txt
 config.py
+tests/output.txt
