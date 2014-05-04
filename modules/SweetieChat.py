@@ -7,11 +7,12 @@ from random import randint
 from jabberbot import botcmd
 from utils import logerrors
 
+class SweetieChat(object):
+    urlregex = re.compile(r"((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@"+
+                          ")?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za"+
+                          "-z0-9.-]+)((?:\/[\+~%\/.\w_-]*)?\??(?:[-\+=&:\/"+
+                          ";%@.\w_]*)#?(?:[\w]*))?)")
 
-class SweetieChat():
-
-    urlregex = re.compile(
-        r"((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w_-]*)?\??(?:[-\+=&:\/;%@.\w_]*)#?(?:[\w]*))?)")
     emotes = [':sweetie:', ':sweetiecrack:',
               ':sweetiederp:', ':sweetiedust:',
               ':sweetieglee:', ':sweetieidea:',
@@ -27,15 +28,21 @@ class SweetieChat():
               ':sweetiefsjal:', ':sweetielod:',
               ':sweetienom:', ':sweetieohyou:',
               ]
+
     preferred_endings = ['.', '~', '!']
-    banned_endings = [
-        'and', 'or', 'aboard', 'about', 'above', 'across', 'after', 'against', 'along', 'amid', 'among',
-        'anti', 'around', 'as', 'at', 'before', 'behind', 'below', 'beneath', 'beside', 'besides',
-        'between', 'beyond', 'but', 'by', 'concerning', 'considering', 'despite', 'down', 'during',
-        'except', 'excepting', 'excluding', 'following', 'for', 'from', 'in', 'inside', 'into', 'like',
-        'minus', 'near', 'of', 'off', 'on', 'onto', 'opposite', 'outside', 'over', 'past', 'per', 'plus',
-        'regarding', 'round', 'save', 'since', 'than', 'through', 'to', 'toward', 'towards', 'under',
-        'underneath', 'unlike', 'until', 'up', 'upon', 'versus', 'via', 'with', 'within', 'without']
+    banned_endings = [ 'and', 'or', 'aboard', 'about', 'above', 'across',
+                      'after', 'against', 'along', 'amid', 'among', 'anti',
+                      'around', 'as', 'at', 'before', 'behind', 'below',
+                      'beneath', 'beside', 'besides', 'between', 'beyond',
+                      'but', 'by', 'concerning', 'considering', 'despite',
+                      'down', 'during', 'except', 'excepting', 'excluding',
+                      'following', 'for', 'from', 'in', 'inside', 'into',
+                      'like', 'minus', 'near', 'of', 'off', 'on', 'onto',
+                      'opposite', 'outside', 'over', 'past', 'per', 'plus',
+                      'regarding', 'round', 'save', 'since', 'than', 'through',
+                      'to', 'toward', 'towards', 'under', 'underneath',
+                      'unlike', 'until', 'up', 'upon', 'versus', 'via', 'with',
+                      'within', 'without']
 
     chain_length = 2
     min_reply_length = 3
@@ -66,7 +73,6 @@ class SweetieChat():
 
         return re.sub('[\"\']', '', message.lower())
 
-
     def save_action(self, action_str):
         self.actions.add_to_file(action_str)
 
@@ -76,7 +82,6 @@ class SweetieChat():
 
         # if the message is any shorter, it won't lead anywhere
         if len(words) > self.chain_length:
-
             # add some stop words onto the message
             # ['what', 'up', 'bro', '\x02']
             words.append(self.redis.stop_word)
@@ -120,13 +125,11 @@ class SweetieChat():
         message = mess.getBody().lower()
         if 'pets' in message:
             return '/me purrs ' + random.choice(self.emotes)
-        #self.save_action(message.replace('\n',' ')+ '\n')
         action = self.actions.get_next()
         action = action.replace('<target>', self.get_sender_username(mess))
         return action + ' ' + random.choice(self.emotes)
 
     def log_mess(self, mess, bot):
-        # speak only when spoken to, or when the spirit moves me
         jid = mess.getFrom()
         props = mess.getProperties()
         message = mess.getBody()
@@ -157,9 +160,11 @@ class SweetieChat():
             return
 
         if say_something:
-            print '# ' + self.get_sender_username(mess).encode('utf-8') + ':' + message_true.encode('utf-8')
+            print('# ' + self.get_sender_username(mess).encode('utf-8') +
+                  ':' + message_true.encode('utf-8'))
         else:
-            print '  ' + self.get_sender_username(mess).encode('utf-8') + ':' + message_true.encode('utf-8')
+            print('  ' + self.get_sender_username(mess).encode('utf-8') +
+                  ':' + message_true.encode('utf-8'))
 
         # split up the incoming message into chunks that are 1 word longer than
         # the size of the chain, e.g. ['what', 'up', 'bro'], ['up', 'bro',
@@ -180,10 +185,11 @@ class SweetieChat():
                             best_message = generated
 
                 if len(best_message.split(' ')) > self.min_reply_length:
-                    print "Candidate best message " + best_message
+                    print("Candidate best message " + best_message)
                     messages.append(best_message)
                 else:
-                    print "Best message for " + '_'.join(words) + " was " + best_message + ", not long enough"
+                    print("Best message for " + '_'.join(words) + " was " +
+                          best_message + ", not long enough")
 
         if messages:
             final = random.choice(messages)
@@ -201,15 +207,10 @@ class SweetieChat():
 
     @logerrors
     def get_page_titles(self, message):
-        if 'shitty octavia memes' in message.lower():
-            logging.warn('hack: ignoring topic')
-            return
         matches = self.urlregex.findall(message)
         matches = map(lambda x: x[0], matches)
         matches = map(self.imgur_filter, matches)
         matches = map(self.deviantart_filter, matches)
-        if matches:
-            print("found matches: "+" / ".join(matches))
         results = map(self.get_page_title, matches)
         results = [result for result in results if result is not None]
         results = filter(self.title_filter, results)
@@ -280,46 +281,35 @@ class SweetieChat():
     def random_chat(self, bot, mess, cmd, args):
         """Does things"""
         message = mess.getBody()
-        # misc stuff here I guess
-        reply = ""
         sender = self.get_sender_username(mess)
 
         titles = self.get_page_titles(message)
         if titles:
-            reply = titles + "\n"
+            return titles
 
         if sender == self.nickname:
             return
+
         if ":lunaglee:" in message.lower():
             print self.get_sender_username(mess)
             self.bot.kick(self.chatroom, sender,
-                      'Don\'t upset my big sister! :sweetiemad:')
+                          'Don\'t upset my big sister! :sweetiemad:')
             return
+
         if "c/d" in message.lower():
-            reply = sender + ": " + random.choice(["c", "d"])
-            return reply
+            return sender + ": " + random.choice(["c", "d"])
+
         if "yiff" in message.lower() and utils.is_ping(self.nickname, message):
-            reply = sender + ": yiff in hell, furfag :sweetiemad:"
-            return reply
-        if "chain" in message.lower():
-            pass
-            #if sender == ":owl":
-            #    self.deowl
-            #return
+            return sender + ": yiff in hell, furfag :sweetiemad:"
+
         if ":lunabeh:" in message.lower() and (sender == ":owl" or "luna" in sender.lower()):
             self.lunabeh_count = self.lunabeh_count + 1
 
         if self.lunabeh_count > self.lunabeh_top:
             self.lunabeh_top = randint(7, 15)
             self.lunabeh_count = 1
-            reply = ":lunabeh:"
-            return reply
+            return ":lunabeh:"
 
-        if len(reply.strip()):
-            return reply.strip()
-
-        # if message.lower().strip().endswith(":rdderp:"):
-        #    return ":rdderp:"
         return self.log_mess(mess, bot)
 
     @botcmd
@@ -363,6 +353,3 @@ class SweetieChat():
         self.sass.add_to_file(args)
         return reply
 
-    #Karan = 30004306
-    #Jita = 30000142
-    #@botcmd
