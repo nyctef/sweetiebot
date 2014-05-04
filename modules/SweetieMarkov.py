@@ -28,10 +28,11 @@ class SweetieMarkov(object):
     max_words = 30
     messages_to_generate = 100
 
-    def __init__(self, bot, redis):
+    def __init__(self, bot, nickname, redis):
         self.bot = bot
         self.bot.load_commands_from(self)
         self.redis = redis
+        self.nickname = nickname
 
     def store_message(self, message):
         for words in self.split_message(message):
@@ -125,26 +126,11 @@ class SweetieMarkov(object):
         if say_something:
             print("speaking ..")
 
-        messages = []
-        # use a convenience method to strip out the "ping" portion of a message
-        if is_ping:
-            logging.warning('fixing ping again?')
-            message = self.bot.fix_ping(message)
+            if is_ping:
+                logging.warning('fixing ping again?')
+                message = self.bot.fix_ping(message)
 
-        # split up the incoming message into chunks that are 1 word longer than
-        # the size of the chain, e.g. ['what', 'up', 'bro'], ['up', 'bro',
-        # '\x02']
-        # if we should say something, generate some messages based on what
-        # was just said and select the longest, then add it to the list
-        if say_something:
-            pass
-        if messages:
-            final = random.choice(messages)
-            try:
-                print 'R--> ' + final
-            except UnicodeEncodeError:
-                print "Error Printing Message..."
-            return final
+            return self.get_message(message)
 
     @botcmd
     def quiet(self, mess, args):

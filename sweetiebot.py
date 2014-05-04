@@ -96,7 +96,7 @@ def build_sweetiebot(config=None):
     actions = ResponsesFile('data/Sweetiebot.actions')
     sass = ResponsesFile('data/Sweetiebot.sass')
     sredis = SweetieRedis(redis_conn)
-    markov = SweetieMarkov(bot, sredis)
+    markov = SweetieMarkov(bot, config.nickname, sredis)
     chat = SweetieChat(bot, actions, sass, config.chatroom, markov)
     roulette = SweetieRoulette(bot, admin)
 

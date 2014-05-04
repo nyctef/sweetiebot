@@ -133,6 +133,7 @@ class SweetieChat(object):
         """Does things"""
         message = mess.getBody()
         sender = self.get_sender_username(mess)
+        self.markov.store_message(message)
 
         titles = self.get_page_titles(message)
         if titles:
@@ -165,7 +166,7 @@ class SweetieChat(object):
         if message.startswith('/me ') and is_ping:
             return self.cuddle(mess)
 
-        markov_response = self.markov.get_message(mess)
+        markov_response = self.markov.log_mess(message)
         if markov_response:
             return markov_response
 
