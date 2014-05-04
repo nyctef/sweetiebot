@@ -1,7 +1,7 @@
 from azure.servicebus import ServiceBusService, Message
 import logging
 
-class SweetieMQ:
+class SweetieMQ(object):
 
     bus_service = None
     topic = None

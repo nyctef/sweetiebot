@@ -1,4 +1,4 @@
-class SweetieRedis():
+class SweetieRedis(object):
 
     separator = '\x01'
     stop_word = '\x02'

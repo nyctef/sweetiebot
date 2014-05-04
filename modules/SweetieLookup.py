@@ -8,7 +8,7 @@ from xml.etree import ElementTree as ET
 from utils import logerrors
 from random import randint
 
-class SweetieLookup():
+class SweetieLookup(object):
 
     id_dic = {"": ""}
 

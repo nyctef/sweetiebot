@@ -5,7 +5,7 @@ from jabberbot import botcmd
 import re
 from datetime import datetime
 
-class SweetieAdmin():
+class SweetieAdmin(object):
     _kick = "kick"
     _ban = "ban"
     _unban = "unban"

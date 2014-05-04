@@ -13,7 +13,7 @@ from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, SweetieRedis,\
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
     RestartException
 
-class Sweetiebot():
+class Sweetiebot(object):
     kick_owl_delay = 7200
     last_owl_kick = 0
 
