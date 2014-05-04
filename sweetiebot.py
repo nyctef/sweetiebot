@@ -10,7 +10,8 @@ import logging
 import json
 from utils import logerrors, randomstr
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, SweetieRedis,\
-    SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette
+    SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
+    RestartException
 
 class Sweetiebot():
     kick_owl_delay = 7200
@@ -106,14 +107,19 @@ if __name__ == '__main__':
         format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', filename='sweetiebot.log', level=logging.DEBUG)
     logging.getLogger().addHandler(logging.StreamHandler())
 
-    import config
-    if '--test' in sys.argv:
-        config.debug = True
-        config.chatroom = config.test_chatroom
-    sweet = build_sweetiebot(config)
+    while True:
+        import config
+        if '--test' in sys.argv:
+            config.debug = True
+            config.chatroom = config.test_chatroom
+        sweet = build_sweetiebot(config)
 
-    print sweet.nickname + ' established!'
-    print 'Joining Room:' + config.chatroom
-    sweet.join_room(config.chatroom, sweet.nickname)
-    print 'Joined!'
-    sweet.serve_forever()
+        print sweet.nickname + ' established!'
+        print 'Joining Room:' + config.chatroom
+        sweet.join_room(config.chatroom, sweet.nickname)
+        print 'Joined!'
+        try:
+            result = sweet.serve_forever()
+        except RestartException:
+            continue
+        break

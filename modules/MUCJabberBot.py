@@ -4,6 +4,9 @@ import re
 import xmpp
 import logging
 
+class RestartException(Exception):
+    pass
+
 class MUCJabberBot(JabberBot):
 
     flood_protection = 0
@@ -107,10 +110,10 @@ class MUCJabberBot(JabberBot):
     def unknown_command(self, mess, cmd, args):
         if self.unknown_command_callback is not None:
             return self.unknown_command_callback(self, mess, cmd, args)
+
     def on_ping_timeout(self):
-        print("PING TIMEOUT")
-        logging.info('WARNING: ping timeout.')
-        # self.quit(1)
+        logging.error('ping timeout.')
+        raise RestartException()
 
     def send_iq(self, iq, callback=None):
         if callback is not None:
