@@ -7,16 +7,20 @@ class SweetieRedis(object):
     def __init__(self, conn):
         self.redis_conn = conn
 
-    def make_key(self, k):
-        return '-'.join((self.prefix, k))
+    def make_key(self, words):
+        return self.separator.join(words)
+
+    def _make_key(self, k):
+        # todo rename
+        return self.separator.join((self.prefix, k))
 
     def get_next_word(self, key):
-        self.redis_conn.srandmember(self.make_key(key))
+        return self.redis_conn.srandmember(self._make_key(key))
 
     def store_chain(self, words):
         # grab everything but the last word
-        key = self.separator.join(words[:-1])
+        key = self.make_key(words[:-1])
         # add the last word to the set
-        self.redis_conn.sadd(self.make_key(key), words[-1])
+        self.redis_conn.sadd(self._make_key(key), words[-1])
         return key
 

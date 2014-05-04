@@ -4,7 +4,6 @@ import utils
 import logging
 import re
 import random
-import xmpp
 
 class SweetieMarkov(object):
 
@@ -23,7 +22,7 @@ class SweetieMarkov(object):
                       'unlike', 'until', 'up', 'upon', 'versus', 'via', 'with',
                       'within', 'without']
 
-    chain_length = 2
+    chain_length = 3
     min_reply_length = 3
     chattiness = .02
     max_words = 30
@@ -34,27 +33,17 @@ class SweetieMarkov(object):
         self.bot.load_commands_from(self)
         self.redis = redis
 
-    def get_message(self, seed):
-        print("generating messages for seed: "+seed)
-        return None
-
     def store_message(self, message):
-        pass #print("storing message: "+message)
+        for words in self.split_message(message):
+            self.redis.store_chain(words)
 
     def get_sender_username(self, mess):
         return self.bot.get_sender_username(mess)
 
-    def sanitize_message(self, message):
-        if "http" in message:
-            return ""
-        if "####" in message:
-            return ""
-
-        return re.sub('[\"\']', '', message.lower())
-
     def split_message(self, message):
         # split the incoming message into words, i.e. ['what', 'up', 'bro']
-        words = message.split()
+        words = re.findall(r"[\w'-]+|:[\w]:|[.,!?;]", message)
+        #print(words)
 
         # if the message is any shorter, it won't lead anywhere
         if len(words) > self.chain_length:
@@ -69,9 +58,32 @@ class SweetieMarkov(object):
                 yield words[i:i + self.chain_length + 1]
 
     @logerrors
-    def generate_message(self, seed):
-        key = seed
+    def get_message(self, seed):
+        messages = []
+        for words in self.split_message(seed):
+            key = self.redis.make_key(words[:-1])
+            best_message = ''
+            for i in range(self.messages_to_generate):
+                generated = self.get_message_from_key(key)
+                if generated[-1] in self.preferred_endings:
+                    best_message = generated
+                    break
+                if len(generated) > len(best_message):
+                    if not generated.split(' ')[-1] in self.banned_endings:
+                        best_message = generated
 
+            if len(best_message.split(' ')) > self.min_reply_length:
+                print("Candidate best message " + best_message)
+                messages.append(best_message)
+            else:
+                print("Best message for " + '_'.join(words) + " was " +
+                        best_message + ", not long enough")
+
+        if len(messages):
+            return random.choice(messages)
+
+
+    def get_message_from_key(self, key):
         # keep a list of words we've seen
         gen_words = []
 
@@ -93,71 +105,39 @@ class SweetieMarkov(object):
 
             # create a new key combining the end of the old one and the
             # next_word
-            key = self.separator.join(words[1:] + [next_word])
-        return ' '.join(gen_words)
+            key = self.redis.make_key(words[1:] + [next_word])
 
-    def log_mess(self, mess, bot):
-        jid = mess.getFrom()
-        props = mess.getProperties()
-        message = mess.getBody()
-        message_true = mess.getBody()
+        result = ''
+        for word in gen_words:
+            if word not in ".,!?;": # is not punctuation
+                result += ' '
+            result += word
+        return result.strip()
+
+    def log_mess(self, message):
         say_something = False
-        if xmpp.NS_DELAY in props:
-            return
-        if not message:
-            return
-        if self.get_sender_username(mess) == self.nickname:
-            return
-        if bot.jid.bareMatch(jid):
-            return
-        if utils.is_ping(self.nickname, message):
+        is_ping = utils.is_ping(self.nickname, message)
+        if is_ping:
             say_something = True
+            print("speaking because pinged..")
         if not say_something:
             say_something = random.random() < self.chattiness
+        if say_something:
+            print("speaking ..")
 
         messages = []
         # use a convenience method to strip out the "ping" portion of a message
-        if utils.is_ping(self.nickname, message):
+        if is_ping:
             logging.warning('fixing ping again?')
-            message = bot.fix_ping(message)
-
-        if message_true.startswith('/'):
-            if message_true.startswith('/me ') and utils.is_ping(self.nickname, message_true):
-                return self.cuddle(mess)
-            return
-
-        if say_something:
-            print('# ' + self.get_sender_username(mess).encode('utf-8') +
-                  ':' + message_true.encode('utf-8'))
-        else:
-            print('  ' + self.get_sender_username(mess).encode('utf-8') +
-                  ':' + message_true.encode('utf-8'))
+            message = self.bot.fix_ping(message)
 
         # split up the incoming message into chunks that are 1 word longer than
         # the size of the chain, e.g. ['what', 'up', 'bro'], ['up', 'bro',
         # '\x02']
-        for words in self.split_message(self.sanitize_message(message)):
-            key = self.redis.store_chain(words)
-            # if we should say something, generate some messages based on what
-            # was just said and select the longest, then add it to the list
-            if say_something:
-                best_message = ''
-                for i in range(self.messages_to_generate):
-                    generated = self.generate_message(seed=key)
-                    if generated[-1] in self.preferred_endings:
-                        best_message = generated
-                        break
-                    if len(generated) > len(best_message):
-                        if not generated.split(' ')[-1] in self.banned_endings:
-                            best_message = generated
-
-                if len(best_message.split(' ')) > self.min_reply_length:
-                    print("Candidate best message " + best_message)
-                    messages.append(best_message)
-                else:
-                    print("Best message for " + '_'.join(words) + " was " +
-                          best_message + ", not long enough")
-
+        # if we should say something, generate some messages based on what
+        # was just said and select the longest, then add it to the list
+        if say_something:
+            pass
         if messages:
             final = random.choice(messages)
             try:
@@ -165,11 +145,6 @@ class SweetieMarkov(object):
             except UnicodeEncodeError:
                 print "Error Printing Message..."
             return final
-        # If was pinged but couldn't think of something relevant, reply with
-        # something generic.
-        elif utils.is_ping(self.nickname, message_true):
-            print 'Quoting instead...'
-            return self.quote(mess, '')
 
     @botcmd
     def quiet(self, mess, args):

@@ -161,7 +161,16 @@ class SweetieChat(object):
             self.lunabeh_count = 1
             return ":lunabeh:"
 
-        return self.markov.get_message(mess)
+        is_ping = utils.is_ping(self.nickname, message)
+        if message.startswith('/me ') and is_ping:
+            return self.cuddle(mess)
+
+        markov_response = self.markov.get_message(mess)
+        if markov_response:
+            return markov_response
+
+        if is_ping:
+            return self.quote(mess, None)
 
     @botcmd
     def quote(self, mess, args):
