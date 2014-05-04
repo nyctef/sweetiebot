@@ -1,7 +1,4 @@
-from jabberbot import botcmd
 from utils import logerrors
-import utils
-import logging
 import re
 import random
 
@@ -24,13 +21,11 @@ class SweetieMarkov(object):
 
     chain_length = 3
     min_reply_length = 3
-    chattiness = .02
     max_words = 30
     messages_to_generate = 100
 
     def __init__(self, bot, nickname, redis):
         self.bot = bot
-        self.bot.load_commands_from(self)
         self.redis = redis
         self.nickname = nickname
 
@@ -115,43 +110,4 @@ class SweetieMarkov(object):
             result += word
         return result.strip()
 
-    def log_mess(self, message):
-        say_something = False
-        is_ping = utils.is_ping(self.nickname, message)
-        if is_ping:
-            say_something = True
-            print("speaking because pinged..")
-        if not say_something:
-            say_something = random.random() < self.chattiness
-        if say_something:
-            print("speaking ..")
-
-            if is_ping:
-                logging.warning('fixing ping again?')
-                message = self.bot.fix_ping(message)
-
-            return self.get_message(message)
-
-    @botcmd
-    def quiet(self, mess, args):
-        '''I will only respond to pings'''
-        self.chattiness = 0
-        sender = self.get_sender_username(mess)
-        if 'rainbow' in sender.lower():
-            return ':rdderp: okay then'
-        if 'luna' in sender.lower():
-            return ':lunabeh: fine'
-        if 'shard' in sender.lower():
-            return "I'll be quiet if you make more emotes for me :sweetiedust:"
-        if 'sparkle' in sender.lower():
-            return "Yes, my princess :sweetiepleased:"
-        if 'spike' in sender.lower():
-            return "Oh my! A dragon! :sweetie: Of course I'll be quiet"
-        return sender + ': Sorry! I\'ll be quiet'
-
-    @botcmd(name='chat')
-    def unquiet(self, mess, args):
-        '''I will chat every once in a while'''
-        self.chattiness = .025
-        return self.get_sender_username(mess) + ': Ok, I\'ll start chatting again'
 

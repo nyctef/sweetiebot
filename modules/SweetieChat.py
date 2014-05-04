@@ -31,6 +31,7 @@ class SweetieChat(object):
     lunabeh_top = 10
     lunabeh_count = 0
     target = '<target>'
+    chattiness = .02
 
     def __init__(self, bot, actions, sass, chatroom, markov):
         self.bot = bot
@@ -166,12 +167,36 @@ class SweetieChat(object):
         if message.startswith('/me ') and is_ping:
             return self.cuddle(mess)
 
-        markov_response = self.markov.log_mess(message)
-        if markov_response:
-            return markov_response
+        if is_ping or random.random() < self.chattiness:
+            markov_response = self.markov.get_message(message)
+            if markov_response:
+                return markov_response
 
         if is_ping:
             return self.quote(mess, None)
+
+    @botcmd
+    def quiet(self, mess, args):
+        '''I will only respond to pings'''
+        self.chattiness = 0
+        sender = self.get_sender_username(mess)
+        if 'rainbow' in sender.lower():
+            return ':rdderp: okay then'
+        if 'luna' in sender.lower():
+            return ':lunabeh: fine'
+        if 'shard' in sender.lower():
+            return "I'll be quiet if you make more emotes for me :sweetiedust:"
+        if 'sparkle' in sender.lower():
+            return "Yes, my princess :sweetiepleased:"
+        if 'spike' in sender.lower():
+            return "Oh my! A dragon! :sweetie: Of course I'll be quiet"
+        return sender + ': Sorry! I\'ll be quiet'
+
+    @botcmd(name='chat')
+    def unquiet(self, mess, args):
+        '''I will chat every once in a while'''
+        self.chattiness = .025
+        return self.get_sender_username(mess) + ': Ok, I\'ll start chatting again'
 
     @botcmd
     def quote(self, mess, args):
