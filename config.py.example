@@ -1,0 +1,8 @@
+username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
+chatroom = 'general@conference.friendshipismagicsquad.com'
+test_chatroom = 'sweetiebot_playground@conference.friendshipismagicsquad.com'
+password = 'correct pony battery staple'
+nickname = 'Sweetiebot'
+debug = False
+sb_account_key = '66666666666666666666666666666666666666666666'
+sb_issuer = 'owner'

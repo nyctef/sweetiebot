@@ -1,11 +1,9 @@
 build/
 doc/
 env/
-password.txt
 *.log
-sb_account_key.txt
 *.swp
 .ropeproject
 *.pyc
-*password.txt
 *log.txt
+config.py

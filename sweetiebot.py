@@ -79,44 +79,41 @@ class Sweetiebot():
         return
 
 
-def build_sweetiebot(debug=True):
-    #username = 'blighted@friendshipismagicsquad.com/sweetiebutt'
-    username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
-    #username = 'nyctef@friendshipismagicsquad.com'
-    password = open('password.txt', 'r').read().strip()
-    chatroom = 'general@conference.friendshipismagicsquad.com'
-    nickname = 'Sweetiebot'
-
-    resource = 'sweetiebutt' + randomstr()
-    if debug:
-        chatroom = 'sweetiebot_playground@conference.friendshipismagicsquad.com'
+def build_sweetiebot(config=None):
+    if config is None: import config
+    resource = config.nickname + randomstr()
+    if config.debug:
         redis_conn = FakeRedis()
     else:
         redis_conn = redis.Redis('localhost')
 
-    bot = MUCJabberBot(nickname, username, password, res=resource,
-                       only_direct=False, command_prefix='', debug=debug)
+    bot = MUCJabberBot(config.nickname, config.username, config.password, res=resource,
+                       only_direct=False, command_prefix='', debug=config.debug)
     lookup = SweetieLookup(bot)
-    admin = SweetieAdmin(bot, chatroom)
-    mq = SweetieMQ()
+    admin = SweetieAdmin(bot, config.chatroom)
+    mq = SweetieMQ(config)
     actions = ResponsesFile('data/Sweetiebot.actions')
     sass = ResponsesFile('data/Sweetiebot.sass')
     sredis = SweetieRedis(redis_conn)
-    chat = SweetieChat(bot, sredis, actions, sass, chatroom)
+    chat = SweetieChat(bot, sredis, actions, sass, config.chatroom)
     roulette = SweetieRoulette(bot, admin)
 
-    sweet = Sweetiebot(nickname, bot, lookup, mq, admin, chat, roulette)
-    return sweet, chatroom
+    sweet = Sweetiebot(config.nickname, bot, lookup, mq, admin, chat, roulette)
+    return sweet
 
 if __name__ == '__main__':
     logging.basicConfig(
         format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', filename='sweetiebot.log', level=logging.DEBUG)
     logging.getLogger().addHandler(logging.StreamHandler())
 
-    sweet, chatroom = build_sweetiebot('--test' in sys.argv)
+    import config
+    if '--test' in sys.argv:
+        config.debug = True
+        config.chatroom = config.test_chatroom
+    sweet = build_sweetiebot(config)
 
     print sweet.nickname + ' established!'
-    print 'Joining Room:' + chatroom
-    sweet.join_room(chatroom, sweet.nickname)
+    print 'Joining Room:' + config.chatroom
+    sweet.join_room(config.chatroom, sweet.nickname)
     print 'Joined!'
     sweet.serve_forever()
