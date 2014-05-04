@@ -99,6 +99,7 @@ class SweetieAdmin():
 
     @botcmd
     def banlist(self, mess, args):
+        """List the current bans. Requires admin"""
         return self.listbans(mess, args)
 
     @botcmd
