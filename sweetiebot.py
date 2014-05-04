@@ -10,7 +10,7 @@ import logging
 import json
 from utils import logerrors, randomstr
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, SweetieRedis,\
-    SweetieChat, SweetieLookup, SweetieMQ
+    SweetieChat, SweetieLookup, SweetieMQ, FakeRedis
 
 class Sweetiebot():
     kick_owl_delay = 7200
@@ -86,23 +86,6 @@ class Sweetiebot():
         '''Yells at everyone Blighties only!'''
         if self.get_sender_username(mess) == 'Blighty':
             self.broadcast(args, True)
-
-class FakeRedis(object):
-
-    def __init__(self):
-        self.data = {}
-
-    def srandmember(self, key):
-        try:
-            return random.choice(self.data[key])
-        except KeyError:
-            return None
-
-    def sadd(self, key, value):
-        if key in self.data:
-            self.data[key].append(value)
-        else:
-            self.data[key] = [value]
 
 
 def build_sweetiebot(debug=True):

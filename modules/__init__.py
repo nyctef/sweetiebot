@@ -5,3 +5,4 @@ from SweetieLookup import SweetieLookup
 from SweetieMQ import SweetieMQ
 from SweetieRedis import SweetieRedis
 from MUCJabberBot import MUCJabberBot
+from FakeRedis import FakeRedis
