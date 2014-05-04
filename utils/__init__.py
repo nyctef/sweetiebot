@@ -1,1 +1,1 @@
-from utils import is_ping, logerrors, randomstr
+from utils import is_ping, is_command, logerrors, randomstr

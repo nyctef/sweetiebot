@@ -57,33 +57,32 @@ class MUCJabberBot(JabberBot):
             return
         if self.jid.bareMatch(jid):
             return
-        if utils.is_ping(self.nickname, message):
-            np_message = self.fix_ping(message)
-        else:
-            np_message = message
-        if ' ' in np_message:
-            command, args = np_message.split(' ', 1)
-        else:
-            command, args = np_message, ''
 
         if mess.getSubject():
             logging.debug('ignoring subject..')
             return
 
-        cmd = command.lower()
-        if cmd in self.commands:
-            if utils.is_ping(self.nickname, message):
-                mess.setBody(np_message)
+        if utils.is_command(self.nickname, message):
+            message = self.fix_ping(message)
+            print('fixed message: '+message)
+
+            command, args = self.get_command_and_args(message)
+
+            command = command.lower()
+            if command in self.commands:
+                mess.setBody(message)
                 super(MUCJabberBot, self).callback_message(conn, mess)
-            else:
                 return
+        command, args = self.get_command_and_args(message)
+        reply = self.unknown_command(mess, command, args)
+        if reply:
+            self.send_simple_reply(mess, reply)
+
+    def get_command_and_args(self, message):
+        if ' ' in message:
+            return message.split(' ', 1)
         else:
-            reply = self.unknown_command(mess, cmd, args)
-            if reply is None:
-                return
-            if reply:
-                self.send_simple_reply(mess, reply)
-        return
+            return message, ''
 
     def callback_presence(self, conn, presence):
         super(MUCJabberBot, self).callback_presence(conn, presence)
@@ -103,9 +102,13 @@ class MUCJabberBot(JabberBot):
                 self.commands[name] = value
 
     def fix_ping(self, message):
-        message = message.replace(self.nickname+": ", "")
-        message = message.replace(self.nickname.lower()+": ", "")
-        return message
+        message = message.strip()
+        if message.lower().startswith(self.nickname.lower()):
+            message = message[len(self.nickname):]
+        message = message.strip()
+        if message.startswith(':') or message.startswith(','):
+            message = message[1:]
+        return message.strip()
 
     def unknown_command(self, mess, cmd, args):
         if self.unknown_command_callback is not None:
