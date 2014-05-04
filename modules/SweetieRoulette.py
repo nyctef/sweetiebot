@@ -15,12 +15,14 @@ class SweetieRoulette(object):
     @botcmd
     @logerrors
     def spin(self, mess, args):
+        """Spin the barrel (see also: roulette)"""
         self._spin()
         return '*WHIIIIiiiiirr...*'
 
     @botcmd
     @logerrors
     def roulette(self, mess, args):
+        """Six bullets, one chamber (see also: spin)"""
         speaker = mess.getFrom().getResource()
 
         self.current_chamber += 1
