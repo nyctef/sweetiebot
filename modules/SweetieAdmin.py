@@ -14,6 +14,7 @@ class SweetieAdmin():
         "twilight_sparkle@friendshipismagicsquad.com",
         "princess_cadence@friendshipismagicsquad.com",
         "seven@friendshipismagicsquad.com",
+        "big_macintosh@friendshipismagicsquad.com",
         "nyctef@friendshipismagicsquad.com",
     ]
 
