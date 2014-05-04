@@ -11,7 +11,7 @@ import json
 from utils import logerrors, randomstr
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, SweetieRedis,\
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
-    RestartException
+    RestartException, SweetieMarkov
 
 class Sweetiebot(object):
     kick_owl_delay = 7200
@@ -96,7 +96,8 @@ def build_sweetiebot(config=None):
     actions = ResponsesFile('data/Sweetiebot.actions')
     sass = ResponsesFile('data/Sweetiebot.sass')
     sredis = SweetieRedis(redis_conn)
-    chat = SweetieChat(bot, sredis, actions, sass, config.chatroom)
+    markov = SweetieMarkov(bot, sredis)
+    chat = SweetieChat(bot, actions, sass, config.chatroom, markov)
     roulette = SweetieRoulette(bot, admin)
 
     sweet = Sweetiebot(config.nickname, bot, lookup, mq, admin, chat, roulette)
