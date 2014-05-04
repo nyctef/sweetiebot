@@ -4,20 +4,18 @@ import random
 
 class SweetieMarkov(object):
 
-    preferred_endings = ['.', '~', '!']
-    banned_endings = [ 'and', 'or', 'aboard', 'about', 'above', 'across',
-                      'after', 'against', 'along', 'amid', 'among', 'anti',
-                      'around', 'as', 'at', 'before', 'behind', 'below',
-                      'beneath', 'beside', 'besides', 'between', 'beyond',
-                      'but', 'by', 'concerning', 'considering', 'despite',
-                      'down', 'during', 'except', 'excepting', 'excluding',
+    preferred_endings = ['.', '~', '!', '?']
+    banned_endings = ['a', 'and', 'or', 'about', 'above', 'across', 'after',
+                      'against', 'along', 'amid', 'among', 'anti', 'as', 'at',
+                      'below', 'beneath', 'beside', 'besides', 'between',
+                      'beyond', 'but', 'by', 'concerning', 'considering',
+                      'despite', 'during', 'except', 'excepting', 'excluding',
                       'following', 'for', 'from', 'in', 'inside', 'into',
-                      'like', 'minus', 'near', 'of', 'off', 'on', 'onto',
-                      'opposite', 'outside', 'over', 'past', 'per', 'plus',
-                      'regarding', 'round', 'save', 'since', 'than', 'through',
-                      'to', 'toward', 'towards', 'under', 'underneath',
-                      'unlike', 'until', 'up', 'upon', 'versus', 'via', 'with',
-                      'within', 'without']
+                      'like', 'minus', 'near', 'of', 'on', 'onto', 'per',
+                      'plus', 'regarding', 'since', 'than', 'the', 'through',
+                      'to', 'toward', 'towards', 'under', 'unlike', 'until',
+                      'up', 'upon', 'versus', 'via', 'with', 'within',
+                      'without', ]
 
     chain_length = 3
     min_reply_length = 3
