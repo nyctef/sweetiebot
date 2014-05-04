@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-
 from jabberbot import botcmd
 from datetime import datetime
 import random
@@ -43,7 +42,6 @@ class Sweetiebot():
     @botcmd
     @logerrors
     def deowl(self, mess, args):
-
         speaker = mess.getFrom()
         timestamp = datetime.utcnow()
         mq_message = {
@@ -79,13 +77,11 @@ class Sweetiebot():
         self.admin.kick(speaker, ':lyraahem:')
         return
 
-    #@botcmd
     def bye(self, mess, args):
         '''Makes me restart! Blighties only!'''
         if self.get_sender_username(mess) == 'Blighty':
             self.quit()
 
-    #@botcmd
     def yell(self, mess, args):
         '''Yells at everyone Blighties only!'''
         if self.get_sender_username(mess) == 'Blighty':
