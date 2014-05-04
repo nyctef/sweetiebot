@@ -210,6 +210,7 @@ class SweetieChat():
         if matches:
             print("found matches: "+" / ".join(matches))
         results = map(self.get_page_title, matches)
+        results = [result for result in results if result is not None]
         results = filter(self.title_filter, results)
         results = map(self.remove_extra_whitespace, results)
         if not len(results):
