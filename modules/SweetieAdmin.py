@@ -74,7 +74,7 @@ class SweetieAdmin():
             if error is not None:
                 not_allowed = error.getTag('not-allowed')
                 if not_allowed is not None:
-                    self.chat('Sorry, that\'s above my paygrade..')
+                    self.chat('Sweetiebot used Kick! It\'s not very effective...')
                     return
                 text = error.getTag('text')
                 if text is None:
