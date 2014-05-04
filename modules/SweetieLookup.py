@@ -103,6 +103,8 @@ class SweetieLookup():
         return i_id, i_name
 
     def youtube_search(self, keyword, channel):
+        if not keyword or keyword.isspace():
+            return "https://www.youtube.com/watch?v=qRC4Vk6kisY"
         import gdata.youtube
         import gdata.youtube.service
 
@@ -151,7 +153,7 @@ class SweetieLookup():
             .format(diff.days, diff.seconds // 3600, (diff.seconds//60) % 60, diff.seconds % 60)
         # print message
         return message
-    
+
     @botcmd
     @logerrors
     def jita(self, mess, args):
