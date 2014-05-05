@@ -71,6 +71,7 @@ class Sweetiebot(object):
             self.log_deowl(speaker, False)
         return handler
 
+    @logerrors
     def log_deowl(self, speaker, success):
         timestamp = datetime.utcnow()
         mq_message = {
