@@ -10,9 +10,11 @@ password = 'correct pony battery staple'
 nickname = 'Sweetiebot'
 debug = False
 # Optional: An account key for Azure Service bus to chuck events at
-sb_account_key = '66666666666666666666666666666666666666666666'
+sb_account_key = None
+# sb_account_key = '66666666666666666666666666666666666666666666'
 # Optional: Issuer for service bus
-sb_issuer = 'owner'
+sb_issuer = None
+# sb_issuer = 'owner'
 # A list of JIDs for people allowed to do admin tasks
 mods = [
     "luna@friendshipismagicsquad.com",
