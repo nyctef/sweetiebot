@@ -47,26 +47,29 @@ class Sweetiebot(object):
     def deowl(self, mess, args):
         speaker = mess.getFrom()
         timestamp = datetime.utcnow()
-        mq_message = {
-            'deowl':True,
-            'room':speaker.getNode(),
-            'server':speaker.getDomain(),
-            'speaker': speaker.getResource(),
-            'timestamp': timestamp.isoformat(' ')
-            }
         '''Only kicks :owl, long cooldown'''
         if self.last_owl_kick:
             if (datetime.now() - self.last_owl_kick).seconds < self.kick_owl_delay:
-                mq_message['success'] = False
-                self.mq.send(json.dumps(mq_message))
+                self.log_deowl(speaker, False)
                 return "I'm tired. Maybe another time?"
         log.debug("trying to kick owl ...")
         self.admin.kick(':owl', ':sweetiestare:')
         self.last_owl_kick = datetime.now()
         self.kick_owl_delay = random.gauss(2*60*60, 20*60)
-        mq_message['success'] = True
-        self.mq.send(json.dumps(mq_message))
+        self.log_deowl(speaker, True)
         return
+
+    def log_deowl(self, speaker, success):
+        mq_message = {
+            'deowl':True,
+            'room':speaker.getNode(),
+            'server':speaker.getDomain(),
+            'speaker': speaker.getResource(),
+            'timestamp': timestamp.isoformat(' '),
+            'success': success,
+            }
+
+        self.mq.send(json.dumps(mq_message))
 
     @botcmd
     def deoctavia(self, mess, args):
