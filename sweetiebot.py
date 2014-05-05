@@ -46,7 +46,6 @@ class Sweetiebot(object):
     @logerrors
     def deowl(self, mess, args):
         speaker = mess.getFrom()
-        timestamp = datetime.utcnow()
         '''Only kicks :owl, long cooldown'''
         if self.last_owl_kick:
             if (datetime.now() - self.last_owl_kick).seconds < self.kick_owl_delay:
@@ -54,11 +53,11 @@ class Sweetiebot(object):
                 return "I'm tired. Maybe another time?"
         log.debug("trying to kick owl ...")
         self.admin.kick(':owl', ':sweetiestare:',
-                        on_success=self.deowl_success_handler(),
-                        on_failure=self.deowl_failure_handler())
+                        on_success=self.deowl_success_handler(speaker),
+                        on_failure=self.deowl_failure_handler(speaker))
         return
 
-    def deowl_success_handler(self):
+    def deowl_success_handler(self, speaker):
         def handler():
             log.debug('deowl success')
             self.last_owl_kick = datetime.now()
@@ -66,13 +65,14 @@ class Sweetiebot(object):
             self.log_deowl(speaker, True)
         return handler
 
-    def deowl_failure_handler(self):
+    def deowl_failure_handler(self, speaker):
         def handler():
             log.debug('deowl failure')
             self.log_deowl(speaker, False)
         return handler
 
     def log_deowl(self, speaker, success):
+        timestamp = datetime.utcnow()
         mq_message = {
             'deowl':True,
             'room':speaker.getNode(),
