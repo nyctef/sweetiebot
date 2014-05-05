@@ -11,7 +11,7 @@ import json
 from utils import logerrors, randomstr
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
-    RestartException, SweetieMarkov
+    RestartException, SweetieMarkov, PBLogHandler
 
 class Sweetiebot(object):
     kick_owl_delay = 7200
@@ -83,7 +83,7 @@ class Sweetiebot(object):
 def build_sweetiebot(config=None):
     if config is None: import config
     resource = config.nickname + randomstr()
-    if config.debug:
+    if config.fake_redis:
         redis_conn = FakeRedis()
     else:
         redis_conn = redis.Redis('localhost')
@@ -102,16 +102,31 @@ def build_sweetiebot(config=None):
     sweet = Sweetiebot(config.nickname, bot, lookup, mq, admin, chat, roulette)
     return sweet
 
+def setup_logging(config):
+    formatter = logging.Formatter('%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+    streamhandler = logging.StreamHandler()
+    streamhandler.setLevel(logging.INFO)
+    streamhandler.setFormatter(formatter)
+    logging.getLogger().addHandler(streamhandler)
+
+    filehandler = logging.FileHandler('sweetiebot.log')
+    filehandler.setLevel(logging.DEBUG)
+    filehandler.setFormatter(formatter)
+    logging.getLogger().addHandler(filehandler)
+
+    errorhandler = PBLogHandler(config)
+    errorhandler.setLevel(logging.ERROR)
+    errorhandler.setFormatter(formatter)
+    logging.getLogger().addHandler(errorhandler)
+
 if __name__ == '__main__':
-    logging.basicConfig(
-        format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', filename='sweetiebot.log', level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler())
+    import config
+    setup_logging(config)
+    if '--test' in sys.argv:
+        config.fake_redis = True
+        config.chatroom = config.test_chatroom
 
     while True:
-        import config
-        if '--test' in sys.argv:
-            config.debug = True
-            config.chatroom = config.test_chatroom
         sweet = build_sweetiebot(config)
 
         print sweet.nickname + ' established!'

@@ -15,6 +15,12 @@ sb_account_key = None
 # Optional: Issuer for service bus
 sb_issuer = None
 # sb_issuer = 'owner'
+# Optional: API key for pushbullet notifications
+pushbullet_api = None
+# pushbullet_api = '000000000000000000000000000000000000000000000'
+# Optional: Device ID for pushbullet notifications
+pushbullet_device = None
+# pushbullet_device = 0000000000000000
 # A list of JIDs for people allowed to do admin tasks
 mods = [
     "luna@friendshipismagicsquad.com",
