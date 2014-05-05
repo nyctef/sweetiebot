@@ -63,16 +63,17 @@ class SweetieAdmin(object):
                 self.chat("Did that work? I timed out for a moment there")
                 return
             error = response.getTag('error')
-            if error is not None:
-                not_allowed = error.getTag('not-allowed')
-                if not_allowed is not None:
-                    self.chat("I'm sorry, Dave. I'm afraid I can't do that.")
-                    return
-                text = error.getTag('text')
-                if text is None:
-                    self.chat('Something\'s fucky...')
-                    return
-                self.chat(str(text))
+            if error is None:
+                return
+            not_allowed = error.getTag('not-allowed')
+            if not_allowed is not None:
+                self.chat("I'm sorry, Dave. I'm afraid I can't do that.")
+                return
+            text = error.getTag('text')
+            if text is None:
+                self.chat('Something\'s fucky...')
+                return
+            self.chat(str(text))
         return handler
 
     def get_nick_reason(self, args):
