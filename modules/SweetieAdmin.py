@@ -47,7 +47,7 @@ class SweetieAdmin(object):
         return iq
 
     def _kickban(self, room, nick=None, jid=None, reason=None,
-                 kickban_type=None):
+                 kickban_type=None, on_success=None, on_failure=None):
         """Kicks user from muc
         Works only with sufficient rights."""
         logging.debug('rm:{} nk{} jid{} rsn{} isBan{}'.format(
@@ -55,25 +55,32 @@ class SweetieAdmin(object):
 
         iq = SweetieAdmin.iq_for_kickban(room, nick, jid, reason, kickban_type)
 
-        self.bot.send_iq(iq, self._kickban_response_handler())
+        self.bot.send_iq(iq, self._kickban_response_handler(on_success,
+                                                            on_failure))
 
-    def _kickban_response_handler(self):
+    def _kickban_response_handler(self, on_success, on_failure):
+        on_success = on_success or (lambda: None)
+        on_failure = on_failure or (lambda: None)
         def handler(session, response):
             if response is None:
                 self.chat("Did that work? I timed out for a moment there")
                 return
             error = response.getTag('error')
             if error is None:
+                on_success()
                 return
             not_allowed = error.getTag('not-allowed')
             if not_allowed is not None:
                 self.chat("I'm sorry, Dave. I'm afraid I can't do that.")
+                on_failure()
                 return
             text = error.getTag('text')
             if text is None:
                 self.chat('Something\'s fucky...')
+                on_failure()
                 return
             self.chat(str(text))
+            on_failure()
         return handler
 
     def get_nick_reason(self, args):
@@ -172,9 +179,10 @@ class SweetieAdmin(object):
         self._kickban(self.chatroom, nick=nick, reason=reason,
                       kickban_type=self._kick)
 
-    def kick(self, nick, reason):
+    def kick(self, nick, reason, on_success=None, on_failure=None):
         self._kickban(self.chatroom, nick=nick, reason=reason,
-                      kickban_type=self._kick)
+                      kickban_type=self._kick, on_success=on_success,
+                      on_failure=on_failure)
 
     #@botcmd()
     #@logerrors
