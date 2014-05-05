@@ -3,6 +3,7 @@ azure==0.7.1
 beautifulsoup4==4.3.2
 gdata==2.0.18
 jabberbot==0.15
+pushbullet.py==0.4.1
 redis==2.8.0
 requests==2.1.0
 wsgiref==0.1.2
