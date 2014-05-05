@@ -129,6 +129,8 @@ if __name__ == '__main__':
     if '--test' in sys.argv:
         config.fake_redis = True
         config.chatroom = config.test_chatroom
+    else:
+        config.fake_redis = False
 
     while True:
         sweet = build_sweetiebot(config)
