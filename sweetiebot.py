@@ -53,11 +53,24 @@ class Sweetiebot(object):
                 self.log_deowl(speaker, False)
                 return "I'm tired. Maybe another time?"
         log.debug("trying to kick owl ...")
-        self.admin.kick(':owl', ':sweetiestare:')
-        self.last_owl_kick = datetime.now()
-        self.kick_owl_delay = random.gauss(2*60*60, 20*60)
-        self.log_deowl(speaker, True)
+        self.admin.kick(':owl', ':sweetiestare:',
+                        on_success=self.deowl_success_handler(),
+                        on_failure=self.deowl_failure_handler())
         return
+
+    def deowl_success_handler(self):
+        def handler():
+            log.debug('deowl success')
+            self.last_owl_kick = datetime.now()
+            self.kick_owl_delay = random.gauss(2*60*60, 20*60)
+            self.log_deowl(speaker, True)
+        return handler
+
+    def deowl_failure_handler(self):
+        def handler():
+            log.debug('deowl failure')
+            self.log_deowl(speaker, False)
+        return handler
 
     def log_deowl(self, speaker, success):
         mq_message = {
