@@ -1,6 +1,9 @@
 from utils import logerrors
 from jabberbot import botcmd
 import random
+import logging
+
+log = logging.getLogger(__name__)
 
 class SweetieRoulette(object):
     def __init__(self, bot, admin):
@@ -10,7 +13,7 @@ class SweetieRoulette(object):
 
     def _spin(self):
         self.current_chamber = random.randint(0, 5)
-        print("chamber on "+str(self.current_chamber))
+        log.debug("chamber on "+str(self.current_chamber))
 
     @botcmd
     @logerrors

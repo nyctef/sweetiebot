@@ -5,6 +5,8 @@ from jabberbot import botcmd
 import re
 from datetime import datetime
 
+log = logging.getLogger(__name__)
+
 class SweetieAdmin(object):
     _kick = "kick"
     _ban = "ban"
@@ -131,7 +133,7 @@ class SweetieAdmin(object):
         if not len(reason):
             return "A reason must be provided"
 
-        print("trying to ban "+nick+" with reason "+reason)
+        log.debug("trying to ban "+nick+" with reason "+reason)
         self._kickban(self.chatroom, nick, None, 'Banned by '+sender +
                     ': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y"),
                       kickban_type=self._ban)
@@ -147,7 +149,7 @@ class SweetieAdmin(object):
 
         sender = self.get_sender_username(mess)
         if self.nick_is_mod(sender):
-            print("trying to unban "+jid)
+            log.debug("trying to unban "+jid)
             self._kickban(self.chatroom, jid=jid, kickban_type=self._unban)
         else:
             return "noooooooope."
@@ -165,7 +167,7 @@ class SweetieAdmin(object):
         if not self.nick_is_mod(sender):
             return "noooooooope."
 
-        print("trying to kick "+nick+" with reason "+reason)
+        log.debug("trying to kick "+nick+" with reason "+reason)
         self._kickban(self.chatroom, nick=nick, reason=reason,
                       kickban_type=self._kick)
 

@@ -1,6 +1,8 @@
 from azure.servicebus import ServiceBusService, Message
 import logging
 
+log = logging.getLogger(__name__)
+
 class SweetieMQ(object):
 
     bus_service = None
@@ -26,4 +28,4 @@ class SweetieMQ(object):
         try:
             self.bus_service.send_topic_message(self.topic, msg)
         except Exception as e:
-            print("MESSAGE DELIVERY FAILED: "+str(e))
+            log.warning("MESSAGE DELIVERY FAILED: "+str(e))

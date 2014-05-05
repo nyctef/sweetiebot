@@ -12,6 +12,7 @@ from utils import logerrors, randomstr
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
     RestartException, SweetieMarkov, PBLogHandler
+log = logging.getLogger(__name__)
 
 class Sweetiebot(object):
     kick_owl_delay = 7200
@@ -59,7 +60,7 @@ class Sweetiebot(object):
                 mq_message['success'] = False
                 self.mq.send(json.dumps(mq_message))
                 return "I'm tired. Maybe another time?"
-        print "trying to kick owl ..."
+        log.debug("trying to kick owl ...")
         self.admin.kick(':owl', ':sweetiestare:')
         self.last_owl_kick = datetime.now()
         self.kick_owl_delay = random.gauss(2*60*60, 20*60)
@@ -75,7 +76,7 @@ class Sweetiebot(object):
     @logerrors
     def detavi(self, mess, args):
         speaker = mess.getFrom().getResource()
-        print "trying to kick "+speaker
+        log.debug("trying to kick "+speaker)
         self.admin.kick(speaker, ':lyraahem:')
         return
 
@@ -129,10 +130,10 @@ if __name__ == '__main__':
     while True:
         sweet = build_sweetiebot(config)
 
-        print sweet.nickname + ' established!'
-        print 'Joining Room:' + config.chatroom
+        log.info(sweet.nickname + ' established!')
+        log.info('Joining Room:' + config.chatroom)
         sweet.join_room(config.chatroom, sweet.nickname)
-        print 'Joined!'
+        log.info('Joined!')
         try:
             result = sweet.serve_forever()
         except RestartException:

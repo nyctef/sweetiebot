@@ -1,6 +1,9 @@
 from utils import logerrors
 import re
 import random
+import logging
+
+log = logging.getLogger(__name__)
 
 class SweetieMarkov(object):
 
@@ -101,10 +104,10 @@ class SweetieMarkov(object):
                         best_message = generated
 
             if len(best_message.split(' ')) > self.min_reply_length:
-                print("Candidate best message " + best_message)
+                log.debug("Candidate best message " + best_message)
                 messages.append(best_message)
             else:
-                print("Best message for " + '_'.join(words) + " was " +
+                log.warning("Best message for " + '_'.join(words) + " was " +
                         best_message + ", not long enough")
 
         if len(messages):

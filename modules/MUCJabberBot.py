@@ -4,6 +4,8 @@ import re
 import xmpp
 import logging
 
+log = logging.getLogger(__name__)
+
 class RestartException(Exception):
     pass
 
@@ -64,7 +66,7 @@ class MUCJabberBot(JabberBot):
 
         if utils.is_command(self.nickname, message):
             message = self.fix_ping(message)
-            print('fixed message: '+message)
+            log.debug('fixed message: '+message)
 
             command, args = self.get_command_and_args(message)
 

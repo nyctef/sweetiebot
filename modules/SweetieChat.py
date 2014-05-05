@@ -6,6 +6,8 @@ from random import randint
 from jabberbot import botcmd
 from utils import logerrors
 
+log = logging.getLogger(__name__)
+
 class SweetieChat(object):
     urlregex = re.compile(r"((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@"+
                           ")?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za"+
@@ -85,7 +87,7 @@ class SweetieChat(object):
             soup = BeautifulSoup(res.text)
             return soup.title.string
         except Exception as e:
-            print "error fetching url "+url+" : "+str(e)
+            log.warning("error fetching url "+url+" : "+str(e))
 
     def get_oembed_page_title(self, url):
         import json
@@ -94,10 +96,10 @@ class SweetieChat(object):
             headers = { 'user-agent': 'sweetiebot' }
             res = requests.get(url, timeout=5, headers=headers)
             result = json.loads(res.text)
-            print(result)
+            log.debug(result)
             return result['title'] + ' by ' +result['author_name']
         except Exception as e:
-            print "error fetching url "+url+" : "+str(e)
+            log.warning("error fetching url "+url+" : "+str(e))
 
     def title_filter(self, result):
         if (result.strip() == 'imgur: the simple image sharer'):
@@ -117,7 +119,7 @@ class SweetieChat(object):
         match = imgurregex.match(link)
         if (match):
             replacement = 'http://imgur.com/'+match.group(2)
-            print("replacing "+link+" with "+replacement)
+            log.debug("replacing "+link+" with "+replacement)
             return replacement
         return link
 
@@ -126,7 +128,7 @@ class SweetieChat(object):
         match = devartregex.match(link)
         if (match):
             replacement = 'http://backend.deviantart.com/oembed?url=http://www.deviantart.com/gallery/%23/'+match.group(2)
-            print("replacing "+link+" with "+replacement)
+            log.debug("replacing "+link+" with "+replacement)
             return replacement
         return link
 
@@ -144,7 +146,7 @@ class SweetieChat(object):
             return
 
         if ":lunaglee:" in message.lower():
-            print self.get_sender_username(mess)
+            log.debug(self.get_sender_username(mess))
             self.bot.kick(self.chatroom, sender,
                           'Don\'t upset my big sister! :sweetiemad:')
             return
