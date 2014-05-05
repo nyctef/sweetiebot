@@ -77,7 +77,8 @@ class Sweetiebot(object):
     def detavi(self, mess, args):
         speaker = mess.getFrom().getResource()
         log.debug("trying to kick "+speaker)
-        self.admin.kick(speaker, ':lyraahem:')
+        target = 'Octavia' if self.admin.nick_is_mod(speaker) else speaker
+        self.admin.kick(target, ':lyraahem:')
         return
 
 
