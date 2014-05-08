@@ -1,33 +1,28 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from jabberbot import botcmd
-from datetime import datetime
-import random
 import redis
 import sys
 import logging
-import json
-from utils import logerrors, randomstr
+from utils import randomstr
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
-    RestartException, SweetieMarkov, PBLogHandler
+    RestartException, SweetieMarkov, PBLogHandler, SweetieDe
+
 log = logging.getLogger(__name__)
 
 class Sweetiebot(object):
-    kick_owl_delay = 7200
-    last_owl_kick = 0
-
-    def __init__(self, nickname, bot, lookup, mq, admin, chat, roulette):
+    def __init__(self, nickname, bot, lookup, mq, admin, chat, roulette,
+                 sweetiede):
         self.nickname = nickname
         self.bot = bot
-        self.bot.load_commands_from(self)
         self.bot.unknown_command_callback = self.unknown_command
         self.lookup = lookup
         self.mq = mq
         self.admin = admin
         self.chat = chat
         self.roulette = roulette
+        self.sweetiede = sweetiede
 
     def join_room(self, room, nick):
         self.bot.join_room(room, nick)
@@ -42,61 +37,6 @@ class Sweetiebot(object):
     def unknown_command(self, bot, mess, cmd, args):
         return self.chat.random_chat(bot, mess, cmd, args)
 
-    @botcmd
-    @logerrors
-    def deowl(self, mess, args):
-        speaker = mess.getFrom()
-        '''Only kicks :owl, long cooldown'''
-        if self.last_owl_kick:
-            if (datetime.now() - self.last_owl_kick).seconds < self.kick_owl_delay:
-                self.log_deowl(speaker, False)
-                return "I'm tired. Maybe another time?"
-        log.debug("trying to kick owl ...")
-        self.admin.kick(':owl', ':sweetiestare:',
-                        on_success=self.deowl_success_handler(speaker),
-                        on_failure=self.deowl_failure_handler(speaker))
-        return
-
-    def deowl_success_handler(self, speaker):
-        def handler():
-            log.debug('deowl success')
-            self.last_owl_kick = datetime.now()
-            self.kick_owl_delay = random.gauss(2*60*60, 20*60)
-            self.log_deowl(speaker, True)
-        return handler
-
-    def deowl_failure_handler(self, speaker):
-        def handler():
-            log.debug('deowl failure')
-            self.log_deowl(speaker, False)
-        return handler
-
-    @logerrors
-    def log_deowl(self, speaker, success):
-        timestamp = datetime.utcnow()
-        mq_message = {
-            'deowl':True,
-            'room':speaker.getNode(),
-            'server':speaker.getDomain(),
-            'speaker': speaker.getResource(),
-            'timestamp': timestamp.isoformat(' '),
-            'success': success,
-            }
-
-        self.mq.send(json.dumps(mq_message))
-
-    @botcmd
-    def deoctavia(self, mess, args):
-        self.detavi(mess, args)
-
-    @botcmd
-    @logerrors
-    def detavi(self, mess, args):
-        speaker = mess.getFrom().getResource()
-        log.debug("trying to kick "+speaker)
-        target = 'Octavia' if self.admin.nick_is_mod(speaker) else speaker
-        self.admin.kick(target, ':lyraahem:')
-        return
 
 
 def build_sweetiebot(config=None):
@@ -107,18 +47,21 @@ def build_sweetiebot(config=None):
     else:
         redis_conn = redis.Redis('localhost')
 
-    bot = MUCJabberBot(config.nickname, config.username, config.password, res=resource,
-                       only_direct=False, command_prefix='', debug=config.debug)
+    bot = MUCJabberBot(config.nickname, config.username, config.password,
+                       res=resource, only_direct=False, command_prefix='',
+                       debug=config.debug)
     lookup = SweetieLookup(bot)
     admin = SweetieAdmin(bot, config.chatroom, config.mods)
     mq = SweetieMQ(config)
+    de = SweetieDe(bot, admin, mq)
     actions = ResponsesFile('data/Sweetiebot.actions')
     sass = ResponsesFile('data/Sweetiebot.sass')
     markov = SweetieMarkov(bot, config.nickname, redis_conn)
     chat = SweetieChat(bot, actions, sass, config.chatroom, markov)
     roulette = SweetieRoulette(bot, admin)
 
-    sweet = Sweetiebot(config.nickname, bot, lookup, mq, admin, chat, roulette)
+    sweet = Sweetiebot(config.nickname, bot, lookup, mq, admin, chat, roulette,
+                       de)
     return sweet
 
 def setup_logging(config):
