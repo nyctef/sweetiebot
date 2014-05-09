@@ -42,8 +42,9 @@ class SweetieLookup(object):
         logging.debug('asking for prices at '+url)
         apiresult = urllib.urlopen(url).read()
         try:
-            root = ET.parse(apiresult).getroot()
+            root = ET.fromstring(apiresult)
         except:
+            logging.exception('error parsing evecentral xml')
             return "EveCentral is unhappy: "+apiresult[:200]
 
         buy = root[0][0][0][2].text  # top buy
