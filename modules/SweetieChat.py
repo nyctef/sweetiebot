@@ -142,9 +142,6 @@ class SweetieChat(object):
         if titles:
             return titles
 
-        if sender == self.nickname:
-            return
-
         if ":lunaglee:" in message.lower():
             log.debug(self.get_sender_username(mess))
             self.bot.kick(self.chatroom, sender,

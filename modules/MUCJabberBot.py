@@ -51,13 +51,21 @@ class MUCJabberBot(JabberBot):
             if self.direct_message_re.match(message):
                 mess.setBody(' '.join(message.split(' ', 1)[1:]))
                 super(MUCJabberBot, self).callback_message(conn, mess)
-        except TypeError:
+        except TypeError as e:
+            log.debug('random typeerror: '+str(e))
             return
         if not message:
             return
         if xmpp.NS_DELAY in props:
             return
+
+        log.debug('comparing jid {} against message from {}'.format(
+            self.jid, jid))
         if self.jid.bareMatch(jid):
+            log.debug('ignoring from jid')
+            return
+        if self.get_sender_username(mess) == self.nickname:
+            log.debug('ignoring from nickname')
             return
 
         if mess.getSubject():
@@ -78,6 +86,7 @@ class MUCJabberBot(JabberBot):
         command, args = self.get_command_and_args(message)
         reply = self.unknown_command(mess, command, args)
         if reply:
+            log.debug('sending reply: '+reply)
             self.send_simple_reply(mess, reply)
 
     def get_command_and_args(self, message):
@@ -117,7 +126,7 @@ class MUCJabberBot(JabberBot):
             return self.unknown_command_callback(self, mess, cmd, args)
 
     def on_ping_timeout(self):
-        logging.error('ping timeout.')
+        log.error('ping timeout.')
         raise RestartException()
 
     def send_iq(self, iq, callback=None):
