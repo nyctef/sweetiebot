@@ -50,7 +50,7 @@ class SweetieAdmin(object):
                  kickban_type=None, on_success=None, on_failure=None):
         """Kicks user from muc
         Works only with sufficient rights."""
-        logging.debug('rm:{} nk{} jid{} rsn{} isBan{}'.format(
+        log.debug('rm:{} nk{} jid{} rsn{} isBan{}'.format(
             room, nick, jid, reason, kickban_type))
 
         iq = SweetieAdmin.iq_for_kickban(room, nick, jid, reason, kickban_type)

@@ -23,7 +23,7 @@ class SweetieMQ(object):
     def send(self, message):
         if self.bus_service is None:
             return
-        logging.debug('Sending message '+message)
+        log.debug('Sending message '+message)
         msg = Message(message)
         try:
             self.bus_service.send_topic_message(self.topic, msg)

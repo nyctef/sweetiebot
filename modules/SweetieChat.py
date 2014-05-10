@@ -51,7 +51,7 @@ class SweetieChat(object):
         self.actions.add_to_file(action_str)
 
     def cuddle(self, mess):
-        logging.debug('cuddle')
+        log.debug('cuddle')
         message = mess.getBody().lower()
         if 'pets' in message:
             return '/me purrs ' + random.choice(self.emotes)

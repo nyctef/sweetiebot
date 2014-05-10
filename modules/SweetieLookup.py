@@ -8,6 +8,8 @@ from xml.etree import ElementTree as ET
 from utils import logerrors
 from random import randint
 
+log = logging.getLogger(__name__)
+
 class SweetieLookup(object):
 
     id_dic = {"": ""}
@@ -39,12 +41,12 @@ class SweetieLookup(object):
               str(system) + \
               "&typeid=" + \
               str(id)
-        logging.debug('asking for prices at '+url)
+        log.debug('asking for prices at '+url)
         apiresult = urllib.urlopen(url).read()
         try:
             root = ET.fromstring(apiresult)
         except:
-            logging.exception('error parsing evecentral xml')
+            log.exception('error parsing evecentral xml')
             return "EveCentral is unhappy: "+apiresult[:200]
 
         buy = root[0][0][0][2].text  # top buy
@@ -87,17 +89,17 @@ class SweetieLookup(object):
         if len(self.id_dic) <= 1:
             self.id_dic = self.read_ids()
 
-        logging.debug('looking for '+test+' in id_dic')
+        log.debug('looking for '+test+' in id_dic')
         if test in list(self.id_dic.keys()):
-            logging.debug('.. found')
+            log.debug('.. found')
             reply = self.id_dic[test]
-            logging.debug(' .. sending '+test+', '+str(reply))
+            log.debug(' .. sending '+test+', '+str(reply))
             return reply, test
         else:
             maybe = difflib.get_close_matches(
                 test, list(self.id_dic.keys()), 1)
             if len(maybe) > 0:
-                logging.debug("maybe meant " + str(maybe))
+                log.debug("maybe meant " + str(maybe))
                 if maybe[0] in list(self.id_dic.keys()):
                     i_id = self.id_dic[maybe[0]]
                     i_name = maybe[0]
@@ -176,7 +178,7 @@ class SweetieLookup(object):
             try:
                 dice, sides = map(int, args.split('d', 1))
             except:
-                logging.error('bad dice')
+                log.error('bad dice')
                 return "Error parsing input"
             if dice > 25:
                 return "Too many variables in possibilty space, abort!"
@@ -196,7 +198,7 @@ class SweetieLookup(object):
                 reply = new_dice
             else:
                 reply = reply + " ~ " + new_dice
-        logging.debug("roll result: {}".format(reply))
+        log.debug("roll result: {}".format(reply))
         return reply
 
     def roll_prim(self, dice=1, sides=6):

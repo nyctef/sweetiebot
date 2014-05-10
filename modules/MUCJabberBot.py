@@ -69,7 +69,7 @@ class MUCJabberBot(JabberBot):
             return
 
         if mess.getSubject():
-            logging.debug('ignoring subject..')
+            log.debug('ignoring subject..')
             return
 
         if utils.is_command(self.nickname, message):
