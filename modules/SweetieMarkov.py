@@ -120,6 +120,7 @@ class SweetieMarkov(object):
         potentials = set()
         for x in xrange(100):
             potential_keyword, potential_message = self.generate_potential_message(input_message)
+            if not potential_message: continue
             #print 'potential', potential_message
             if (potential_message[0] == self.begin and
                 potential_message[-1] == self.end and
@@ -130,8 +131,10 @@ class SweetieMarkov(object):
         if best:
             print('we got a best!')
             result = self.set_random_choice(best)
-        else:
+        elif potentials:
             result = self.set_random_choice(potentials)
+        else:
+            return None
         keyword, message = result
         print('using keyword', keyword)
         return ''.join(message[1:-1])
@@ -145,6 +148,8 @@ class SweetieMarkov(object):
         split_message = self.replace_swap_words(split_message)
         #print('split_message', split_message)
         keywords = self.extract_keywords(split_message)
+        if not keywords:
+            return None, None
         keyword = random.choice(keywords)
         forwards = self.generate_message_from_keyword(keyword, 'fwd')
         #print('forwards', forwards)
