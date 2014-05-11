@@ -16,3 +16,18 @@ class FakeRedis(object):
         else:
             self.data[key] = [value]
 
+    def hincryby(self, key, field, increment):
+        if not key in self.data:
+            self.data[key] = {}
+        hash = self.data[key]
+        if not field in hash:
+            hash[field] = 0
+        hash[field] += increment
+        #print(key, '=', field, hash[field])
+
+    def hgetall(self, key):
+        return self.data[key]
+
+    def exists(self, key):
+        return key in self.data
+

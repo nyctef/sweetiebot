@@ -1,151 +1,211 @@
-from utils import logerrors
 import re
 import random
-import logging
-
-log = logging.getLogger(__name__)
 
 class SweetieMarkov(object):
+    """Generate markov-style random chat from input text.
 
-    preferred_endings = ['.', '~', '!', '?']
-    banned_endings = ['a', 'and', 'or', 'about', 'above', 'across', 'after',
-                      'against', 'along', 'amid', 'among', 'anti', 'as', 'at',
-                      'below', 'beneath', 'beside', 'besides', 'between',
-                      'beyond', 'but', 'by', 'concerning', 'considering',
-                      'despite', 'during', 'except', 'excepting', 'excluding',
-                      'following', 'for', 'from', 'in', 'inside', 'into',
-                      'like', 'minus', 'near', 'of', 'on', 'onto', 'per',
-                      'plus', 'regarding', 'since', 'than', 'the', 'through',
-                      'to', 'toward', 'towards', 'under', 'unlike', 'until',
-                      'up', 'upon', 'versus', 'via', 'with', 'within',
-                      'without', ]
-
-    chain_length = 3
-    min_reply_length = 3
-    max_words = 30
-    messages_to_generate = 100
+    Uses ideas based on http://megahal.alioth.debian.org/How.html but a custom
+    implementation. It tries to be cleverer with input splitting, and the way
+    it gets started from a single keyword into the full chain is a bit hacky"""
 
     separator = '\x01'
-    stop_word = '\x02'
-    prefix = 'jab'
+    begin = '\x02'
+    end = '\x03'
+    word_re = re.compile(r'^[a-zA-Z\-\']+$')
+    emote_re = re.compile(r'^:[a-zA-Z0-9]+:$')
+    punctuation = frozenset((',', '.', ':', ';', '!', '?', '~', '(', ')'))
+    order = 4
 
-    def __init__(self, bot, nickname, redis):
-        self.bot = bot
+    def __init__(self, redis, banned_keywords, preferred_keywords, swap_words):
         self.redis = redis
-        self.nickname = nickname
-
-    def make_key(self, words):
-        return self.separator.join(words)
-
-    def _make_key(self, k):
-        # todo rename
-        return self.separator.join((self.prefix, k))
-
-    def get_next_word(self, key):
-        return self.redis.srandmember(self._make_key(key))
-
-    def store_chain(self, words):
-        # grab everything but the last word
-        key = self.make_key(words[:-1])
-        # add the last word to the set
-        self.redis.sadd(self._make_key(key), words[-1])
-        return key
+        self.banned_keywords = frozenset(self.read_banned_keywords(
+            banned_keywords) + list(self.punctuation))
+        self.preferred_keywords = []#frozenset(preferred_keywords)
+        self.swap_words = self.read_swap_words(swap_words)
 
     def store_message(self, message):
-        for words in self.split_message_into_subsequences(message):
-            self.store_chain(words)
+        split_message = self.split_message(message)
+        split_message = map(lambda x: x.lower(), split_message)
+        split_message = [self.begin] + split_message + [self.end]
+        #print('split_message', split_message)
+        #keywords = self.extract_keywords(split_message)
+        #print('keywords', list(keywords))
+        main_sequences = list(self.get_subsequences(split_message, self.order+1))
+        keyword_sequences_fwd = list(self.get_keyword_sequences(split_message, self.order+1, True))
+        keyword_sequences_bwd = list(self.get_keyword_sequences(split_message, self.order+1, False))
+        self.store_sequences(main_sequences)
+        for seq in keyword_sequences_fwd:
+            self.store_sequence('fwd', seq)
+        for seq in keyword_sequences_bwd:
+            self.store_sequence('bwd', seq)
+        #replaced_message = self.replace_swap_words(split_message)
+        ##print(replaced_message)
 
-    def get_sender_username(self, mess):
-        return self.bot.get_sender_username(mess)
+    def store_sequences(self, sequences):
+        for seq in sequences:
+            self.store_sequence('fwd', seq)
+            bwd = list(reversed(seq))
+            self.store_sequence('bwd', bwd)
+
+    def store_sequence(self, prefix, sequence):
+        key = 'seq'+prefix+self.separator.join(sequence[:-1])
+        #print prefix, sequence, sequence.__class__
+        self.redis.hincryby(key, sequence[-1], 1)
+
+    def extract_keywords(self, sequence):
+        return filter(lambda x: self.is_keyword(x), sequence)
+
+    def is_keyword(self, segment):
+        return (self.word_re.match(segment) and
+            segment.lower() not in self.banned_keywords)
 
     def split_message(self, message):
-        return re.findall(r"[\w'-]+|:[\w]:|[.,!~?;]", message)
+        initial_split = message.split()
+        #print('initial_split', initial_split)
+        split = list(self.split_words(initial_split))
+        #print('segment split', split)
+        return split
 
-    def split_message_into_subsequences(self, message):
-        # split the incoming message into words, i.e. ['what', 'up', 'bro']
-        words = self.split_message(message)
-        #print(words)
-
-        # if the message is any shorter, it won't lead anywhere
-        if len(words) > self.chain_length:
-            # add some stop words onto the message
-            # ['what', 'up', 'bro', '\x02']
-            words.append(self.stop_word)
-
-            # len(words) == 4, so range(4-2) == range(2) == 0, 1, meaning
-            # we return the following slices: [0:3], [1:4]
-            # or ['what', 'up', 'bro'], ['up', 'bro', '\x02']
-            for i in range(len(words) - self.chain_length):
-                yield words[i:i + self.chain_length + 1]
-
-    def is_subset(self, smaller, larger):
-        return set(smaller) <= set(larger)
-
-    def is_submessage(self, generated, original):
-        """return if the generated message is just a subset of the input"""
-        return self.is_subset(self.split_message(generated),
-                              self.split_message(original))
-
-    @logerrors
-    def get_message(self, seed):
-        messages = []
-        for words in self.split_message_into_subsequences(seed):
-            key = self.make_key(words[:-1])
-            best_message = ''
-            for i in range(self.messages_to_generate):
-                generated = self.get_message_from_key(key)
-                if self.is_submessage(generated, seed):
-                    continue
-                if generated[-1] in self.preferred_endings:
-                    best_message = generated
-                    break
-                if len(generated) > len(best_message):
-                    if not generated.split(' ')[-1] in self.banned_endings:
-                        best_message = generated
-
-            if len(best_message.split(' ')) > self.min_reply_length:
-                log.debug("Candidate best message " + best_message)
-                messages.append(best_message)
+    def replace_swap_words(self, split_message):
+        for word in split_message:
+            if word in self.swap_words.keys():
+                yield self.swap_words[word]
             else:
-                log.warning("Best message for " + '_'.join(words) + " was " +
-                        best_message + ", not long enough")
+                yield word
 
-        if len(messages):
-            return random.choice(messages)
+    def get_keyword_sequences(self, sequence, subsequence_length, fwd=True):
+        """ We need a list of shorter sequences since we start with a single
+        keyword input and most of our data requires four segments as an input"""
+        for idx, segment in enumerate(sequence):
+            if not self.is_keyword(segment):
+                continue
+            for length in range(2, subsequence_length):
+                for subseq in self.get_subsequences_at(sequence, length, idx, fwd):
+                    if len(subseq)>1:
+                        yield subseq
 
+    def get_subsequences(self, sequence, subsequence_length):
+        for i in range(len(sequence) - subsequence_length + 1):
+            yield sequence[i:i+subsequence_length]
 
-    def get_message_from_key(self, key):
-        # keep a list of words we've seen
-        gen_words = []
+    def get_subsequences_at(self, sequence, subsequence_length, position, fwd):
+        #print('getting subseqs at', position, subsequence_length, sequence[position])
+        direction = 1 if fwd else -1
+        position_diff = position + (subsequence_length * direction)
+        yield sequence[position:position_diff]
+        yield sequence[position:position_diff:-1]
 
-        # only follow the chain so far, up to <max words>
-        for i in xrange(self.max_words):
+    def split_words(self, initial_split):
+        for segment in initial_split:
+            if self.word_re.match(segment) or self.emote_re.match(segment):
+                yield segment
+                yield ' '
+            elif (segment[0] in self.punctuation
+                and self.word_re.match(segment[1:])):
+                yield segment[0] + ' '
+                yield segment[1:]
+            elif (segment[-1] in self.punctuation
+                  and self.word_re.match(segment[:-1])):
+                yield segment[:-1]
+                yield segment[-1] + ' '
+            elif (segment[-1] in self.punctuation
+                  and segment[0] in self.punctuation
+                  and self.word_re.match(segment[1:-1])):
+                yield segment[0] + ' '
+                yield segment[1:-1]
+                yield segment[-1] + ' '
 
-            # split the key on the separator to extract the words -- the key
-            # might look like "this\x01is" and split out into [ 'this', 'is']
-            words = key.split(self.separator)
+    def get_message(self, input_message):
+        best = set()
+        potentials = set()
+        for x in xrange(100):
+            potential_keyword, potential_message = self.generate_potential_message(input_message)
+            #print 'potential', potential_message
+            if (potential_message[0] == self.begin and
+                potential_message[-1] == self.end and
+                len(potential_message) > 5):
+                best.add((potential_keyword, tuple(potential_message)))
+            else:
+                potentials.add((potential_keyword, tuple(potential_message)))
+        if best:
+            print('we got a best!')
+            result = self.set_random_choice(best)
+        else:
+            result = self.set_random_choice(potentials)
+        keyword, message = result
+        print('using keyword', keyword)
+        return ''.join(message[1:-1])
 
-            # add the word to the list of words in our generated message
-            gen_words.append(words[0])
+    def set_random_choice(self, the_set):
+        return random.sample(the_set, 1)[0]
 
-            # get a new word that lives at this key -- if none are present we've
-            # reached the end of the chain and can bail
-            next_word = self.get_next_word(key)
-            if not next_word:
+    def generate_potential_message(self, input_message):
+        #print('input_message', input_message)
+        split_message = self.split_message(input_message)
+        split_message = self.replace_swap_words(split_message)
+        #print('split_message', split_message)
+        keywords = self.extract_keywords(split_message)
+        keyword = random.choice(keywords)
+        forwards = self.generate_message_from_keyword(keyword, 'fwd')
+        #print('forwards', forwards)
+        backwards = list(reversed(self.generate_message_from_keyword(keyword, 'bwd')))[:-1]
+        #print('backwards', backwards)
+        return keyword, backwards + forwards
+
+    def generate_message_from_keyword(self, keyword, prefix):
+        sequence = [keyword]
+        terminator = self.end if prefix == 'fwd' else self.begin
+        for x in range(3):
+            #print(sequence)
+            next = self.get_next_in_sequence(sequence, prefix)
+            if next is None:
+                break
+            sequence = sequence + [next]
+            if next == terminator:
                 break
 
-            # create a new key combining the end of the old one and the
-            # next_word
-            key = self.make_key(words[1:] + [next_word])
+        for x in range(50):
+            #print('initial key', sequence[-4:])
+            next = self.get_next_in_sequence(sequence[-4:], prefix)
+            if next is None:
+                break
+            sequence = sequence + [next]
+            if next == terminator:
+                break
 
-        return self.build_message(gen_words)
+        return sequence
 
-    def build_message(self, gen_words):
-        result = ''
-        for word in gen_words:
-            if word not in ".,!?;": # is not punctuation
-                result += ' '
-            result += word
-        return result.strip()
+    def get_next_in_sequence(self, sequence, prefix):
+        key = 'seq'+prefix+self.separator.join(sequence)
+        if not self.redis.exists(key):
+            #print('key not found', key)
+            return None
+        nexts = self.redis.hgetall(key)
+        return self.weighted_choice(list(nexts.iteritems()))
+
+    def weighted_choice(self, choices):
+        """taken from http://stackoverflow.com/a/3679747/895407"""
+        total = sum(w for c, w in choices)
+        r = random.uniform(0, total)
+        upto = 0
+        for c, w in choices:
+            if upto + w > r:
+                return c
+            upto += w
+        assert False, "Shouldn't get here"
+
+    def read_swap_words(self, filename):
+        with open(filename, 'r') as f:
+            # read all non-comment lines
+            lines = filter(lambda x: x[0]!='#', f.readlines())
+            lines = map(lambda x: x.lower(), lines)
+            # split each line and convert to dictionary
+            return {l[0]:l[1] for l in map(lambda x: x.strip().split(), lines)}
+
+    def read_banned_keywords(self, filename):
+        with open(filename, 'r') as f:
+            lines = filter(lambda x: x[0]!='#', f.readlines())
+            lines = map(lambda x: x.lower().strip(), lines)
+            return lines
 
 

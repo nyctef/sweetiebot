@@ -4,11 +4,7 @@ import os
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.sys.path.insert(0,parentdir)
 
-from modules import SweetieMarkov, SweetieRedis, FakeRedis
-
-class StubBot(object):
-    def load_commands_from(self, target):
-        pass
+from modules import SweetieMarkov, FakeRedis
 
 def read_dump():
     """open an input file with one message per line"""
@@ -17,7 +13,8 @@ def read_dump():
 
 if __name__ == '__main__':
     lines = read_dump()
-    markov = SweetieMarkov(StubBot(), SweetieRedis(FakeRedis()))
+    markov = SweetieMarkov(FakeRedis(), '../data/banned_keywords.txt',
+                      '../data/preferred_keywords.txt', '../data/swap_words.txt')
     for line in lines:
         markov.store_message(line)
     while True:
