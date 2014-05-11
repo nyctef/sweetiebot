@@ -132,6 +132,7 @@ class SweetieChat(object):
             return replacement
         return link
 
+    @logerrors
     def random_chat(self, bot, mess, cmd, args):
         """Does things"""
         message = mess.getBody()
