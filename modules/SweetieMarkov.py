@@ -185,13 +185,13 @@ class SweetieMarkov(object):
 
     def weighted_choice(self, choices):
         """taken from http://stackoverflow.com/a/3679747/895407"""
-        total = sum(w for c, w in choices)
+        total = sum(int(w) for c, w in choices)
         r = random.uniform(0, total)
         upto = 0
         for c, w in choices:
-            if upto + w > r:
+            if upto + int(w) > r:
                 return c
-            upto += w
+            upto += int(w)
         assert False, "Shouldn't get here"
 
     def read_swap_words(self, filename):
