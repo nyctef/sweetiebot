@@ -56,7 +56,9 @@ def build_sweetiebot(config=None):
     de = SweetieDe(bot, admin, mq)
     actions = ResponsesFile('data/Sweetiebot.actions')
     sass = ResponsesFile('data/Sweetiebot.sass')
-    markov = SweetieMarkov(bot, config.nickname, redis_conn)
+    markov = SweetieMarkov(redis_conn, 'data/banned_keywords.txt',
+                           'data/preferred_keywords.txt',
+                           'data/swap_words.txt')
     chat = SweetieChat(bot, actions, sass, config.chatroom, markov)
     roulette = SweetieRoulette(bot, admin)
 
