@@ -121,10 +121,10 @@ class SweetieMarkov(object):
         for x in xrange(100):
             potential_keyword, potential_message = self.generate_potential_message(input_message)
             if not potential_message: continue
+            if len(potential_message) <5: continue
             #print 'potential', potential_message
             if (potential_message[0] == self.begin and
-                potential_message[-1] == self.end and
-                len(potential_message) > 5):
+                potential_message[-1] == self.end):
                 best.add((potential_keyword, tuple(potential_message)))
             else:
                 potentials.add((potential_keyword, tuple(potential_message)))
