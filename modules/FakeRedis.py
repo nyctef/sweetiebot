@@ -16,7 +16,7 @@ class FakeRedis(object):
         else:
             self.data[key] = [value]
 
-    def hincryby(self, key, field, increment):
+    def hincrby(self, key, field, increment):
         if not key in self.data:
             self.data[key] = {}
         hash = self.data[key]

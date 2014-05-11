@@ -50,7 +50,7 @@ class SweetieMarkov(object):
     def store_sequence(self, prefix, sequence):
         key = 'seq'+prefix+self.separator.join(sequence[:-1])
         #print prefix, sequence, sequence.__class__
-        self.redis.hincryby(key, sequence[-1], 1)
+        self.redis.hincrby(key, sequence[-1], 1)
 
     def extract_keywords(self, sequence):
         return filter(lambda x: self.is_keyword(x), sequence)
