@@ -118,28 +118,64 @@ class SweetieMarkov(object):
                 yield segment[-1] + ' '
 
     def get_message(self, input_message):
-        best = set()
         potentials = set()
-        for x in xrange(100):
+        for x in xrange(20):
             potential_keyword, potential_message = self.generate_potential_message(input_message)
-            if not potential_message: continue
-            if len(potential_message) <5: continue
-            #log.info 'potential', potential_message
-            if (potential_message[0] == self.begin and
-                potential_message[-1] == self.end):
-                best.add((potential_keyword, tuple(potential_message)))
-            else:
-                potentials.add((potential_keyword, tuple(potential_message)))
-        if best:
-            log.info('we got a best!')
-            result = self.set_random_choice(best)
-        elif potentials:
-            result = self.set_random_choice(potentials)
-        else:
+            if potential_message is None: continue
+            potential_score = self.score_message(input_message, potential_message)
+            potentials.add((potential_keyword, potential_score, tuple(potential_message)))
+        result = None
+        high_score = 0
+        for p in potentials:
+            log.info(p)
+            if p[1] > high_score:
+                result = p
+        if result is None:
             return None
-        keyword, message = result
-        log.info('using keyword', keyword)
+        keyword, score, message = result
+        log.info('using keyword %s ', keyword)
         return ''.join(message[1:-1])
+
+    def score_message(self, input_message, potential_message):
+        if not potential_message:
+            return 0
+
+        score = 0
+        # we should get messages with a size roughly matching the input
+        score -= abs(len(input_message) - len(potential_message)) * 100
+
+        # we prefer messages that start and end at expected points
+        if (potential_message[0] == self.begin and
+            potential_message[-1] == self.end):
+            score += 500
+
+        input_message_split = self.split_message(input_message)
+
+        # we really don't like parrotting the user
+        if self.message_is_subset_of_input(input_message_split,
+                                           potential_message):
+            score -= 1000
+
+        # however, we do like talking about the same things they do
+        common_keywords = self.get_common_keywords(input_message_split,
+                                                   potential_message)
+        score += 100 * len(common_keywords)
+
+        return score
+
+    def get_common_keywords(self, input_message_split, potential_message):
+        return (set(self.extract_keywords(input_message_split)) &
+                set(self.extract_keywords(potential_message)))
+
+    def message_is_subset_of_input(self, input_message_split, potential_message):
+        potential_except_punc = self.only_words(set(potential_message))
+        input_except_punc = self.only_words(set(input_message_split))
+#        log.info('comparing %s against %s', potential_except_punc,
+#                 input_except_punc)
+        return potential_except_punc.issubset(input_except_punc)
+
+    def only_words(self, word_set):
+        return set(filter(lambda x: self.word_re.match(x), word_set))
 
     def set_random_choice(self, the_set):
         return random.sample(the_set, 1)[0]
