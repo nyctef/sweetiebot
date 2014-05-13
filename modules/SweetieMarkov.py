@@ -75,6 +75,23 @@ class SweetieMarkov(object):
             else:
                 yield word
 
+    def get_keyword_seed_subsequences(self, sequence):
+        current_keyword_chain = []
+        for segment in sequence:
+#            log.debug('looking at %s', segment)
+            if not (self.is_keyword(segment)
+                    or segment.isspace()
+                    or segment.strip() in self.punctuation):
+#                log.debug('resetting on segment')
+                current_keyword_chain = []
+                continue
+            if (not len(current_keyword_chain)) and segment.isspace():
+#                log.debug('we dont want to start the sequence with %s', segment)
+                continue
+            current_keyword_chain.append(segment)
+            if not segment.isspace():
+                yield tuple(current_keyword_chain[-4:])
+
     def get_keyword_sequences(self, sequence, subsequence_length, fwd=True):
         """ We need a list of shorter sequences since we start with a single
         keyword input and most of our data requires four segments as an input"""
@@ -119,7 +136,7 @@ class SweetieMarkov(object):
 
     def get_message(self, input_message):
         potentials = set()
-        for x in xrange(20):
+        for x in xrange(200):
             potential_keyword, potential_message = self.generate_potential_message(input_message)
             if potential_message is None: continue
             potential_score = self.score_message(input_message, potential_message)
@@ -139,27 +156,37 @@ class SweetieMarkov(object):
     def score_message(self, input_message, potential_message):
         if not potential_message:
             return 0
-
+        log.debug('scoring %s', potential_message)
+        input_message_split = self.split_message(input_message)
         score = 0
         # we should get messages with a size roughly matching the input
-        score -= abs(len(input_message) - len(potential_message)) * 100
+        score -= abs(len(input_message_split) - len(potential_message)) * 20
+        log.debug('input len %s', len(input_message_split))
+        log.debug('output len %s', len(potential_message))
+        log.debug('after length penalty: %s', score)
 
         # we prefer messages that start and end at expected points
         if (potential_message[0] == self.begin and
             potential_message[-1] == self.end):
-            score += 500
+            score += 100
+        log.debug('after begin/end bonus: %s', score)
 
-        input_message_split = self.split_message(input_message)
 
         # we really don't like parrotting the user
         if self.message_is_subset_of_input(input_message_split,
                                            potential_message):
             score -= 1000
+        log.debug('after parrot penalty: %s', score)
 
         # however, we do like talking about the same things they do
         common_keywords = self.get_common_keywords(input_message_split,
                                                    potential_message)
-        score += 100 * len(common_keywords)
+        # let's try and get at least another common keyword
+        if len(common_keywords) < 2:
+            score -= 1000
+        else:
+            score += 100 * len(common_keywords)
+        log.debug('after keyword bonus: %s', score)
 
         return score
 
@@ -185,27 +212,20 @@ class SweetieMarkov(object):
         split_message = self.split_message(input_message)
         split_message = self.replace_swap_words(split_message)
         #log.info('split_message', split_message)
-        keywords = self.extract_keywords(split_message)
+        keywords = tuple(self.get_keyword_seed_subsequences((split_message)))
+        log.info('potential keywords %s', keywords)
         if not keywords:
             return None, None
         keyword = random.choice(keywords)
         forwards = self.generate_message_from_keyword(keyword, 'fwd')
         #log.info('forwards', forwards)
-        backwards = list(reversed(self.generate_message_from_keyword(keyword, 'bwd')))[:-1]
+        backwards = list(reversed(self.generate_message_from_keyword(keyword, 'bwd')))[:-len(keyword)]
         #log.info('backwards', backwards)
         return keyword, backwards + forwards
 
-    def generate_message_from_keyword(self, keyword, prefix):
-        sequence = [keyword]
+    def generate_message_from_keyword(self, keywords, prefix):
+        sequence = list(keywords)
         terminator = self.end if prefix == 'fwd' else self.begin
-        for x in range(3):
-            #log.info(sequence)
-            next = self.get_next_in_sequence(sequence, prefix)
-            if next is None:
-                break
-            sequence = sequence + [next]
-            if next == terminator:
-                break
 
         for x in range(50):
             #log.info('initial key', sequence[-4:])
