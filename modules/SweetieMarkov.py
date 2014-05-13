@@ -1,5 +1,7 @@
 import re
 import random
+import logging
+log = logging.getLogger(__name__)
 
 class SweetieMarkov(object):
     """Generate markov-style random chat from input text.
@@ -27,9 +29,9 @@ class SweetieMarkov(object):
         split_message = self.split_message(message)
         split_message = map(lambda x: x.lower(), split_message)
         split_message = [self.begin] + split_message + [self.end]
-        #print('split_message', split_message)
+        #log.info('split_message', split_message)
         #keywords = self.extract_keywords(split_message)
-        #print('keywords', list(keywords))
+        #log.info('keywords', list(keywords))
         main_sequences = list(self.get_subsequences(split_message, self.order+1))
         keyword_sequences_fwd = list(self.get_keyword_sequences(split_message, self.order+1, True))
         keyword_sequences_bwd = list(self.get_keyword_sequences(split_message, self.order+1, False))
@@ -39,7 +41,7 @@ class SweetieMarkov(object):
         for seq in keyword_sequences_bwd:
             self.store_sequence('bwd', seq)
         #replaced_message = self.replace_swap_words(split_message)
-        ##print(replaced_message)
+        ##log.info(replaced_message)
 
     def store_sequences(self, sequences):
         for seq in sequences:
@@ -49,7 +51,7 @@ class SweetieMarkov(object):
 
     def store_sequence(self, prefix, sequence):
         key = 'seq'+prefix+self.separator.join(sequence[:-1])
-        #print prefix, sequence, sequence.__class__
+        #log.info prefix, sequence, sequence.__class__
         self.redis.hincrby(key, sequence[-1], 1)
 
     def extract_keywords(self, sequence):
@@ -61,9 +63,9 @@ class SweetieMarkov(object):
 
     def split_message(self, message):
         initial_split = message.split()
-        #print('initial_split', initial_split)
+        #log.info('initial_split', initial_split)
         split = list(self.split_words(initial_split))
-        #print('segment split', split)
+        #log.info('segment split', split)
         return split
 
     def replace_swap_words(self, split_message):
@@ -89,7 +91,7 @@ class SweetieMarkov(object):
             yield sequence[i:i+subsequence_length]
 
     def get_subsequences_at(self, sequence, subsequence_length, position, fwd):
-        #print('getting subseqs at', position, subsequence_length, sequence[position])
+        #log.info('getting subseqs at', position, subsequence_length, sequence[position])
         direction = 1 if fwd else -1
         position_diff = position + (subsequence_length * direction)
         yield sequence[position:position_diff]
@@ -122,46 +124,46 @@ class SweetieMarkov(object):
             potential_keyword, potential_message = self.generate_potential_message(input_message)
             if not potential_message: continue
             if len(potential_message) <5: continue
-            #print 'potential', potential_message
+            #log.info 'potential', potential_message
             if (potential_message[0] == self.begin and
                 potential_message[-1] == self.end):
                 best.add((potential_keyword, tuple(potential_message)))
             else:
                 potentials.add((potential_keyword, tuple(potential_message)))
         if best:
-            print('we got a best!')
+            log.info('we got a best!')
             result = self.set_random_choice(best)
         elif potentials:
             result = self.set_random_choice(potentials)
         else:
             return None
         keyword, message = result
-        print('using keyword', keyword)
+        log.info('using keyword', keyword)
         return ''.join(message[1:-1])
 
     def set_random_choice(self, the_set):
         return random.sample(the_set, 1)[0]
 
     def generate_potential_message(self, input_message):
-        #print('input_message', input_message)
+        #log.info('input_message', input_message)
         split_message = self.split_message(input_message)
         split_message = self.replace_swap_words(split_message)
-        #print('split_message', split_message)
+        #log.info('split_message', split_message)
         keywords = self.extract_keywords(split_message)
         if not keywords:
             return None, None
         keyword = random.choice(keywords)
         forwards = self.generate_message_from_keyword(keyword, 'fwd')
-        #print('forwards', forwards)
+        #log.info('forwards', forwards)
         backwards = list(reversed(self.generate_message_from_keyword(keyword, 'bwd')))[:-1]
-        #print('backwards', backwards)
+        #log.info('backwards', backwards)
         return keyword, backwards + forwards
 
     def generate_message_from_keyword(self, keyword, prefix):
         sequence = [keyword]
         terminator = self.end if prefix == 'fwd' else self.begin
         for x in range(3):
-            #print(sequence)
+            #log.info(sequence)
             next = self.get_next_in_sequence(sequence, prefix)
             if next is None:
                 break
@@ -170,7 +172,7 @@ class SweetieMarkov(object):
                 break
 
         for x in range(50):
-            #print('initial key', sequence[-4:])
+            #log.info('initial key', sequence[-4:])
             next = self.get_next_in_sequence(sequence[-4:], prefix)
             if next is None:
                 break
@@ -183,7 +185,7 @@ class SweetieMarkov(object):
     def get_next_in_sequence(self, sequence, prefix):
         key = 'seq'+prefix+self.separator.join(sequence)
         if not self.redis.exists(key):
-            #print('key not found', key)
+            #log.info('key not found', key)
             return None
         nexts = self.redis.hgetall(key)
         return self.weighted_choice(list(nexts.iteritems()))
