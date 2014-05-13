@@ -12,11 +12,13 @@ def read_dump():
         return f.readlines()
 
 if __name__ == '__main__':
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
     lines = read_dump()
     markov = SweetieMarkov(FakeRedis(), '../data/banned_keywords.txt',
                       '../data/preferred_keywords.txt', '../data/swap_words.txt')
-    #for line in lines:
-        #markov.store_message(line)
+    for line in lines:
+        markov.store_message(line)
     while True:
         seed = raw_input("Enter a seed: ")
         print markov.get_message(seed)
