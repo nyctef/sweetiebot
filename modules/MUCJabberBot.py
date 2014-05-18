@@ -25,7 +25,6 @@ class MessageProcessor(object):
                 return self.commands[message.command](message)
 
         if self.unknown_command_callback is not None:
-            log.debug('running unknown_command_callback')
             return self.unknown_command_callback(message)
 
 class MUCJabberBot(JabberBot):
@@ -58,7 +57,6 @@ class MUCJabberBot(JabberBot):
         self.unknown_command_callback = None
 
         def on_unknown_callback(message):
-            log.debug('in mucjbot on_unknown_callback')
             if self.unknown_command_callback is not None:
                 return self.unknown_command_callback(message)
         self.message_processor = MessageProcessor(on_unknown_callback)
