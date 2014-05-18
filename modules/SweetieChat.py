@@ -1,6 +1,5 @@
 import logging
 import re
-import utils
 import random
 from random import randint
 from jabberbot import botcmd
@@ -133,10 +132,10 @@ class SweetieChat(object):
         return link
 
     @logerrors
-    def random_chat(self, bot, mess, cmd, args):
+    def random_chat(self, mess):
         """Does things"""
-        message = mess.getBody()
-        sender = self.get_sender_username(mess)
+        message = mess.message_text
+        sender = mess.sender_nick
         self.markov.store_message(message)
 
         titles = self.get_page_titles(message)
@@ -152,7 +151,8 @@ class SweetieChat(object):
         if "c/d" in message.lower():
             return sender + ": " + random.choice(["c", "d"])
 
-        if "yiff" in message.lower() and utils.is_ping(self.nickname, message):
+        is_ping = mess.is_ping
+        if "yiff" in message.lower() and is_ping:
             return sender + ": yiff in hell, furfag :sweetiemad:"
 
         if ":lunabeh:" in message.lower() and (sender == ":owl" or "luna" in sender.lower()):
@@ -163,7 +163,6 @@ class SweetieChat(object):
             self.lunabeh_count = 1
             return ":lunabeh:"
 
-        is_ping = utils.is_ping(self.nickname, message)
         if message.startswith('/me ') and is_ping:
             return self.cuddle(mess)
 
