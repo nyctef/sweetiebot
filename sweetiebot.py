@@ -31,13 +31,8 @@ class Sweetiebot(object):
     def serve_forever(self):
         self.bot.serve_forever()
 
-    def get_sender_username(self, message):
-        return self.bot.get_sender_username(message)
-
     def unknown_command(self, bot, mess, cmd, args):
         return self.chat.random_chat(bot, mess, cmd, args)
-
-
 
 def build_sweetiebot(config=None):
     if config is None: import config
