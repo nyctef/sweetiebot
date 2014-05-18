@@ -1,12 +1,6 @@
 import logging
 import random
 
-def is_ping(nickname, message):
-    return nickname.lower() in message.lower()
-
-def is_command(nickname, message):
-    return message.lower().strip().startswith(nickname.lower())
-
 def logerrors(func):
     from functools import wraps
     @wraps(func)

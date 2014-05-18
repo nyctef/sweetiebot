@@ -1,5 +1,5 @@
 from jabberbot import JabberBot
-import utils
+from Message import Message
 import re
 import xmpp
 import logging
@@ -8,6 +8,25 @@ log = logging.getLogger(__name__)
 
 class RestartException(Exception):
     pass
+
+class MessageProcessor(object):
+
+    def __init__(self, unknown_command_callback):
+        self.commands = {}
+        self.unknown_command_callback = unknown_command_callback
+
+    def add_command(self, command_name, command_callback):
+        self.commands[command_name] = command_callback
+
+    def process_message(self, message):
+        if message.command is not None:
+            if message.command in self.commands:
+                log('running command '+message.command)
+                return self.commands[message.command](message)
+
+        if self.unknown_command_callback is not None:
+            log.debug('running unknown_command_callback')
+            return self.unknown_command_callback(message)
 
 class MUCJabberBot(JabberBot):
 
@@ -38,25 +57,25 @@ class MUCJabberBot(JabberBot):
 
         self.unknown_command_callback = None
 
+        def on_unknown_callback(message):
+            log.debug('in mucjbot on_unknown_callback')
+            if self.unknown_command_callback is not None:
+                return self.unknown_command_callback(message)
+        self.message_processor = MessageProcessor(on_unknown_callback)
 
     def callback_message(self, conn, mess):
-        ''' Changes the behaviour of the JabberBot in order to allow
-        it to answer direct messages. This is used often when it is
-        connected in MUCs (multiple users chatroom). '''
-        # fuck you unicode
         message = mess.getBody()
+        if not message:
+            log.warn('apparently empty message %s', mess)
+            return
+
         props = mess.getProperties()
         jid = mess.getFrom()
-        try:
-            if self.direct_message_re.match(message):
-                mess.setBody(' '.join(message.split(' ', 1)[1:]))
-                super(MUCJabberBot, self).callback_message(conn, mess)
-        except TypeError as e:
-            log.debug('random typeerror: '+str(e))
-            return
-        if not message:
-            return
+        if self.direct_message_re.match(message):
+            self.deal_with_direct_message(mess)
+
         if xmpp.NS_DELAY in props:
+            # delayed messages are history from before we joined the chat
             return
 
         log.debug('comparing jid {} against message from {}'.format(
@@ -64,7 +83,9 @@ class MUCJabberBot(JabberBot):
         if self.jid.bareMatch(jid):
             log.debug('ignoring from jid')
             return
-        if self.get_sender_username(mess) == self.nickname:
+
+        sender_nick = self.get_sender_username(mess)
+        if sender_nick == self.nickname:
             log.debug('ignoring from nickname')
             return
 
@@ -72,28 +93,16 @@ class MUCJabberBot(JabberBot):
             log.debug('ignoring subject..')
             return
 
-        if utils.is_command(self.nickname, message):
-            message = self.fix_ping(message)
-            log.debug('fixed message: '+message)
+        parsed_message = Message(self.nickname, sender_nick, jid, message,
+                                 message) # TODO message_html
 
-            command, args = self.get_command_and_args(message)
-
-            command = command.lower()
-            if command in self.commands:
-                mess.setBody(message)
-                super(MUCJabberBot, self).callback_message(conn, mess)
-                return
-        command, args = self.get_command_and_args(message)
-        reply = self.unknown_command(mess, command, args)
+        reply = self.message_processor.process_message(parsed_message)
+        log.debug('reply: '+str(reply))
         if reply:
-            log.debug('sending reply: '+reply)
             self.send_simple_reply(mess, reply)
 
-    def get_command_and_args(self, message):
-        if ' ' in message:
-            return message.split(' ', 1)
-        else:
-            return message, ''
+    def deal_with_direct_message(self, mess):
+        pass
 
     def callback_presence(self, conn, presence):
         super(MUCJabberBot, self).callback_presence(conn, presence)
@@ -109,21 +118,8 @@ class MUCJabberBot(JabberBot):
         for name, value in inspect.getmembers(target, inspect.ismethod):
             if getattr(value, '_jabberbot_command', False):
                 name = getattr(value, '_jabberbot_command_name')
-                self.log.info('Registered command: %s' % name)
-                self.commands[name] = value
-
-    def fix_ping(self, message):
-        message = message.strip()
-        if message.lower().startswith(self.nickname.lower()):
-            message = message[len(self.nickname):]
-        message = message.strip()
-        if message.startswith(':') or message.startswith(','):
-            message = message[1:]
-        return message.strip()
-
-    def unknown_command(self, mess, cmd, args):
-        if self.unknown_command_callback is not None:
-            return self.unknown_command_callback(self, mess, cmd, args)
+                log.info('Registered command: %s' % name)
+                self.message_processor.add_command(name, value)
 
     def on_ping_timeout(self):
         log.error('ping timeout.')
