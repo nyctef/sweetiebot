@@ -167,7 +167,7 @@ class SweetieChat(object):
         if message.startswith('/me ') and is_ping:
             return self.cuddle(mess)
 
-        if is_ping or random.random() < self.chattiness:
+        if False: #is_ping or random.random() < self.chattiness:
             markov_response = self.markov.get_message(message)
             if markov_response:
                 return markov_response
