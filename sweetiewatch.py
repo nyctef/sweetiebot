@@ -14,6 +14,8 @@ log = logging.getLogger(__name__)
 
 class SweetieWatch(JabberBot):
 
+    PING_FREQUENCY = 60
+
     def randomstr(self):
         return ('%08x' % random.randrange(16**8))
 
@@ -49,7 +51,7 @@ class SweetieWatch(JabberBot):
         self.mq.send(jsonstr)
 
     def on_ping_timeout(self):
-        log.error('ping timeout')
+        print('ping timeout')
         raise RestartException()
 
 
