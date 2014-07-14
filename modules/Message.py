@@ -1,6 +1,7 @@
 
 class Message(object):
     def __init__(self, nickname, sender_nick, sender_jid, message_text, message_html):
+        self.nickname = nickname
         self.sender_nick = sender_nick
         self.sender_jid = sender_jid
         self.message_text = message_text
@@ -18,7 +19,7 @@ class Message(object):
 
     def _get_command_and_args(self, message_text):
         if ' ' in message_text:
-            return message_text.split(' ', 1)
+            return self._fix_ping(message_text).split(' ', 1)
         else:
             return message_text, ''
 
