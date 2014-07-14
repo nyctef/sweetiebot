@@ -18,10 +18,11 @@ class Message(object):
         return nickname.lower() in message.lower()
 
     def _get_command_and_args(self, message_text):
-        if ' ' in message_text:
-            return self._fix_ping(message_text).split(' ', 1)
+        message_after_ping = self._fix_ping(message_text)
+        if ' ' in message_after_ping:
+            return message_after_ping.split(' ', 1)
         else:
-            return message_text, ''
+            return message_after_ping, ''
 
     def _is_command(self, nickname, message):
         return message.lower().strip().startswith(nickname.lower())
