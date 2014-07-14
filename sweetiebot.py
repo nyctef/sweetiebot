@@ -25,6 +25,11 @@ class Sweetiebot(object):
         self.sweetiede = sweetiede
 
     def join_room(self, room, nick):
+        connection = self.bot.connect()
+        if connection is None:
+            sleep(5)
+            log.error('connection failed .. sleeping for 5')
+            raise RestartException()
         self.bot.join_room(room, nick)
         self.chatroom = room
 
@@ -90,13 +95,13 @@ if __name__ == '__main__':
         config.fake_redis = False
 
     while True:
-        sweet = build_sweetiebot(config)
-
-        log.info(sweet.nickname + ' established!')
-        log.info('Joining Room:' + config.chatroom)
-        sweet.join_room(config.chatroom, sweet.nickname)
-        log.info('Joined!')
         try:
+            sweet = build_sweetiebot(config)
+
+            log.info(sweet.nickname + ' established!')
+            log.info('Joining Room:' + config.chatroom)
+            sweet.join_room(config.chatroom, sweet.nickname)
+            log.info('Joined!')
             result = sweet.serve_forever()
         except RestartException:
             continue

@@ -4,8 +4,17 @@ from modules import SweetieMQ
 import json
 import random
 import xmpp
+import logging
+from time import sleep
+
+class RestartException(Exception):
+    pass
+
+log = logging.getLogger(__name__)
 
 class SweetieWatch(JabberBot):
+
+    PING_FREQUENCY = 60
 
     def randomstr(self):
         return ('%08x' % random.randrange(16**8))
@@ -41,11 +50,25 @@ class SweetieWatch(JabberBot):
         print('sending '+jsonstr)
         self.mq.send(jsonstr)
 
+    def on_ping_timeout(self):
+        print('ping timeout')
+        raise RestartException()
+
 
 if __name__ == '__main__':
     import config
-    sweetiewatch = SweetieWatch(config.nickname, SweetieMQ(config),\
-            config.username, config.password)
-    sweetiewatch.join_room(config.chatroom, config.nickname)
-    sweetiewatch.serve_forever()
+    while True: 
+        try:
+            sweetiewatch = SweetieWatch(config.nickname, SweetieMQ(config),\
+                    config.username, config.password)
+            connection = sweetiewatch.connect()
+            if connection is None:
+                print("failed to connect .. sleeping for 5 and continuing")
+                sleep(5)
+                continue
+            sweetiewatch.join_room(config.chatroom, config.nickname)
+            sweetiewatch.serve_forever()
+        except RestartException:
+            continue
+        break
 
