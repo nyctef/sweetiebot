@@ -43,19 +43,15 @@ class SweetieChat(object):
         self.chatroom = chatroom
         self.markov = markov
 
-    def get_sender_username(self, mess):
-        return self.bot.get_sender_username(mess)
-
     def save_action(self, action_str):
         self.actions.add_to_file(action_str)
 
-    def cuddle(self, mess):
+    def cuddle(self, message):
         log.debug('cuddle')
-        message = mess.getBody().lower()
-        if 'pets' in message:
+        if 'pets' in message.message_text:
             return '/me purrs ' + random.choice(self.emotes)
         action = self.actions.get_next()
-        action = action.replace('<target>', self.get_sender_username(mess))
+        action = action.replace('<target>', message.sender_nick)
         return action + ' ' + random.choice(self.emotes)
 
     @logerrors
@@ -175,10 +171,10 @@ class SweetieChat(object):
             return self.quote(mess, None)
 
     @botcmd
-    def quiet(self, mess, args):
+    def quiet(self, message):
         '''I will only respond to pings'''
         self.chattiness = 0
-        sender = self.get_sender_username(mess)
+        sender = message.sender_nick
         if 'rainbow' in sender.lower():
             return ':rdderp: okay then'
         if 'luna' in sender.lower():
@@ -192,26 +188,26 @@ class SweetieChat(object):
         return sender + ': Sorry! I\'ll be quiet'
 
     @botcmd(name='chat')
-    def unquiet(self, mess, args):
+    def unquiet(self, message):
         '''I will chat every once in a while'''
         self.chattiness = .025
-        return self.get_sender_username(mess) + ': Ok, I\'ll start chatting again'
+        return message.sender_nick + ': Ok, I\'ll start chatting again'
 
     @botcmd
-    def quote(self, mess, args):
+    def quote(self, message):
         '''Replays sass'''
         return self.sass.get_next()
 
     @botcmd
-    def sass(self, mess, args):
+    def sass(self, message):
         '''Remembers some sass to say back next time it is mentioned'''
-        if len(args) > 400:
+        if len(message.args) > 400:
             return "Sass too long :sweetiedust"
-        if not args.strip():
+        if not message.args.strip():
             return "What do you want me to remember?"
-        if ":owl:" in args or self.get_sender_username(mess) == ':owl':
+        if ":owl:" in message.args or message.sender_nick == ':owl':
             return "No owls allowed! :sweetiedust:"
-        reply = self.get_sender_username(mess) + ': I\'ll remember that!'
-        self.sass.add_to_file(args)
+        reply = message.sender_nick + ': I\'ll remember that!'
+        self.sass.add_to_file(message.args)
         return reply
 
