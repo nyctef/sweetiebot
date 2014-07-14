@@ -19,9 +19,11 @@ class MessageProcessor(object):
         self.commands[command_name] = command_callback
 
     def process_message(self, message):
+        log.debug('matching command {} against commands {}'.format(\
+            message.command, self.commands))
         if message.command is not None:
             if message.command in self.commands:
-                log('running command '+message.command)
+                log.debug('running command '+message.command)
                 return self.commands[message.command](message)
 
         if self.unknown_command_callback is not None:
