@@ -66,7 +66,7 @@ class SweetieLookup(object):
             try:
                 id_dic[unicode(item_name, 'utf-8').upper()] = int(typeid)
             except UnicodeDecodeError:
-                log.exception('failed to utf-8 decode line: '+typeid+' (skipping)')
+                log.warning('failed to utf-8 decode line: '+typeid+' (skipping)')
             line = f.readline().replace("\n", "")
         f.close()
         return id_dic
