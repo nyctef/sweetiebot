@@ -23,14 +23,14 @@ class SweetieLookup(object):
 
     @botcmd
     @logerrors
-    def argue(self, message, args):
+    def argue(self, message):
         '''Start a tumblr argument courtesy of lokaltog.github.io/tumblr-argument-generator'''
         res = requests.get('http://tumblraas.azurewebsites.net/', timeout=5)
         return res.text.strip()
 
     @botcmd
     @logerrors
-    def rant(self, message, args):
+    def rant(self, message):
         '''Rant for a while, courtesy of lokaltog.github.io/tumblr-argument-generator'''
         res = requests.get(
             'http://tumblraas.azurewebsites.net/rant', timeout=5)
@@ -132,24 +132,24 @@ class SweetieLookup(object):
 
     @botcmd
     @logerrors
-    def nerd3(self, mess, args):
+    def nerd3(self, message):
         '''Search for a video by NerdCubed'''
-        return self.youtube_search(args, 'OfficialNerdCubed')
+        return self.youtube_search(message.args, 'OfficialNerdCubed')
 
     @botcmd
     @logerrors
-    def tb(self, mess, args):
+    def tb(self, message):
         '''Search for a video by TotalBiscuit'''
-        return self.youtube_search(args, 'TotalHalibut')
+        return self.youtube_search(message.args, 'TotalHalibut')
 
     @botcmd
     @logerrors
-    def yt(self, mess, args):
+    def yt(self, message):
         '''Search for a video on youtube'''
-        return self.youtube_search(args, None)
+        return self.youtube_search(message.args, None)
 
     @logerrors
-    def hype(self, mess, args):
+    def hype(self, message):
         """Get hype! Print time until S4 starts"""
         # print 'getting hype ..'
         hypetime = datetime.strptime('03:00PM 2013-11-23', '%I:%M%p %Y-%m-%d')
@@ -162,20 +162,19 @@ class SweetieLookup(object):
 
     @botcmd
     @logerrors
-    def jita(self, mess, args):
+    def jita(self, message):
         '''Looks up Jita Prices, use !jita [ITEM NAME]'''
-        id, name = self.id_lookup(args)
+        id, name = self.id_lookup(message.args)
         if id is None:
             return 'Couldn\'t find any matches'
         reply = self.get_prices(id, 30000142)
-        reply = reply = self.get_sender_username(
-            mess) + ': '+name.title() + ' - ' + reply
+        reply = message.sender_nick + ': '+name.title() + ' - ' + reply
         return reply
 
     @botcmd
-    def roll(self, mess, args):
+    def roll(self, message):
         '''Accepts rolls in the form of 'roll 1d6' and similar -- max 25 dice'''
-        brup = args.split(' ')
+        brup = message.args.split(' ')
         reply = ''
         for args in brup:
             try:
@@ -211,9 +210,9 @@ class SweetieLookup(object):
             return []
 
     @botcmd
-    def date(self, mess, args):
+    def date(self, message):
         '''Returns the current date'''
         reply = datetime.now().strftime('%Y-%m-%d')
-        reply = self.get_sender_username(mess) + ': ' + reply
+        reply = message.sender_nick + ': ' + reply
         return reply
 

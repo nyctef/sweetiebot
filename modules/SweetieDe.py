@@ -18,8 +18,8 @@ class SweetieDe(object):
 
     @botcmd
     @logerrors
-    def deowl(self, mess, args):
-        speaker = mess.getFrom()
+    def deowl(self, message):
+        speaker = message.sender_jid
         '''Only kicks :owl, long cooldown'''
         if self.last_owl_kick:
             if (datetime.now() - self.last_owl_kick).seconds < self.kick_owl_delay:
@@ -60,13 +60,13 @@ class SweetieDe(object):
         self.mq.send(json.dumps(mq_message))
 
     @botcmd
-    def deoctavia(self, mess, args):
-        self.detavi(mess, args)
+    def deoctavia(self, message):
+        self.detavi(message)
 
     @botcmd
     @logerrors
-    def detavi(self, mess, args):
-        speaker = mess.getFrom().getResource()
+    def detavi(self, message):
+        speaker = message.sender_nick
         log.debug("trying to kick "+speaker)
         target = 'Octavia' if self.admin.nick_is_mod(speaker) else speaker
         self.admin.kick(target, ':lyraahem:')

@@ -18,9 +18,6 @@ class SweetieAdmin(object):
         self.chatroom = chatroom
         self.mods = mods
 
-    def get_sender_username(self, message):
-        return self.bot.get_sender_username(message)
-
     def nick_is_mod(self, nick):
         return self.bot.get_jid_from_nick(nick) in self.mods
 
@@ -98,13 +95,13 @@ class SweetieAdmin(object):
         self.bot.send(self.chatroom, message, message_type='groupchat')
 
     @botcmd
-    def banlist(self, mess, args):
+    def banlist(self, message):
         """List the current bans. Requires admin"""
-        return self.listbans(mess, args)
+        return self.listbans(message)
 
     @botcmd
     @logerrors
-    def listbans(self, mess, args):
+    def listbans(self, message):
         """List the current bans. Requires admin"""
         id = 'banlist'+randomstr()
         NS_MUCADMIN = 'http://jabber.org/protocol/muc#admin'
@@ -128,35 +125,33 @@ class SweetieAdmin(object):
 
     @botcmd(name='ban')
     @logerrors
-    def ban(self, mess, args):
+    def ban(self, message):
         '''bans user. Requires admin and a reason
 
         nick can be wrapped in single or double quotes'''
 
-        nick, reason = self.get_nick_reason(args)
+        nick, reason = self.get_nick_reason(message.args)
 
-        sender = self.get_sender_username(mess)
-        if not self.nick_is_mod(sender):
+        if not self.nick_is_mod(message.sender_nick):
             return "nooope"
         if not len(reason):
             return "A reason must be provided"
 
         log.debug("trying to ban "+nick+" with reason "+reason)
-        self._kickban(self.chatroom, nick, None, 'Banned by '+sender +
+        self._kickban(self.chatroom, nick, None, 'Banned by '+message.sender_nick +
                     ': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y"),
                       kickban_type=self._ban)
 
     @botcmd(name='unban')
     @logerrors
-    def un(self, mess, args):
+    def un(self, message):
         '''unbans a user. Requires admin and a jid (check listbans)
 
         nick can be wrapped in single or double quotes'''
 
-        jid = args
+        jid = message.args
 
-        sender = self.get_sender_username(mess)
-        if self.nick_is_mod(sender):
+        if self.nick_is_mod(message.sender_nick):
             log.debug("trying to unban "+jid)
             self._kickban(self.chatroom, jid=jid, kickban_type=self._unban)
         else:
@@ -164,15 +159,14 @@ class SweetieAdmin(object):
 
     @botcmd(name='kick')
     @logerrors
-    def remove(self, mess, args):
+    def remove(self, message):
         '''kicks user. Requires admin and a reason
 
         nick can be wrapped in single or double quotes'''
 
-        nick, reason = self.get_nick_reason(args)
+        nick, reason = self.get_nick_reason(message.args)
 
-        sender = self.get_sender_username(mess)
-        if not self.nick_is_mod(sender):
+        if not self.nick_is_mod(message.sender_nick):
             return "noooooooope."
 
         log.debug("trying to kick "+nick+" with reason "+reason)
@@ -186,6 +180,6 @@ class SweetieAdmin(object):
 
     #@botcmd()
     #@logerrors
-    #def debug(self, mess, args):
+    #def debug(self, message):
     #    # what could possibly go wrong
-    #    return str(eval(args))
+    #    return str(eval(message.args))
