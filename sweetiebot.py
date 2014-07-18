@@ -72,7 +72,7 @@ def setup_logging(config):
 
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
     streamhandler = logging.StreamHandler()
-    streamhandler.setLevel(logging.INFO)
+    streamhandler.setLevel(logging.DEBUG if config.debug else logging.INFO)
     streamhandler.setFormatter(formatter)
     logging.getLogger().addHandler(streamhandler)
 
