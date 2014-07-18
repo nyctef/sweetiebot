@@ -49,8 +49,8 @@ class SweetieLookup(object):
             log.exception('error parsing evecentral xml')
             return "EveCentral is unhappy: "+apiresult[:200]
 
-        buy = root[0][0][0][2].text  # top buy
-        sell = root[0][0][1][3].text  # low sell
+        buy = root.find('marketstat/type/buy/max').text
+        sell = root.find('marketstat/type/sell/min').text
         buy = '{0:,}'.format(float(buy))
         sell = '{0:,}'.format(float(sell))
         r = 'buy: ' + buy + ' isk, sell: ' + sell + ' isk'
