@@ -178,6 +178,12 @@ class SweetieAdmin(object):
                       kickban_type=self._kick, on_success=on_success,
                       on_failure=on_failure)
 
+    @botcmd
+    @logerrors
+    def sudo(self, message):
+        return message.sender_nick + " is not in the sudoers file. This "+\
+                "incident will be reported."
+
     #@botcmd()
     #@logerrors
     #def debug(self, message):
