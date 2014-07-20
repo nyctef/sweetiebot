@@ -18,8 +18,6 @@ class MessageProcessor(object):
         self.commands[command_name] = command_callback
 
     def process_message(self, message):
-        log.debug('matching command {} against commands {}'.format(\
-            message.command, self.commands))
         if message.command is not None:
             if message.command in self.commands:
                 log.debug('running command '+message.command)
@@ -81,21 +79,22 @@ class MUCJabberBot(JabberBot):
             log.debug('ignoring subject..')
             return
 
+        is_pm = props.type == 'chat'
         message_html = self.get_message_html(mess)
         parsed_message = Message(self.nickname, sender_nick, jid, message,
-                                 message_html)
+                                 message_html, is_pm)
 
         reply = self.message_processor.process_message(parsed_message)
         log.debug('reply: '+str(reply))
         if reply:
-            self.send_simple_reply(mess, reply)
+            self.send_simple_reply(mess, reply, is_pm)
 
     def get_message_html(self, xml_message):
         # simple case: no html in message
         if xml_message.getTag('html') is None:
             return xml_message.getTag('body').getData()
 
-        # complex case: concat all children of html/body
+        # complex case: concat all children of /html/body
         nodes = xml_message.getTag('html').getTag('body').getPayload()
         strings = map(str, nodes)
         return ''.join(strings)

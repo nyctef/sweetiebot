@@ -1,6 +1,6 @@
 
 class Message(object):
-    def __init__(self, nickname, sender_nick, sender_jid, message_text, message_html):
+    def __init__(self, nickname, sender_nick, sender_jid, message_text, message_html, is_pm):
         self.nickname = nickname
         self.sender_nick = sender_nick
         self.sender_jid = sender_jid
@@ -10,7 +10,7 @@ class Message(object):
             self.command, self.args = self._get_command_and_args(message_text)
         else:
             self.command, self.args = None,None
-        self.is_ping = self._is_ping(nickname, message_text)
+        self.is_ping = self._is_ping(nickname, message_text) or is_pm
 
     # TODO: make these methods consistent
 
