@@ -4,6 +4,9 @@ import urllib
 import requests
 import logging
 import difflib
+import json
+import random
+import re
 from xml.etree import ElementTree as ET
 from utils import logerrors
 from random import randint
@@ -215,4 +218,51 @@ class SweetieLookup(object):
         reply = datetime.now().strftime('%Y-%m-%d')
         reply = message.sender_nick + ': ' + reply
         return reply
+
+    @botcmd
+    @logerrors
+    def woon(self, message):
+        luna_data = self.get('http://www.reddit.com/r/luna/new.json')
+        if luna_data is None: raise Exception('failed to call reddit api')
+        link_data = self.get_children_of_type(json.loads(luna_data), 't3')
+
+        kyuu_data = self.get('http://www.reddit.com/user/kyuuketsuki.json?count=100')
+        if kyuu_data is None: raise Exception('failed to call reddit api')
+        link_title_data = self.get_children_of_type(json.loads(kyuu_data), 't1')
+
+        log.info('choosing one of {} links'.format(len(link_data)))
+        log.info('choosing one of {} comments'.format(len(link_title_data)))
+        link = random.choice(link_data)['data']['url']
+        text = random.choice(link_title_data)['data']['body']
+        text = re.split('\.|!|\?', text)[0]
+        return '<a href="{}">{}</a>'.format(link, text)
+
+    def get_children_of_type(self, reddit_data, kind):
+        if type(reddit_data) is dict:
+            return self.get_children_from_listing(reddit_data, kind)
+
+        result = []
+        for listing in reddit_data:
+            for child in self.get_children_from_listing(listing, kind):
+                result.append(child)
+        return result
+
+    def get_children_from_listing(self, listing_data, kind):
+        result = []
+        for child in listing_data['data']['children']:
+            if child['kind'] == kind:
+                result.append(child)
+        return result
+
+    def get(self, url):
+        try:
+            headers = {
+                    'user-agent': 'sweetiebot',
+                    'cache-control': 'no-cache'
+                }
+            res = requests.get(url, timeout=5, headers = headers)
+            return res.text
+        except Exception as e:
+            log.warning("error fetching url "+url+" : "+str(e))
+            return None
 
