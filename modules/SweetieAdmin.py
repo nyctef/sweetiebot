@@ -178,6 +178,11 @@ class SweetieAdmin(object):
                       kickban_type=self._kick, on_success=on_success,
                       on_failure=on_failure)
 
+    def kick_jid(self, jid, reason, on_success=None, on_failure=None):
+        self._kickban(self.chatroom, jid=jid, reason=reason,
+                      kickban_type=self._kick, on_success=on_success,
+                      on_failure=on_failure)
+
     @botcmd
     @logerrors
     def sudo(self, message):

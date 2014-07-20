@@ -26,7 +26,7 @@ class SweetieDe(object):
                 self.log_deowl(speaker, False)
                 return "I'm tired. Maybe another time?"
         log.debug("trying to kick owl ...")
-        self.admin.kick(':owl', ':sweetiestare:',
+        self.admin.kick_jid('owlowiscious@friendshipismagicsquad.com', ':sweetiestare:',
                         on_success=self.deowl_success_handler(speaker),
                         on_failure=self.deowl_failure_handler(speaker))
         return
