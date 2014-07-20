@@ -38,7 +38,6 @@ class MUCJabberBot(JabberBot):
     def __init__(self, nickname, *args, **kwargs):
         ''' Initialize variables. '''
 
-        # answer only direct messages or not?
         self.nickname = nickname
 
         # initialize jabberbot
@@ -82,13 +81,24 @@ class MUCJabberBot(JabberBot):
             log.debug('ignoring subject..')
             return
 
+        message_html = self.get_message_html(mess)
         parsed_message = Message(self.nickname, sender_nick, jid, message,
-                                 message) # TODO message_html
+                                 message_html)
 
         reply = self.message_processor.process_message(parsed_message)
         log.debug('reply: '+str(reply))
         if reply:
             self.send_simple_reply(mess, reply)
+
+    def get_message_html(self, xml_message):
+        # simple case: no html in message
+        if xml_message.getTag('html') is None:
+            return xml_message.getTag('body').getData()
+
+        # complex case: concat all children of html/body
+        nodes = xml_message.getTag('html').getTag('body').getPayload()
+        strings = map(str, nodes)
+        return ''.join(strings)
 
     def callback_presence(self, conn, presence):
         super(MUCJabberBot, self).callback_presence(conn, presence)
