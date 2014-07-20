@@ -25,7 +25,7 @@ class FakeXMPPUser():
     def __init__(self, timeout, username, password):
         print("creating bot..")
         self.bot = MUCJabberBot('a_random_nick', username, password,
-                only_direct=False, command_prefix='###')
+                command_prefix='###')
         self.bot.connect()
         self.bot.unknown_command_callback = self.message_received
         self.timeout = timeout
