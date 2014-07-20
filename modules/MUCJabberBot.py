@@ -1,6 +1,5 @@
 from jabberbot import JabberBot
 from Message import Message
-import re
 import xmpp
 import logging
 
@@ -47,8 +46,6 @@ class MUCJabberBot(JabberBot):
 
         # create a regex to check if a message is a direct message
         user, domain = str(self.jid).split('@')
-        self.direct_message_re = re.compile('^%s(@%s)?[^\w]? '
-                                            % (user, domain))
 
         self.unknown_command_callback = None
 
@@ -65,8 +62,6 @@ class MUCJabberBot(JabberBot):
 
         props = mess.getProperties()
         jid = mess.getFrom()
-        if self.direct_message_re.match(message):
-            self.deal_with_direct_message(mess)
 
         if xmpp.NS_DELAY in props:
             # delayed messages are history from before we joined the chat
@@ -94,9 +89,6 @@ class MUCJabberBot(JabberBot):
         log.debug('reply: '+str(reply))
         if reply:
             self.send_simple_reply(mess, reply)
-
-    def deal_with_direct_message(self, mess):
-        pass
 
     def callback_presence(self, conn, presence):
         super(MUCJabberBot, self).callback_presence(conn, presence)
