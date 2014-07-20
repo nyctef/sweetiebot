@@ -168,7 +168,7 @@ class SweetieChat(object):
                 return markov_response
 
         if is_ping:
-            return self.quote(mess, None)
+            return self.quote(mess)
 
     @botcmd
     def quiet(self, message):
