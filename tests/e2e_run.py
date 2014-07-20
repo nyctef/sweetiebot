@@ -5,7 +5,7 @@ parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.sys.path.insert(0,parentdir)
 
 from sweetiebot import build_sweetiebot
-from MUCJabberBot import MUCJabberBot
+from modules import MUCJabberBot
 
 '''
 
@@ -53,16 +53,20 @@ def bot_connects_to_chat():
     nickname = 'Sweetiebot'
     #username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
     #password = open('password.txt', 'r').read().strip()
-    sweet, _ = build_sweetiebot()
+    import config
+    config.fake_redis = True
+    config.chatroom = config.test_chatroom
+    sweet = build_sweetiebot()
     sweet.join_room(chatroom, nickname)
     stay_awhile_and_listen()
     return sweet
 
 def admin_connects_to_chat():
+    import config
     print("connecting admin...")
     nickname = 'admin'
     username = 'nyctef@friendshipismagicsquad.com/sweetieadmin'
-    password = open('nycpassword.txt', 'r').read().strip()
+    password = config.admin_password
     admin = FakeXMPPUser(1000, username, password)
     print("joining admin... ")
     admin.join_room(chatroom, nickname)
