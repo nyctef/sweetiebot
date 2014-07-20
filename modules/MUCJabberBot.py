@@ -79,7 +79,7 @@ class MUCJabberBot(JabberBot):
             log.debug('ignoring subject..')
             return
 
-        is_pm = props.type == 'chat'
+        is_pm = mess.getAttr('type') == 'chat'
         message_html = self.get_message_html(mess)
         parsed_message = Message(self.nickname, sender_nick, jid, message,
                                  message_html, is_pm)
