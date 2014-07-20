@@ -84,13 +84,22 @@ def admin_connects_to_chat():
     nickname = 'admin'
     username = 'nyctef@friendshipismagicsquad.com/sweetieadmin'
     password = config.admin_password
-    admin = FakeXMPPUser(1000, username, password)
+    admin = FakeXMPPUser(1, username, password)
     print("joining admin... ")
     admin.join_room(chatroom, nickname)
     # todo: block on chatroom join
     stay_awhile_and_listen()
     return admin
 
+def bot_processes_messages(sweetie):
+    print('processes_messages')
+    last_result = None
+    while True:
+        result = sweetie.bot.conn.Process(1)
+        print(result)
+        #god damn this api is terrible
+        if result == '0' and last_result == '0': break
+        last_result = result
 
 def when_bot_is_pinged(admin):
     admin.send_message('Sweetiebot: this is a ping')
@@ -99,6 +108,13 @@ def bot_responds_with_sass(admin):
     stay_awhile_and_listen()
     admin.check_for_messages()
     admin.has_received_message(sender='Sweetiebot')
+
+def spam_bot_with_stuff(admin):
+    admin.send_message('Sweetiebot: confirmed c/d')
+    admin.send_message('http://google.com/')
+    admin.send_message('Sweetiebot: roll 1d20')
+    admin.send_message('/me pets Sweetiebot')
+    admin.send_message('Sweetiebot: jita plex')
 
 def admin_disconnects(admin):
     admin.quit()
@@ -111,16 +127,19 @@ def run_tests():
     admin = admin_connects_to_chat()
     #user_connects_to_chat()
 
-    sweetie.bot.conn.Process(100)
+    bot_processes_messages(sweetie)
     #TODO: make an attribute that logs method names automatically when they are run
     print("initial processing done")
     print("pinging bot")
     when_bot_is_pinged(admin)
     stay_awhile_and_listen()
     print("bot pinged")
-    sweetie.bot.conn.Process(100)
+    bot_processes_messages(sweetie)
     print("bot processed")
     bot_responds_with_sass(admin)
+    spam_bot_with_stuff(admin)
+    bot_processes_messages(sweetie)
+    stay_awhile_and_listen()
 
     admin_disconnects(admin)
     bot_disconnects(sweetie)
