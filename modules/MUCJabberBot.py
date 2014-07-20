@@ -41,12 +41,6 @@ class MUCJabberBot(JabberBot):
 
         # answer only direct messages or not?
         self.nickname = nickname
-        self.only_direct = kwargs.get('only_direct', False)
-
-        try:
-            del kwargs['only_direct']
-        except KeyError:
-            pass
 
         # initialize jabberbot
         super(MUCJabberBot, self).__init__(*args, **kwargs)

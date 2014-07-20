@@ -49,7 +49,7 @@ def build_sweetiebot(config=None):
         redis_conn = redis.Redis('localhost')
 
     bot = MUCJabberBot(config.nickname, config.username, config.password,
-                       res=resource, only_direct=False, command_prefix='',
+                       res=resource, command_prefix='',
                        debug=config.debug)
     lookup = SweetieLookup(bot)
     admin = SweetieAdmin(bot, config.chatroom, config.mods)
