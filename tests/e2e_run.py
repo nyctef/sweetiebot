@@ -27,14 +27,31 @@ class FakeXMPPUser():
         self.bot = MUCJabberBot('a_random_nick', username, password,
                 only_direct=False, command_prefix='###')
         self.bot.connect()
+        self.bot.unknown_command_callback = self.message_received
         self.timeout = timeout
+        self.messages = []
     def send_message(self, message):
         self.bot.send(self.chatroom, message, message_type='groupchat')
     def has_received_message(self, message_re=None, sender=None):
-        raise Exception()
+        found_message = None
+        for message in self.messages:
+            print('checking message '+message.message_text)
+            if message_re is not None and not message_re.match(message.message_text):
+                print('failed at re')
+                continue
+            if sender is not None and sender != message.sender_nick:
+                print('failed {} != {}'.format(sender, message.sender_nick))
+                continue
+            found_message = message
+        if found_message is None:
+            raise Exception()
+        return found_message
     def join_room(self, chatroom, nick):
         self.bot.join_room(chatroom, nick)
         self.chatroom = chatroom
+    def message_received(self, message):
+        print('message recieved: '+message.message_text)
+        self.messages.append(message)
     def check_for_messages(self):
         self.bot.conn.Process(self.timeout)
     def quit(self):
@@ -79,6 +96,7 @@ def when_bot_is_pinged(admin):
     admin.send_message('Sweetiebot: this is a ping')
 
 def bot_responds_with_sass(admin):
+    stay_awhile_and_listen()
     admin.check_for_messages()
     admin.has_received_message(sender='Sweetiebot')
 
