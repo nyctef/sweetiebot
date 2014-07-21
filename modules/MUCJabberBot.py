@@ -2,6 +2,7 @@ from jabberbot import JabberBot
 from Message import Message
 import xmpp
 import logging
+from utils import logerrors
 
 log = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ class MessageProcessor(object):
     def add_command(self, command_name, command_callback):
         self.commands[command_name] = command_callback
 
+    @logerrors
     def process_message(self, message):
         if message.command is not None:
             if message.command in self.commands:
