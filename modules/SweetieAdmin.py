@@ -179,7 +179,11 @@ class SweetieAdmin(object):
                       on_failure=on_failure)
 
     def kick_jid(self, jid, reason, on_success=None, on_failure=None):
-        self._kickban(self.chatroom, jid=jid, reason=reason,
+        nick = self.bot.get_nick_from_jid(jid)
+        if nick is None:
+            self.bot.chat('Could not find nick matching '+jid)
+            return
+        self._kickban(self.chatroom, nick=nick, reason=reason,
                       kickban_type=self._kick, on_success=on_success,
                       on_failure=on_failure)
 
