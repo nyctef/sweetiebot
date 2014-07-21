@@ -1,3 +1,5 @@
+# coding:utf8
+
 # add parent dir to path since we're not using any fancy frameworks for
 # these tests
 import os
@@ -111,7 +113,7 @@ def bot_responds_with_sass(admin):
 
 def spam_bot_with_stuff(admin):
     admin.send_message('Sweetiebot: confirmed c/d')
-    admin.send_message('http://google.com/')
+    admin.send_message('https://www.google.com/?q=ƒ')
     admin.send_message('<a href="http://google.com/">google</a>')
     admin.send_message('Sweetiebot: roll 1d20')
     admin.send_message('/me pets Sweetiebot')

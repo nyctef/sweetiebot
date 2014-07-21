@@ -87,7 +87,6 @@ class MUCJabberBot(JabberBot):
                                  message_html, is_pm)
 
         reply = self.message_processor.process_message(parsed_message)
-        log.debug('reply: '+str(reply))
         if reply:
             self.send_simple_reply(mess, reply, is_pm)
 
