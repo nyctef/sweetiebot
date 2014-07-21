@@ -6,7 +6,7 @@ class Message(object):
         self.sender_jid = sender_jid
         self.message_text = message_text
         self.message_html = message_html
-        if self._is_command(nickname, message_text):
+        if self._is_command(nickname, message_text) or is_pm:
             self.command, self.args = self._get_command_and_args(message_text)
         else:
             self.command, self.args = None,None
