@@ -34,6 +34,7 @@ class MUCJabberBot(JabberBot):
     flood_delay = 5
     PING_FREQUENCY = 60
     nicks_to_jids = {}
+    jids_to_nicks = {}
 
     def __init__(self, nickname, *args, **kwargs):
         ''' Initialize variables. '''
@@ -104,10 +105,15 @@ class MUCJabberBot(JabberBot):
         super(MUCJabberBot, self).callback_presence(conn, presence)
         nick = presence.getFrom().getResource()
         if presence.getJid() is not None:
-            self.nicks_to_jids[nick] = xmpp.JID(presence.getJid()).getStripped()
+            jid = xmpp.JID(presence.getJid()).getStripped()
+            self.nicks_to_jids[nick] = jid
+            self.jids_to_nicks[jid] = nick
 
     def get_jid_from_nick(self, nick):
         if self.nicks_to_jids.has_key(nick): return self.nicks_to_jids[nick]
+
+    def get_nick_from_jid(self, jid):
+        if self.jids_to_nicks.has_key(jid): return self.jids_to_nicks[jid]
 
     def load_commands_from(self, target):
         import inspect
