@@ -64,6 +64,8 @@ class SweetiePings:
     def groups(self, message):
         result = []
         for group in self.store.keys('ping:*'):
-            if self.store.scard(group):
-                result.append(group[len('ping:'):])
+            num_in_group = self.store.scard(group)
+            if num_in_group:
+                group_name = group[len('ping:'):]
+                result.append(group_name + ' ({})'.format(num_in_group))
         return 'Available groups: {}'.format(', '.join(result))
