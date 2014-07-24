@@ -12,9 +12,12 @@ class FakeRedis(object):
 
     def sadd(self, key, value):
         if key in self.data:
+            if value in self.data[key]:
+                return 0
             self.data[key].append(value)
-        else:
-            self.data[key] = [value]
+            return 1
+        self.data[key] = [value]
+        return 1
 
     def hincrby(self, key, field, increment):
         if not key in self.data:
