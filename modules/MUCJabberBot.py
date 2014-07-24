@@ -91,6 +91,11 @@ class MUCJabberBot(JabberBot):
         if reply:
             self.send_simple_reply(mess, reply, is_pm)
 
+    def send_pm_to_jid(self, jid, pm):
+        response = xmpp.Message(jid, pm)
+        response.setType('chat')
+        self.send_message(response)
+
     def get_message_html(self, xml_message):
         # simple case: no html in message
         if xml_message.getTag('html') is None:
