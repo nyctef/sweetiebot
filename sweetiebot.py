@@ -8,13 +8,13 @@ from utils import randomstr
 from time import sleep
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
-    RestartException, SweetieMarkov, PBLogHandler, SweetieDe
+    RestartException, SweetieMarkov, PBLogHandler, SweetieDe, SweetiePings
 
 log = logging.getLogger(__name__)
 
 class Sweetiebot(object):
     def __init__(self, nickname, bot, lookup, mq, admin, chat, roulette,
-                 sweetiede):
+                 sweetiede, pings):
         self.nickname = nickname
         self.bot = bot
         self.bot.unknown_command_callback = self.unknown_command
@@ -23,7 +23,8 @@ class Sweetiebot(object):
         self.admin = admin
         self.chat = chat
         self.roulette = roulette
-        self.sweetiede = sweetiede
+        self.sweetiede = SweetieDe
+        self.pings = pings
 
     def join_room(self, room, nick):
         connection = self.bot.connect()
@@ -62,9 +63,10 @@ def build_sweetiebot(config=None):
                            'data/swap_words.txt')
     chat = SweetieChat(bot, actions, sass, config.chatroom, markov)
     roulette = SweetieRoulette(bot, admin)
+    pings = SweetiePings(bot, redis_conn)
 
     sweet = Sweetiebot(config.nickname, bot, lookup, mq, admin, chat, roulette,
-                       de)
+                       de, pings)
     return sweet
 
 def setup_logging(config):

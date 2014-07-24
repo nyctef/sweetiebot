@@ -9,3 +9,4 @@ from SweetieRoulette import SweetieRoulette
 from SweetieMarkov import SweetieMarkov
 from PBLogHandler import PBLogHandler
 from SweetieDe import SweetieDe
+from SweetiePings import SweetiePings
