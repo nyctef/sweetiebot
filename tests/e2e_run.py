@@ -112,6 +112,7 @@ def bot_responds_with_sass(admin):
     admin.has_received_message(sender='Sweetiebot')
 
 def spam_bot_with_stuff(admin):
+    admin.send_message('Sweetiebot: help')
     admin.send_message('Sweetiebot: confirmed c/d')
     admin.send_message('<a href="http://google.com/">google ?q=&#x192;</a>')
     admin.send_message('Sweetiebot: roll 1d20')
