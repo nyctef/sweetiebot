@@ -120,6 +120,10 @@ def spam_bot_with_stuff(admin):
     admin.send_message('Sweetiebot: jita plex')
     admin.send_message('Sweetiebot: woon')
     admin.send_message('Sweetiebot: spin')
+    admin.send_message('Sweetiebot: subscribe test_ping')
+    admin.send_message('Sweetiebot: ping test_ping this is a test ping message')
+    admin.send_message('Sweetiebot: unsubscribe test_ping')
+    admin.send_message('Sweetiebot: ping test_ping should not ping anyone')
 
 def admin_disconnects(admin):
     admin.quit()
