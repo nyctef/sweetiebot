@@ -20,7 +20,7 @@ class Message(object):
     def _get_command_and_args(self, message_text):
         message_after_ping = self._fix_ping(message_text)
         if ' ' in message_after_ping:
-            return message_after_ping.split(' ', 1)
+            return [x.strip() for x in message_after_ping.split(None, 1)]
         else:
             return message_after_ping, ''
 

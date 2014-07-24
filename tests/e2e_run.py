@@ -122,6 +122,7 @@ def spam_bot_with_stuff(admin):
     admin.send_message('Sweetiebot: spin')
     admin.send_message('Sweetiebot: subscribe')
     admin.send_message('Sweetiebot: subscribe test_ping')
+    admin.send_message('Sweetiebot: subscribe   test_ping')
     admin.send_message('Sweetiebot: ping test_ping')
     admin.send_message('Sweetiebot: ping test_ping this is a test ping message')
     admin.send_message('Sweetiebot: unsubscribe')
