@@ -19,6 +19,17 @@ class FakeRedis(object):
         self.data[key] = [value]
         return 1
 
+    def smembers(self, key):
+        if key in self.data:
+            return self.data[key]
+        return []
+
+    def srem(self, key, value):
+        if key in self.data:
+            if value in self.data[key]:
+                self.data[key].remove(value)
+                return 1
+
     def hincrby(self, key, field, increment):
         if not key in self.data:
             self.data[key] = {}
