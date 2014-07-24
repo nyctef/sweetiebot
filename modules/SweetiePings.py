@@ -15,8 +15,11 @@ class SweetiePings:
     @botcmd
     @logerrors
     def ping(self, message):
-        group = message.args.split()[0]
-        ping_message = message.args.split(None, 1)[1]
+        split = message.args.split(None, 1)
+        if len(split) != 2:
+            return 'Usage: ping group_name message'
+        group = split[0]
+        ping_message = split[1]
         sender = message.sender_nick
         time = datetime.now()
         formatted_message = '''{}
@@ -33,6 +36,8 @@ class SweetiePings:
     @logerrors
     def subscribe(self, message):
         group = message.args
+        if not group or group.isspace():
+            return 'Usage: subscribe group_name'
         jid = message.sender_jid
         num_added = self.store.sadd(self.key(group), str(jid))
         print('num_added: {}'.format(num_added))
@@ -45,6 +50,8 @@ class SweetiePings:
     @logerrors
     def unsubscribe(self, message):
         group = message.args
+        if not group or group.isspace():
+            return 'Usage: unsubscribe group_name'
         jid = message.sender_jid
         num_removed = self.store.srem(self.key(group), str(jid))
         if num_removed:
