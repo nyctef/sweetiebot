@@ -119,6 +119,7 @@ def spam_bot_with_stuff(admin):
     admin.send_message('/me pets Sweetiebot')
     admin.send_message('Sweetiebot: jita plex')
     admin.send_message('Sweetiebot: woon')
+    admin.send_message('Sweetiebot: spin')
 
 def admin_disconnects(admin):
     admin.quit()

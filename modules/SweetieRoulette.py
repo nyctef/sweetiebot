@@ -17,16 +17,16 @@ class SweetieRoulette(object):
 
     @botcmd
     @logerrors
-    def spin(self, mess, args):
+    def spin(self, message):
         """Spin the barrel (see also: roulette)"""
         self._spin()
         return '*WHIIIIiiiiirr...*'
 
     @botcmd
     @logerrors
-    def roulette(self, mess, args):
+    def roulette(self, message):
         """Six bullets, one chamber (see also: spin)"""
-        speaker = mess.getFrom().getResource()
+        speaker = message.sender_nick
 
         self.current_chamber += 1
         self.current_chamber = self.current_chamber % 6
