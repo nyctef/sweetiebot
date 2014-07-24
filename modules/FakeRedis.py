@@ -1,8 +1,12 @@
 import random
+from fnmatch import fnmatch
 
 class FakeRedis(object):
     def __init__(self):
         self.data = {}
+
+    def keys(self, pattern):
+        return [x for x in self.data.keys() if fnmatch(x, pattern)]
 
     def srandmember(self, key):
         try:
@@ -29,6 +33,9 @@ class FakeRedis(object):
             if value in self.data[key]:
                 self.data[key].remove(value)
                 return 1
+
+    def scard(self, key):
+        return len(self.data[key])
 
     def hincrby(self, key, field, increment):
         if not key in self.data:

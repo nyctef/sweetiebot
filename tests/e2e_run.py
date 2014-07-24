@@ -123,11 +123,13 @@ def spam_bot_with_stuff(admin):
     admin.send_message('Sweetiebot: subscribe')
     admin.send_message('Sweetiebot: subscribe test_ping')
     admin.send_message('Sweetiebot: subscribe   test_ping')
+    admin.send_message('Sweetiebot: groups')
     admin.send_message('Sweetiebot: ping test_ping')
     admin.send_message('Sweetiebot: ping test_ping this is a test ping message')
     admin.send_message('Sweetiebot: unsubscribe')
     admin.send_message('Sweetiebot: unsubscribe test_ping')
     admin.send_message('Sweetiebot: ping test_ping should not ping anyone')
+    admin.send_message('Sweetiebot: groups')
 
 def admin_disconnects(admin):
     admin.quit()

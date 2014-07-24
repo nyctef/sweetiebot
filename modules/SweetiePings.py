@@ -59,4 +59,11 @@ class SweetiePings:
         else:
             return "User {} was not in group '{}'".format(jid, group)
 
-
+    @botcmd
+    @logerrors
+    def groups(self, message):
+        result = []
+        for group in self.store.keys('ping:*'):
+            if self.store.scard(group):
+                result.append(group[len('ping:'):])
+        return 'Available groups: {}'.format(', '.join(result))
