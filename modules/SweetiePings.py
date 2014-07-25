@@ -40,6 +40,7 @@ class SweetiePings:
             return 'Usage: subscribe group_name'
         jid = self.bot.get_jid_from_nick(message.sender_nick) \
             or message.sender_jid
+        jid = jid.getStripped()
         num_added = self.store.sadd(self.key(group), str(jid))
         print('num_added: {}'.format(num_added))
         if num_added:
@@ -55,6 +56,7 @@ class SweetiePings:
             return 'Usage: unsubscribe group_name'
         jid = self.bot.get_jid_from_nick(message.sender_nick) \
             or message.sender_jid
+        jid = jid.getStripped()
         num_removed = self.store.srem(self.key(group), str(jid))
         if num_removed:
             return "User {} removed from group '{}'".format(jid, group)
