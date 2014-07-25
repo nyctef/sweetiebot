@@ -42,7 +42,6 @@ class SweetiePings:
             or message.sender_jid
         jid = jid.getStripped()
         num_added = self.store.sadd(self.key(group), str(jid))
-        print('num_added: {}'.format(num_added))
         if num_added:
             return "User {} added to group '{}'".format(jid, group)
         else:
