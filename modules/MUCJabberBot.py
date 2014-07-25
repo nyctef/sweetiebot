@@ -101,10 +101,25 @@ class MUCJabberBot(JabberBot):
         if xml_message.getTag('html') is None:
             return xml_message.getTag('body').getData()
 
+        #print ' dealing with '+xml_message
         # complex case: concat all children of /html/body
         nodes = xml_message.getTag('html').getTag('body').getPayload()
-        strings = map(str, nodes)
+
+        return self.nodes_to_string(nodes)
+
+    def nodes_to_string(self, nodes):
+        strings = map(self.node_str, nodes)
         return ''.join(strings)
+
+    def node_str(self, obj):
+        if isinstance(obj, xmpp.simplexml.Node):
+            return self.nodes_to_string(obj.getPayload())
+
+        # we can't call on str on unicode objects so just pass them through
+        if isinstance(obj, unicode):
+            return obj
+
+        return str(obj)
 
     def callback_presence(self, conn, presence):
         super(MUCJabberBot, self).callback_presence(conn, presence)
