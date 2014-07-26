@@ -1,6 +1,5 @@
 import logging
 import random
-import unicodedata
 
 def logerrors(func):
     from functools import wraps
@@ -15,9 +14,6 @@ def logerrors(func):
 
 def randomstr():
     return ('%08x' % random.randrange(16**8))
-
-def fuck(u):
-    return unicodedata.normalize('NFKD', u).encode('ascii', 'ignore')
 
 def botcmd(*args, **kwargs):
     """Decorator for bot command functions

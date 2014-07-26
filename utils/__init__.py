@@ -1,1 +1,1 @@
-from .utils import logerrors, randomstr, fuck, botcmd
+from .utils import logerrors, randomstr, botcmd
