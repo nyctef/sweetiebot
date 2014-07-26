@@ -1,5 +1,4 @@
-from utils import logerrors
-from jabberbot import botcmd
+from utils import logerrors, botcmd
 import random
 import logging
 

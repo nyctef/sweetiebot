@@ -2,8 +2,7 @@ import logging
 import re
 import random
 from random import randint
-from jabberbot import botcmd
-from utils import logerrors
+from utils import logerrors, botcmd
 
 log = logging.getLogger(__name__)
 

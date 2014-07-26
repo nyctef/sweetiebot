@@ -1,8 +1,6 @@
-from MUCJabberBot import MUCJabberBot
-from utils import logerrors
-from jabberbot import botcmd
+from modules import MUCJabberBot
+from utils import logerrors, botcmd
 from datetime import datetime
-from xmpp import JID
 
 class SweetiePings:
     def __init__(self, bot, store):

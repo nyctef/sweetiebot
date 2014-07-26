@@ -1,7 +1,5 @@
 import logging
-import xmpp
-from utils import logerrors, randomstr
-from jabberbot import botcmd
+from utils import logerrors, randomstr, botcmd
 import re
 from datetime import datetime
 

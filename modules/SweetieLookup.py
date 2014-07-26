@@ -1,4 +1,3 @@
-from jabberbot import botcmd
 from datetime import datetime
 import urllib
 import requests
@@ -8,7 +7,7 @@ import json
 import random
 import re
 from xml.etree import ElementTree as ET
-from utils import logerrors
+from utils import logerrors, botcmd
 from random import randint
 
 log = logging.getLogger(__name__)
