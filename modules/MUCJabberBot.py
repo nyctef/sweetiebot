@@ -91,6 +91,11 @@ class MUCJabberBot(JabberBot):
         if reply:
             self.send_simple_reply(mess, reply, is_pm)
 
+    def join_room(self, room, nick):
+        self.room = room
+        self.nick = nick
+        super(MUCJabberBot, self).join_room(room, nick)
+
     def send_pm_to_jid(self, jid, pm):
         response = xmpp.Message(jid, pm)
         response.setType('chat')
