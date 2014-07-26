@@ -1,5 +1,4 @@
 import logging
-from utils import fuck
 
 log = logging.getLogger(__name__)
 
@@ -21,9 +20,9 @@ class Message(object):
         sender: {} jid {} user {}
         message: {}
         message_html: {}
-        parsed: {}/ {}
-        is_ping: {}'''.format(self.nickname, self.sender_nick, self.sender_jid, 
-            self.user_jid, self.message_text, fuck(self.message_html), self.command, self.args,
+        parsed: {}|{}
+        is_ping: {}'''.format(self.nickname, self.sender_nick, self.sender_jid,
+            self.user_jid, self.message_text, self.message_html, self.command, self.args,
             self.is_ping))
 
     def _is_ping(self, nickname, message):
