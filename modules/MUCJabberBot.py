@@ -1,9 +1,7 @@
-from jabberbot import JabberBot
-from Message import Message
-import xmpp
+from modules import Message
 import logging
 from utils import logerrors
-import re
+from sleekxmpp import ClientXMPP
 
 log = logging.getLogger(__name__)
 
@@ -29,24 +27,19 @@ class MessageProcessor(object):
         if self.unknown_command_callback is not None:
             return self.unknown_command_callback(message)
 
-class MUCJabberBot(JabberBot):
+class MUCJabberBot(ClientXMPP):
 
-    flood_protection = 0
-    flood_delay = 5
-    PING_FREQUENCY = 60
-    nicks_to_jids = {}
-    jids_to_nicks = {}
+    def __init__(self, jid, password, room, nick):
+        self.nick = nick
+        self.room = room
 
-    def __init__(self, nickname, *args, **kwargs):
-        ''' Initialize variables. '''
+        super(ClientXMPP, self).__init__(jid, password)
 
-        self.nickname = nickname
+        self.register_plugin('xep_0045')
+        self.muc = self.plugin['xep_0045']
 
-        # initialize jabberbot
-        super(MUCJabberBot, self).__init__(*args, **kwargs)
-
-        # create a regex to check if a message is a direct message
-        user, domain = str(self.jid).split('@')
+        self.add_event_handler('session_start', self.on_start)
+        self.add_event_handler('message', self.on_message)
 
         self.unknown_command_callback = None
 
@@ -55,7 +48,13 @@ class MUCJabberBot(JabberBot):
                 return self.unknown_command_callback(message)
         self.message_processor = MessageProcessor(on_unknown_callback)
 
-    def callback_message(self, conn, mess):
+    def on_start(self, event):
+        self.get_roster()
+        self.send_presence()
+        self.muc.joinMUC(self.room, self.nick, wait=True)
+
+    def on_message(self, event):
+        print(event)
         message = mess.getBody()
         if not message:
             log.warn('apparently empty message %s', mess)
@@ -97,12 +96,6 @@ class MUCJabberBot(JabberBot):
         reply = self.message_processor.process_message(parsed_message)
         if reply:
             self.send_simple_reply(mess, reply, is_pm)
-
-    def join_room(self, room, nick):
-        self.room = room
-        self.nick = nick
-        self.groupchat_im_re = re.compile(r'{}/(\w+)'.format(room))
-        super(MUCJabberBot, self).join_room(room, nick)
 
     def send_pm_to_jid(self, jid, pm):
         response = xmpp.Message(jid, pm)

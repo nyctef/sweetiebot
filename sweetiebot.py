@@ -49,9 +49,12 @@ def build_sweetiebot(config=None):
     else:
         redis_conn = redis.Redis('localhost')
 
-    bot = MUCJabberBot(config.nickname, config.username, config.password,
-                       res=resource, command_prefix='',
-                       debug=config.debug)
+    jid = config.username + '/' + resource
+    nick = config.nickname
+    room = config.chatroom
+    password = config.password
+
+    bot = MUCJabberBot(jid, password, room, nick)
     lookup = SweetieLookup(bot)
     admin = SweetieAdmin(bot, config.chatroom, config.mods)
     mq = SweetieMQ(config)
