@@ -19,3 +19,17 @@ def randomstr():
 def fuck(u):
     return unicodedata.normalize('NFKD', u).encode('ascii', 'ignore')
 
+def botcmd(*args, **kwargs):
+    """Decorator for bot command functions
+    based on http://sourceforge.net/p/pythonjabberbot/code/ci/master/tree/jabberbot.py
+    """
+    def decorate(func, hidden=False, name=None, thread=False):
+        setattr(func, '_bot_command', True)
+        setattr(func, '_bot_command_hidden', hidden)
+        setattr(func, '_bot_command_name', name or func.__name__)
+        return func
+    if len(args):
+        return decorate(args[0], **kwargs)
+    else:
+        return lambda func: decorate(func, **kwargs)
+
