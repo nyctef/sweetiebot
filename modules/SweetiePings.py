@@ -39,9 +39,7 @@ class SweetiePings:
         group = message.args
         if not group or group.isspace():
             return 'Usage: subscribe group_name'
-        jid = self.bot.get_jid_from_nick(message.sender_nick) \
-            or message.sender_jid
-        jid = JID(jid).getStripped()
+        jid = message.user_jid
         num_added = self.store.sadd(self.key(group), str(jid))
         if num_added:
             return "User {} added to group '{}'".format(jid, group)
@@ -54,9 +52,7 @@ class SweetiePings:
         group = message.args
         if not group or group.isspace():
             return 'Usage: unsubscribe group_name'
-        jid = self.bot.get_jid_from_nick(message.sender_nick) \
-            or message.sender_jid
-        jid = JID(jid).getStripped()
+        jid = message.user_jid
         num_removed = self.store.srem(self.key(group), str(jid))
         if num_removed:
             return "User {} removed from group '{}'".format(jid, group)

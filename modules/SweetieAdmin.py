@@ -18,10 +18,8 @@ class SweetieAdmin(object):
         self.chatroom = chatroom
         self.mods = mods
 
-    def nick_is_mod(self, nick):
-        jid = self.bot.get_jid_from_nick(nick) 
-        log.debug('using jid {} to check if {} is a mod'.format(jid, nick))
-        return jid in self.mods
+    def message_is_from_mod(self, message):
+        return message.user_jid in self.mods
 
     @staticmethod
     def iq_for_kickban(room, nick, jid, reason, kickban_type):
@@ -134,7 +132,7 @@ class SweetieAdmin(object):
 
         nick, reason = self.get_nick_reason(message.args)
 
-        if not self.nick_is_mod(message.sender_nick):
+        if not message.user_jid in self.mods:
             return "nooope"
         if not len(reason):
             return "A reason must be provided"
@@ -153,7 +151,7 @@ class SweetieAdmin(object):
 
         jid = message.args
 
-        if self.nick_is_mod(message.sender_nick):
+        if message.user_jid in self.mods:
             log.debug("trying to unban "+jid)
             self._kickban(self.chatroom, jid=jid, kickban_type=self._unban)
         else:
@@ -168,7 +166,7 @@ class SweetieAdmin(object):
 
         nick, reason = self.get_nick_reason(message.args)
 
-        if not self.nick_is_mod(message.sender_nick):
+        if message.user_jid not in self.mods:
             log.debug('failing kick because {} is not registered as a mod'.format(message.sender_nick))
             return "noooooooope."
 

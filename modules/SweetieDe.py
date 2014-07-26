@@ -68,6 +68,6 @@ class SweetieDe(object):
     def detavi(self, message):
         speaker = message.sender_nick
         log.debug("trying to kick "+speaker)
-        target = 'Octavia' if self.admin.nick_is_mod(speaker) else speaker
+        target = 'Octavia' if self.admin.message_is_from_mod(message) else speaker
         self.admin.kick(target, ':lyraahem:')
         return
