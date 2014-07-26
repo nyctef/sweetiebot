@@ -130,6 +130,7 @@ def spam_bot_with_stuff(admin):
     admin.send_message('Sweetiebot: unsubscribe test_ping')
     admin.send_message('Sweetiebot: ping test_ping should not ping anyone')
     admin.send_message('Sweetiebot: groups')
+    admin.send_message('Sweetiebot: yt pfudor')
 
 def admin_disconnects(admin):
     admin.quit()
