@@ -12,8 +12,6 @@ class Message(object):
             self.command, self.args = None,None
         self.is_ping = self._is_ping(nickname, message_text) or is_pm
 
-    # TODO: make these methods consistent
-
     def _is_ping(self, nickname, message):
         return nickname.lower() in message.lower()
 
