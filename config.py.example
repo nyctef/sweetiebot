@@ -1,5 +1,5 @@
 # Account and jabber server to connect to
-username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
+username = 'sweetiebutt@friendshipismagicsquad.com'
 # The chatroom to join
 chatroom = 'general@conference.friendshipismagicsquad.com'
 # The chatroom to join in debug mode
