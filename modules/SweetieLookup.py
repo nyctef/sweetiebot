@@ -1,5 +1,5 @@
 from datetime import datetime
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import requests
 import logging
 import difflib
@@ -44,7 +44,7 @@ class SweetieLookup(object):
               "&typeid=" + \
               str(id)
         log.debug('asking for prices at '+url)
-        apiresult = urllib.urlopen(url).read()
+        apiresult = urllib.request.urlopen(url).read()
         try:
             root = ET.fromstring(apiresult)
         except:
@@ -66,7 +66,7 @@ class SweetieLookup(object):
         while(len(line) > 0):
             typeid, item_name = line.split('=', 1)
             try:
-                id_dic[unicode(item_name, 'utf-8').upper()] = int(typeid)
+                id_dic[str(item_name, 'utf-8').upper()] = int(typeid)
             except UnicodeDecodeError:
                 log.warning('failed to utf-8 decode line: '+typeid+' (skipping)')
             line = f.readline().replace("\n", "")
@@ -180,7 +180,7 @@ class SweetieLookup(object):
         reply = ''
         for args in brup:
             try:
-                dice, sides = map(int, args.split('d', 1))
+                dice, sides = list(map(int, args.split('d', 1)))
             except:
                 log.error('bad dice')
                 return "Error parsing input"

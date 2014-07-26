@@ -6,7 +6,7 @@ class FakeRedis(object):
         self.data = {}
 
     def keys(self, pattern):
-        return [x for x in self.data.keys() if fnmatch(x, pattern)]
+        return [x for x in list(self.data.keys()) if fnmatch(x, pattern)]
 
     def srandmember(self, key):
         try:

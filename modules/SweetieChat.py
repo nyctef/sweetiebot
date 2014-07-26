@@ -56,13 +56,13 @@ class SweetieChat(object):
     @logerrors
     def get_page_titles(self, message):
         matches = self.urlregex.findall(message)
-        matches = map(lambda x: x[0], matches)
-        matches = map(self.imgur_filter, matches)
-        matches = map(self.deviantart_filter, matches)
-        results = map(self.get_page_title, matches)
+        matches = [x[0] for x in matches]
+        matches = list(map(self.imgur_filter, matches))
+        matches = list(map(self.deviantart_filter, matches))
+        results = list(map(self.get_page_title, matches))
         results = [result for result in results if result is not None]
-        results = filter(self.title_filter, results)
-        results = map(self.remove_extra_whitespace, results)
+        results = list(filter(self.title_filter, results))
+        results = list(map(self.remove_extra_whitespace, results))
         if not len(results):
             return None
         return " / ".join(results)

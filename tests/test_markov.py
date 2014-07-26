@@ -20,5 +20,5 @@ if __name__ == '__main__':
     for line in lines:
         markov.store_message(line)
     while True:
-        seed = raw_input("Enter a seed: ")
-        print markov.get_message(seed)
+        seed = input("Enter a seed: ")
+        print(markov.get_message(seed))

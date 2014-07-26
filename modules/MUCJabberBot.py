@@ -114,7 +114,7 @@ class MUCJabberBot(ClientXMPP):
         return self.nodes_to_string(nodes)
 
     def nodes_to_string(self, nodes):
-        strings = map(self.node_str, nodes)
+        strings = list(map(self.node_str, nodes))
         return ''.join(strings)
 
     def node_str(self, obj):
@@ -122,7 +122,7 @@ class MUCJabberBot(ClientXMPP):
             return self.nodes_to_string(obj.getPayload())
 
         # we can't call on str on unicode objects so just pass them through
-        if isinstance(obj, unicode):
+        if isinstance(obj, str):
             return obj
 
         return str(obj)
@@ -136,10 +136,10 @@ class MUCJabberBot(ClientXMPP):
             self.jids_to_nicks[jid] = nick
 
     def get_jid_from_nick(self, nick):
-        if self.nicks_to_jids.has_key(nick): return self.nicks_to_jids[nick]
+        if nick in self.nicks_to_jids: return self.nicks_to_jids[nick]
 
     def get_nick_from_jid(self, jid):
-        if self.jids_to_nicks.has_key(jid): return self.jids_to_nicks[jid]
+        if jid in self.jids_to_nicks: return self.jids_to_nicks[jid]
 
     def load_commands_from(self, target):
         import inspect

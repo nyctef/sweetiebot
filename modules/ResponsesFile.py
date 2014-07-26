@@ -24,7 +24,7 @@ class ResponsesFile(object):
     def random_line(self):
         try:
             with open(self.filename, 'r') as f:
-                lines = filter(None, (line.strip() for line in f))
+                lines = [_f for _f in (line.strip() for line in f) if _f]
                 return random.choice(lines)
         except Exception as e:
             log.error("failed to read file "+self.filename+": "+str(e))

@@ -27,7 +27,7 @@ class SweetieMarkov(object):
 
     def store_message(self, message):
         split_message = self.split_message(message)
-        split_message = map(lambda x: x.lower(), split_message)
+        split_message = [x.lower() for x in split_message]
         split_message = [self.begin] + split_message + [self.end]
         #log.info('split_message', split_message)
         #keywords = self.extract_keywords(split_message)
@@ -55,7 +55,7 @@ class SweetieMarkov(object):
         self.redis.hincrby(key, sequence[-1], 1)
 
     def extract_keywords(self, sequence):
-        return filter(lambda x: self.is_keyword(x), sequence)
+        return [x for x in sequence if self.is_keyword(x)]
 
     def is_keyword(self, segment):
         return (self.word_re.match(segment) and
@@ -70,7 +70,7 @@ class SweetieMarkov(object):
 
     def replace_swap_words(self, split_message):
         for word in split_message:
-            if word in self.swap_words.keys():
+            if word in list(self.swap_words.keys()):
                 yield self.swap_words[word]
             else:
                 yield word
@@ -136,7 +136,7 @@ class SweetieMarkov(object):
 
     def get_message(self, input_message):
         potentials = set()
-        for x in xrange(200):
+        for x in range(200):
             potential_keyword, potential_message = self.generate_potential_message(input_message)
             if potential_message is None: continue
             potential_score = self.score_message(input_message, potential_message)
@@ -202,7 +202,7 @@ class SweetieMarkov(object):
         return potential_except_punc.issubset(input_except_punc)
 
     def only_words(self, word_set):
-        return set(filter(lambda x: self.word_re.match(x), word_set))
+        return set([x for x in word_set if self.word_re.match(x)])
 
     def set_random_choice(self, the_set):
         return random.sample(the_set, 1)[0]
@@ -244,7 +244,7 @@ class SweetieMarkov(object):
             #log.info('key not found', key)
             return None
         nexts = self.redis.hgetall(key)
-        return self.weighted_choice(list(nexts.iteritems()))
+        return self.weighted_choice(list(nexts.items()))
 
     def weighted_choice(self, choices):
         """taken from http://stackoverflow.com/a/3679747/895407"""
@@ -260,15 +260,15 @@ class SweetieMarkov(object):
     def read_swap_words(self, filename):
         with open(filename, 'r') as f:
             # read all non-comment lines
-            lines = filter(lambda x: x[0]!='#', f.readlines())
-            lines = map(lambda x: x.lower(), lines)
+            lines = [x for x in f.readlines() if x[0]!='#']
+            lines = [x.lower() for x in lines]
             # split each line and convert to dictionary
-            return {l[0]:l[1] for l in map(lambda x: x.strip().split(), lines)}
+            return {l[0]:l[1] for l in [x.strip().split() for x in lines]}
 
     def read_banned_keywords(self, filename):
         with open(filename, 'r') as f:
-            lines = filter(lambda x: x[0]!='#', f.readlines())
-            lines = map(lambda x: x.lower().strip(), lines)
+            lines = [x for x in f.readlines() if x[0]!='#']
+            lines = [x.lower().strip() for x in lines]
             return lines
 
 
