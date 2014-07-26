@@ -3,6 +3,7 @@ from Message import Message
 import xmpp
 import logging
 from utils import logerrors
+import re
 
 log = logging.getLogger(__name__)
 
@@ -73,18 +74,24 @@ class MUCJabberBot(JabberBot):
             log.debug('ignoring from jid')
             return
 
-        sender_nick = self.get_sender_username(mess)
-        if sender_nick == self.nickname:
-            log.debug('ignoring from nickname')
-            return
-
         if mess.getSubject():
             log.debug('ignoring subject..')
             return
 
+        if self.groupchat_im_re and self.groupchat_im_re.match(str(mess.getFrom())):
+            sender_nick = jid.getResource()
+            user_jid = self.get_jid_from_nick(sender_nick)
+        else:
+            user_jid = jid.getStripped()
+            sender_nick = self.get_nick_from_jid(user_jid)
+
+        if sender_nick == self.nickname:
+            log.debug('ignoring from nickname')
+            return
+
         is_pm = mess.getAttr('type') == 'chat'
         message_html = self.get_message_html(mess)
-        parsed_message = Message(self.nickname, sender_nick, jid, message,
+        parsed_message = Message(self.nickname, sender_nick, jid, user_jid, message,
                                  message_html, is_pm)
 
         reply = self.message_processor.process_message(parsed_message)
@@ -94,6 +101,7 @@ class MUCJabberBot(JabberBot):
     def join_room(self, room, nick):
         self.room = room
         self.nick = nick
+        self.groupchat_im_re = re.compile(r'{}/(\w+)'.format(room))
         super(MUCJabberBot, self).join_room(room, nick)
 
     def send_pm_to_jid(self, jid, pm):

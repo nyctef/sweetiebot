@@ -1,9 +1,13 @@
+import logging
+
+log = logging.getLogger(__name__)
 
 class Message(object):
-    def __init__(self, nickname, sender_nick, sender_jid, message_text, message_html, is_pm):
+    def __init__(self, nickname, sender_nick, sender_jid, user_jid, message_text, message_html, is_pm):
         self.nickname = nickname
         self.sender_nick = sender_nick
         self.sender_jid = sender_jid
+        self.user_jid = user_jid
         self.message_text = message_text
         self.message_html = message_html
         if self._is_command(nickname, message_text) or is_pm:
@@ -11,6 +15,15 @@ class Message(object):
         else:
             self.command, self.args = None,None
         self.is_ping = self._is_ping(nickname, message_text) or is_pm
+        log.debug('''creating message:
+        self: {}
+        sender: {} jid {} user {}
+        message: {}
+        message_html: {}
+        parsed: {}/ {}
+        is_ping: {}'''.format(self.nickname, self.sender_nick, self.sender_jid, 
+            self.user_jid, self.message_text, self.message_html, self.command, self.args,
+            self.is_ping))
 
     def _is_ping(self, nickname, message):
         return nickname.lower() in message.lower()
