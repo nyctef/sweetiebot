@@ -36,7 +36,7 @@ class SweetieChat(object):
     def __init__(self, bot, actions, sass, chatroom, markov):
         self.bot = bot
         self.bot.load_commands_from(self)
-        self.nickname = self.bot.nickname
+        self.nickname = self.bot.nick
         self.actions = actions
         self.sass = sass
         self.chatroom = chatroom
