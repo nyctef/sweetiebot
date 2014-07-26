@@ -8,7 +8,9 @@ def logerrors(func):
         try:
             return func(self, *args, **kwargs)
         except Exception:
+            print('\n\n####\n\n')
             logging.exception('Error in '+func.__name__)
+            print('\n\n####\n\n')
             return "My code is problematic :sweetieoops:"
     return logged
 

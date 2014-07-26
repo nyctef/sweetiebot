@@ -5,7 +5,7 @@ import redis
 import sys
 import logging
 from utils import randomstr
-from time import sleep
+#from time import sleep
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
     RestartException, SweetieMarkov, PBLogHandler, SweetieDe, SweetiePings
@@ -26,14 +26,14 @@ class Sweetiebot(object):
         self.sweetiede = SweetieDe
         self.pings = pings
 
-    def join_room(self, room, nick):
-        connection = self.bot.connect()
-        if connection is None:
-            sleep(5)
-            log.error('connection failed .. sleeping for 5')
-            raise RestartException()
-        self.bot.join_room(room, nick)
-        self.chatroom = room
+#    def join_room(self, room, nick):
+#        connection = self.bot.connect()
+#        if connection is None:
+#            sleep(5)
+#            log.error('connection failed .. sleeping for 5')
+#            raise RestartException()
+#        self.bot.join_room(room, nick)
+#        self.chatroom = room
 
     def serve_forever(self):
         self.bot.serve_forever()
@@ -106,7 +106,6 @@ if __name__ == '__main__':
 
             log.info(sweet.nickname + ' established!')
             log.info('Joining Room:' + config.chatroom)
-            sweet.join_room(config.chatroom, sweet.nickname)
             log.info('Joined!')
             result = sweet.serve_forever()
         except RestartException:

@@ -1,7 +1,8 @@
-from modules import Message
+from modules.Message import Message
 import logging
 from utils import logerrors
 from sleekxmpp import ClientXMPP
+from sleekxmpp.xmlstream.jid import JID
 
 log = logging.getLogger(__name__)
 
@@ -27,19 +28,21 @@ class MessageProcessor(object):
         if self.unknown_command_callback is not None:
             return self.unknown_command_callback(message)
 
-class MUCJabberBot(ClientXMPP):
+class MUCJabberBot():
 
     def __init__(self, jid, password, room, nick):
+        print('creating bot with {} {} {} {} '.format(jid, password, room, nick))
         self.nick = nick
         self.room = room
+        self.jid = JID(jid)
 
-        super(ClientXMPP, self).__init__(jid, password)
+        bot = ClientXMPP(jid, password)
 
-        self.register_plugin('xep_0045')
-        self.muc = self.plugin['xep_0045']
+        bot.add_event_handler('session_start', self.on_start)
+        bot.add_event_handler('message', self.on_message)
 
-        self.add_event_handler('session_start', self.on_start)
-        self.add_event_handler('message', self.on_message)
+        bot.register_plugin('xep_0045')
+        self._muc = bot.plugin['xep_0045']
 
         self.unknown_command_callback = None
 
@@ -48,59 +51,89 @@ class MUCJabberBot(ClientXMPP):
                 return self.unknown_command_callback(message)
         self.message_processor = MessageProcessor(on_unknown_callback)
 
+        print('sb connect')
+        if bot.connect():
+            print('sb process')
+            bot.process()
+        else:
+            raise 'could not connect'
+
+        self._bot = bot
+
+    def disconnect(self):
+        self._bot.disconnect()
+
     def on_start(self, event):
-        self.get_roster()
-        self.send_presence()
-        self.muc.joinMUC(self.room, self.nick, wait=True)
+        print('sb on_start')
+        self._bot.get_roster()
+        self._bot.send_presence()
+        print('sb join {} as {}'.format(self.room, self.nick))
+        self._muc.joinMUC(self.room, self.nick, wait=True)
 
-    def on_message(self, event):
-        print(event)
-        message = mess.getBody()
-        if not message:
-            log.warn('apparently empty message %s', mess)
+    def send_groupchat_message(self, message, room=None):
+        room = room or self.room
+        self._bot.send_message(mto=self.room, mbody=message, mhtml=message, mtype='groupchat')
+
+    @logerrors
+    def on_message(self, message_stanza):
+
+        if message_stanza['type'] == 'error':
+            print('\n\nerror!\n\n')
+            log.error(message_stanza)
+
+        body = message_stanza['body']
+        if not body:
+            log.warn('apparently empty message [no body] %s', message_stanza)
             return
 
-        props = mess.getProperties()
-        jid = mess.getFrom()
+        #print('##')
+        #print('keys: {}'.format(message_stanza.keys()))
+        #print('xml: {}'.format(message_stanza.xml))
+        #print('type: {}'.format(message_stanza['type']))
 
-        if xmpp.NS_DELAY in props:
-            # delayed messages are history from before we joined the chat
-            return
+        #props = mess.getProperties()
+        jid = message_stanza['from']
+
+#        if xmpp.NS_DELAY in props:
+#            # delayed messages are history from before we joined the chat
+#            return
 
         log.debug('comparing jid {} against message from {}'.format(
             self.jid, jid))
-        if self.jid.bareMatch(jid):
+        if self.jid.bare == jid.bare:
             log.debug('ignoring from jid')
             return
 
-        if mess.getSubject():
+        #print('checking for subject {}'.format(message_stanza['subject']))
+        if message_stanza['subject']:
             log.debug('ignoring subject..')
             return
 
-        if self.groupchat_im_re and self.groupchat_im_re.match(str(mess.getFrom())):
-            sender_nick = jid.getResource()
+        if message_stanza['mucnick']:
+            sender_nick = message_stanza['mucnick']
             user_jid = self.get_jid_from_nick(sender_nick)
         else:
-            user_jid = jid.getStripped()
+            user_jid = jid
             sender_nick = self.get_nick_from_jid(user_jid)
 
-        if sender_nick == self.nickname:
+        if sender_nick == self.nick:
             log.debug('ignoring from nickname')
             return
 
-        is_pm = mess.getAttr('type') == 'chat'
-        message_html = self.get_message_html(mess)
-        parsed_message = Message(self.nickname, sender_nick, jid, user_jid, message,
+        is_pm = message_stanza['type'] == 'chat'
+        message_html = None#= self.get_message_html(mess)
+        message = message_stanza['body']
+        print(str(type(Message)))
+        parsed_message = Message(self.nick, sender_nick, jid, user_jid, message,
                                  message_html, is_pm)
 
         reply = self.message_processor.process_message(parsed_message)
         if reply:
-            self.send_simple_reply(mess, reply, is_pm)
+            self.send_groupchat_message(reply)
 
     def send_pm_to_jid(self, jid, pm):
-        response = xmpp.Message(jid, pm)
-        response.setType('chat')
-        self.send_message(response)
+        print('sending {} to {}'.format(pm, jid))
+        self._bot.send_message(mto=jid, mbody=pm)
 
     def get_message_html(self, xml_message):
         # simple case: no html in message
@@ -127,16 +160,16 @@ class MUCJabberBot(ClientXMPP):
 
         return str(obj)
 
-    def callback_presence(self, conn, presence):
-        super(MUCJabberBot, self).callback_presence(conn, presence)
-        nick = presence.getFrom().getResource()
-        if presence.getJid() is not None:
-            jid = xmpp.JID(presence.getJid()).getStripped()
-            self.nicks_to_jids[nick] = jid
-            self.jids_to_nicks[jid] = nick
+#    def callback_presence(self, conn, presence):
+#        super(MUCJabberBot, self).callback_presence(conn, presence)
+#        nick = presence.getFrom().getResource()
+#        if presence.getJid() is not None:
+#            jid = JID(presence.getJid()).getStripped()
+#            self.nicks_to_jids[nick] = jid
+#            self.jids_to_nicks[jid] = nick
 
     def get_jid_from_nick(self, nick):
-        if nick in self.nicks_to_jids: return self.nicks_to_jids[nick]
+        return self._muc.getJidProperty(self.room, nick, 'jid').bare
 
     def get_nick_from_jid(self, jid):
         if jid in self.jids_to_nicks: return self.jids_to_nicks[jid]
@@ -144,8 +177,8 @@ class MUCJabberBot(ClientXMPP):
     def load_commands_from(self, target):
         import inspect
         for name, value in inspect.getmembers(target, inspect.ismethod):
-            if getattr(value, '_jabberbot_command', False):
-                name = getattr(value, '_jabberbot_command_name')
+            if getattr(value, '_bot_command', False):
+                name = getattr(value, '_bot_command_name')
                 log.info('Registered command: %s' % name)
                 self.message_processor.add_command(name, value)
 
@@ -153,9 +186,9 @@ class MUCJabberBot(ClientXMPP):
         log.error('ping timeout.')
         raise RestartException()
 
-    def send_iq(self, iq, callback=None):
-        if callback is not None:
-            self.connect().SendAndCallForResponse(iq, callback)
-        else:
-            self.connect().send(iq)
+    def create_iq(self, id, type, xml):
+        iq = self._bot.make_iq(id=id, ifrom=self.jid, ito=self.room, itype=type)
+        iq.set_payload(xml)
+        return iq
+
 

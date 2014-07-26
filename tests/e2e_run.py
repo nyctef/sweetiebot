@@ -7,7 +7,9 @@ parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.sys.path.insert(0,parentdir)
 
 from sweetiebot import build_sweetiebot
-from modules import MUCJabberBot
+import sleekxmpp
+import queue
+from utils import logerrors
 
 '''
 
@@ -26,39 +28,58 @@ class FakeXMPPUser():
     """ helper class for making assertions about the state of a chat"""
     def __init__(self, timeout, username, password):
         print("creating bot..")
-        self.bot = MUCJabberBot('a_random_nick', username, password,
-                command_prefix='###')
-        self.bot.connect()
-        self.bot.unknown_command_callback = self.message_received
+        self.chatroom =  'sweetiebot_playground@conference.friendshipismagicsquad.com'
+        bot = sleekxmpp.ClientXMPP(username, password)
+        bot.add_event_handler('session_start', self.on_start)
+        bot.add_event_handler('message', self.on_message_received)
+        bot.register_plugin('xep_0045')
+        self.muc = bot.plugin['xep_0045']
+        self.bot = bot
         self.timeout = timeout
-        self.messages = []
-    def send_message(self, message):
-        self.bot.send(self.chatroom, message, message_type='groupchat')
-    def has_received_message(self, message_re=None, sender=None):
-        found_message = None
-        for message in self.messages:
-            print('checking message '+message.message_text)
-            if message_re is not None and not message_re.match(message.message_text):
-                print('failed at re')
-                continue
-            if sender is not None and sender != message.sender_nick:
-                print('failed {} != {}'.format(sender, message.sender_nick))
-                continue
-            found_message = message
-        if found_message is None:
-            raise Exception()
-        return found_message
-    def join_room(self, chatroom, nick):
-        self.bot.join_room(chatroom, nick)
-        self.chatroom = chatroom
-    def message_received(self, message):
-        print('message recieved: '+message.message_text)
-        self.messages.append(message)
-    def check_for_messages(self):
-        self.bot.conn.Process(self.timeout)
-    def quit(self):
-        self.bot.quit()
+        self.messages = queue.Queue()
+        print('fake user connecting ..')
+        if self.bot.connect():
+            print('.. connected')
+            self.bot.process()
+        else:
+            raise 'unable to connect'
 
+    def on_start(self, event):
+        print('fake user on_start')
+        self.bot.get_roster()
+        self.bot.send_presence()
+        print('fake user joining {} as {}'.format(self.chatroom, 'admin'))
+        self.muc.joinMUC(self.chatroom, 'admin', wait=True)
+
+    def send_message(self, message):
+        self.bot.send_message(mto=self.chatroom, mbody=message, mtype='groupchat')
+
+    def has_received_message(self, message_re=None, sender=None):
+        message = self.messages.get(True, self.timeout)
+        print('checking message '+str(message))
+        #if message_re is not None and not message_re.match(message.message_text):
+            #print('failed at re')
+            #continue
+        #if sender is not None and sender != message.sender_nick:
+            #print('failed {} != {}'.format(sender, message.sender_nick))
+            #continue
+        #found_message = message
+        #if found_message is None:
+            #raise Exception()
+        #return found_message
+
+    @logerrors
+    def on_message_received(self, message):
+        #print('message recieved: '+str(message))
+        if message['subject'] or message['mucnick'] == 'admin':
+            return
+        self.messages.put(message)
+
+    def check_for_messages(self):
+        pass# self.bot.process()
+
+    def quit(self):
+        self.bot.disconnect()
 
 
 chatroom = 'sweetiebot_playground@conference.friendshipismagicsquad.com'
@@ -69,39 +90,25 @@ def stay_awhile_and_listen():
     time.sleep(1)
 
 def bot_connects_to_chat():
-    nickname = 'Sweetiebot'
     #username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
     #password = open('password.txt', 'r').read().strip()
     import config
     config.fake_redis = True
     config.chatroom = config.test_chatroom
     sweet = build_sweetiebot()
-    sweet.join_room(chatroom, nickname)
     stay_awhile_and_listen()
     return sweet
 
 def admin_connects_to_chat():
     import config
     print("connecting admin...")
-    nickname = 'admin'
     username = 'nyctef@friendshipismagicsquad.com/sweetieadmin'
     password = config.admin_password
-    admin = FakeXMPPUser(1, username, password)
+    admin = FakeXMPPUser(10, username, password)
     print("joining admin... ")
-    admin.join_room(chatroom, nickname)
     # todo: block on chatroom join
     stay_awhile_and_listen()
     return admin
-
-def bot_processes_messages(sweetie):
-    print('processes_messages')
-    last_result = None
-    while True:
-        result = sweetie.bot.conn.Process(1)
-        print(result)
-        #god damn this api is terrible
-        if result == '0' and last_result == '0': break
-        last_result = result
 
 def when_bot_is_pinged(admin):
     admin.send_message('Sweetiebot: this is a ping')
@@ -111,56 +118,88 @@ def bot_responds_with_sass(admin):
     admin.check_for_messages()
     admin.has_received_message(sender='Sweetiebot')
 
+def send_and_wait(message):
+    global admin
+    admin.send_message(message)
+    admin.has_received_message()
+
 def spam_bot_with_stuff(admin):
-    admin.send_message('Sweetiebot: help')
-    admin.send_message('Sweetiebot: confirmed c/d')
-    admin.send_message('<a href="http://google.com/">google ?q=&#x192;</a>')
-    admin.send_message('Sweetiebot: roll 1d20')
-    admin.send_message('/me pets Sweetiebot')
-    admin.send_message('Sweetiebot: jita plex')
-    admin.send_message('Sweetiebot: woon')
-    admin.send_message('Sweetiebot: spin')
-    admin.send_message('Sweetiebot: subscribe')
-    admin.send_message('Sweetiebot: subscribe test_ping')
-    admin.send_message('Sweetiebot: subscribe   test_ping')
-    admin.send_message('Sweetiebot: groups')
-    admin.send_message('Sweetiebot: ping test_ping')
-    admin.send_message('Sweetiebot: ping test_ping this is a test ping message')
-    admin.send_message('Sweetiebot: unsubscribe')
-    admin.send_message('Sweetiebot: unsubscribe test_ping')
-    admin.send_message('Sweetiebot: ping test_ping should not ping anyone')
-    admin.send_message('Sweetiebot: groups')
-    admin.send_message('Sweetiebot: yt pfudor')
+    send_and_wait('Sweetiebot: help')
+    send_and_wait('Sweetiebot: confirmed c/d')
+    send_and_wait('<a href="http://google.com/">google ?q=&#x192;</a>')
+    send_and_wait('Sweetiebot: roll 1d20')
+    send_and_wait('/me pets Sweetiebot')
+    send_and_wait('Sweetiebot: jita plex')
+    send_and_wait('Sweetiebot: woon')
+    send_and_wait('Sweetiebot: spin')
+    send_and_wait('Sweetiebot: subscribe')
+    send_and_wait('Sweetiebot: subscribe test_ping')
+    send_and_wait('Sweetiebot: subscribe   test_ping')
+    send_and_wait('Sweetiebot: groups')
+    send_and_wait('Sweetiebot: ping test_ping')
+    send_and_wait('Sweetiebot: ping test_ping this is a test ping message')
+    send_and_wait('Sweetiebot: unsubscribe')
+    send_and_wait('Sweetiebot: unsubscribe test_ping')
+    send_and_wait('Sweetiebot: ping test_ping should not ping anyone')
+    send_and_wait('Sweetiebot: groups')
+    send_and_wait('Sweetiebot: yt pfudor')
+    send_and_wait('Sweetiebot: banlist')
 
 def admin_disconnects(admin):
-    admin.quit()
+    print('trying to kill admin'+str(admin))
+    if admin: admin.quit()
 
 def bot_disconnects(bot):
-    bot.bot.quit()
+    print('trying to kill bot'+str(bot))
+    if bot: bot.bot.disconnect()
+
+admin = None
+sweetie = None
 
 def run_tests():
+    global sweetie
     sweetie = bot_connects_to_chat()
+    global admin
     admin = admin_connects_to_chat()
     #user_connects_to_chat()
 
-    bot_processes_messages(sweetie)
+    stay_awhile_and_listen()
+    stay_awhile_and_listen()
+    stay_awhile_and_listen()
+
     #TODO: make an attribute that logs method names automatically when they are run
     print("initial processing done")
     print("pinging bot")
     when_bot_is_pinged(admin)
     stay_awhile_and_listen()
     print("bot pinged")
-    bot_processes_messages(sweetie)
     print("bot processed")
     bot_responds_with_sass(admin)
     spam_bot_with_stuff(admin)
-    bot_processes_messages(sweetie)
     stay_awhile_and_listen()
-
-    admin_disconnects(admin)
-    bot_disconnects(sweetie)
-
+    print('checking for spam results')
+    admin.has_received_message()
 
 
 if __name__ == '__main__':
-    run_tests()
+    try:
+        import os,threading,time,faulthandler,traceback
+        import logging
+        #logging.getLogger().setLevel(logging.DEBUG)
+        #logging.getLogger('modules.Message').setLevel(logging.DEBUG)
+        #logging.getLogger('modules.MUCJabberBot').setLevel(logging.DEBUG)
+        logging.getLogger('sleekxmpp').setLevel(logging.DEBUG)
+
+        run_tests()
+    except:
+        traceback.print_exc()
+    finally:
+        traceback.print_stack()
+        admin_disconnects(admin)
+        bot_disconnects(sweetie)
+        if threading.active_count() != 1:
+            print('waiting for all threads to end')
+            time.sleep(5)
+            print('threads remaining: {}'.format(threading.active_count()))
+            faulthandler.dump_traceback()
+        os._exit(1)

@@ -2,6 +2,8 @@ import logging
 from utils import logerrors, randomstr, botcmd
 import re
 from datetime import datetime
+from sleekxmpp import Iq
+import xml.etree.ElementTree as ET
 
 log = logging.getLogger(__name__)
 
@@ -19,26 +21,32 @@ class SweetieAdmin(object):
     def message_is_from_mod(self, message):
         return message.user_jid in self.mods
 
+    QUERY_NS = 'http://jabber.org/protocol/muc#admin'
+
+    @staticmethod
+    def query_element():
+        ele = ET.Element('{'+SweetieAdmin.QUERY_NS+'}query')
+        return ele
+
     @staticmethod
     def iq_for_kickban(room, nick, jid, reason, kickban_type):
-        NS_MUCADMIN = 'http://jabber.org/protocol/muc#admin'
-        item = xmpp.simplexml.Node('item')
+        query = SweetieAdmin.query_element()
+        item = ET.SubElement(query, 'item')
         if nick is not None:
-            item.setAttr('nick', nick)
+            item.set('nick', nick)
         if jid is not None:
-            item.setAttr('jid', jid)
+            item.set('jid', jid)
 
         if kickban_type is SweetieAdmin._kick:
-            item.setAttr('role', 'none')
+            item.set('role', 'none')
         if kickban_type is SweetieAdmin._ban:
-            item.setAttr('affiliation', 'outcast')
+            item.set('affiliation', 'outcast')
         if kickban_type is SweetieAdmin._unban:
-            item.setAttr('affiliation', 'none')
+            item.set('affiliation', 'none')
 
-        iq = xmpp.Iq(typ='set', queryNS=NS_MUCADMIN, xmlns=None, to=room,
-                     payload=set([item]))
         if reason is not None:
             item.setTagData('reason', reason)
+        iq = Iq(xml=query)
         return iq
 
     def _kickban(self, room, nick=None, jid=None, reason=None,
@@ -90,7 +98,7 @@ class SweetieAdmin(object):
         return nick, reason
 
     def chat(self, message):
-        self.bot.send(self.chatroom, message, message_type='groupchat')
+        self.bot.send_groupchat_message(message)
 
     @botcmd
     def banlist(self, message):
@@ -101,25 +109,30 @@ class SweetieAdmin(object):
     @logerrors
     def listbans(self, message):
         """List the current bans. Requires admin"""
+        print('banlist')
         id = 'banlist'+randomstr()
-        NS_MUCADMIN = 'http://jabber.org/protocol/muc#admin'
-        item = xmpp.simplexml.Node('item')
-        item.setAttr('affiliation', 'outcast')
-        iq = xmpp.Iq(
-            typ='get', attrs={"id": id}, queryNS=NS_MUCADMIN, xmlns=None, to=self.chatroom,
-            payload=set([item]))
+        query = SweetieAdmin.query_element()
+        item = ET.SubElement(query, 'item')
+        item.set('affiliation', 'outcast')
+        iq = self.bot.create_iq(id, 'get', query)
 
-        def handleBanlist(session, response):
+        @logerrors
+        def handleBanlist(response):
+            print('handleBanlist')
+            print(response)
             if response is None:
                 return "timed out waiting for banlist"
             res = ""
-            items = response.getChildren()[0].getChildren()
+            items = response.findall('.//{'+self.QUERY_NS+'}item')
+            print('items: '+str(items))
             for item in items:
-                if item.getAttr('jid') is not None:
-                    res += "\n" + item.getAttr('jid') + ": "+str(item.getChildren()[0].getData())
+                if item.get('jid') is not None:
+                    res += "\n" + item.get('jid') + ": "+str(item[0].text)
             self.chat(res)
 
-        self.bot.send_iq(iq, handleBanlist)
+        print('created iq {}'.format(iq))
+
+        iq.send(callback=handleBanlist)
 
     @botcmd(name='ban')
     @logerrors
