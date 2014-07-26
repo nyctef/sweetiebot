@@ -2,6 +2,7 @@ from MUCJabberBot import MUCJabberBot
 from utils import logerrors
 from jabberbot import botcmd
 from datetime import datetime
+from xmpp import JID
 
 class SweetiePings:
     def __init__(self, bot, store):
@@ -40,7 +41,7 @@ class SweetiePings:
             return 'Usage: subscribe group_name'
         jid = self.bot.get_jid_from_nick(message.sender_nick) \
             or message.sender_jid
-        jid = jid.getStripped()
+        jid = JID(jid).getStripped()
         num_added = self.store.sadd(self.key(group), str(jid))
         if num_added:
             return "User {} added to group '{}'".format(jid, group)
@@ -55,7 +56,7 @@ class SweetiePings:
             return 'Usage: unsubscribe group_name'
         jid = self.bot.get_jid_from_nick(message.sender_nick) \
             or message.sender_jid
-        jid = jid.getStripped()
+        jid = JID(jid).getStripped()
         num_removed = self.store.srem(self.key(group), str(jid))
         if num_removed:
             return "User {} removed from group '{}'".format(jid, group)
