@@ -163,23 +163,14 @@ def run_tests():
     admin = admin_connects_to_chat()
     #user_connects_to_chat()
 
-    stay_awhile_and_listen()
-    stay_awhile_and_listen()
-    stay_awhile_and_listen()
-
     #TODO: make an attribute that logs method names automatically when they are run
     print("initial processing done")
     print("pinging bot")
     when_bot_is_pinged(admin)
-    stay_awhile_and_listen()
     print("bot pinged")
     print("bot processed")
     bot_responds_with_sass(admin)
     spam_bot_with_stuff(admin)
-    stay_awhile_and_listen()
-    print('checking for spam results')
-    admin.has_received_message()
-
 
 if __name__ == '__main__':
     try:
@@ -188,7 +179,7 @@ if __name__ == '__main__':
         #logging.getLogger().setLevel(logging.DEBUG)
         #logging.getLogger('modules.Message').setLevel(logging.DEBUG)
         #logging.getLogger('modules.MUCJabberBot').setLevel(logging.DEBUG)
-        logging.getLogger('sleekxmpp').setLevel(logging.DEBUG)
+        #logging.getLogger('sleekxmpp').setLevel(logging.DEBUG)
 
         run_tests()
     except:
