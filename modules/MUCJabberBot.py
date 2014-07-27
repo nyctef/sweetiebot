@@ -121,7 +121,7 @@ class MUCJabberBot():
             return
 
         is_pm = message_stanza['type'] == 'chat'
-        message_html = None#= self.get_message_html(mess)
+        message_html = str(message_stanza['html']['body'])
         message = message_stanza['body']
         print(str(type(Message)))
         parsed_message = Message(self.nick, sender_nick, jid, user_jid, message,
@@ -134,39 +134,6 @@ class MUCJabberBot():
     def send_pm_to_jid(self, jid, pm):
         print('sending {} to {}'.format(pm, jid))
         self._bot.send_message(mto=jid, mbody=pm)
-
-    def get_message_html(self, xml_message):
-        # simple case: no html in message
-        if xml_message.getTag('html') is None:
-            return xml_message.getTag('body').getData()
-
-        #print ' dealing with '+xml_message
-        # complex case: concat all children of /html/body
-        nodes = xml_message.getTag('html').getTag('body').getPayload()
-
-        return self.nodes_to_string(nodes)
-
-    def nodes_to_string(self, nodes):
-        strings = list(map(self.node_str, nodes))
-        return ''.join(strings)
-
-    def node_str(self, obj):
-        if isinstance(obj, xmpp.simplexml.Node):
-            return self.nodes_to_string(obj.getPayload())
-
-        # we can't call on str on unicode objects so just pass them through
-        if isinstance(obj, str):
-            return obj
-
-        return str(obj)
-
-#    def callback_presence(self, conn, presence):
-#        super(MUCJabberBot, self).callback_presence(conn, presence)
-#        nick = presence.getFrom().getResource()
-#        if presence.getJid() is not None:
-#            jid = JID(presence.getJid()).getStripped()
-#            self.nicks_to_jids[nick] = jid
-#            self.jids_to_nicks[jid] = nick
 
     def get_jid_from_nick(self, nick):
         return self._muc.getJidProperty(self.room, nick, 'jid').bare
@@ -190,5 +157,6 @@ class MUCJabberBot():
         iq = self._bot.make_iq(id=id, ifrom=self.jid, ito=self.room, itype=type)
         iq.set_payload(xml)
         return iq
+
 
 
