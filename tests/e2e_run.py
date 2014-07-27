@@ -27,8 +27,9 @@ class LoggingXMPPClient():
 
 class FakeXMPPUser():
     """ helper class for making assertions about the state of a chat"""
-    def __init__(self, timeout, username, password):
+    def __init__(self, timeout, username, password, nick):
         print("creating bot..")
+        self.nick = nick
         self.chatroom =  'sweetiebot_playground@conference.friendshipismagicsquad.com'
         bot = sleekxmpp.ClientXMPP(username, password)
         bot.add_event_handler('session_start', self.on_start)
@@ -50,16 +51,15 @@ class FakeXMPPUser():
         print('fake user on_start')
         self.bot.get_roster()
         self.bot.send_presence()
-        print('fake user joining {} as {}'.format(self.chatroom, 'admin'))
-        self.muc.joinMUC(self.chatroom, 'admin', wait=True)
+        print('fake user joining {} as {}'.format(self.chatroom, self.nick))
+        self.muc.joinMUC(self.chatroom, self.nick, wait=True)
         self.has_joined_chat.set()
 
     def send_message(self, message):
         self.bot.send_message(mto=self.chatroom, mbody=message, mtype='groupchat')
 
     def has_received_message(self, message_re=None, sender=None):
-        message = self.messages.get(True, self.timeout)
-        print('checking message '+str(message))
+        return self.messages.get(True, self.timeout)
         #if message_re is not None and not message_re.match(message.message_text):
             #print('failed at re')
             #continue
@@ -107,10 +107,17 @@ def admin_connects_to_chat():
     print("connecting admin...")
     username = 'nyctef@friendshipismagicsquad.com/sweetieadmin'
     password = config.admin_password
-    admin = FakeXMPPUser(10, username, password)
+    admin = FakeXMPPUser(10, username, password, 'admin')
     print("joining admin... ")
     assert admin.has_joined_chat.wait(10)
     return admin
+
+def test_user_connects_to_chat():
+    username = 'sweetietest@friendshipismagicsquad.com/asdftest'
+    password = 'asdf'
+    test_user = FakeXMPPUser(10, username, password, 'test_user')
+    assert test_user.has_joined_chat.wait(10)
+    return test_user
 
 def when_bot_is_pinged(admin):
     admin.send_message('Sweetiebot: this is a ping')
@@ -147,7 +154,12 @@ def spam_bot_with_stuff(admin):
     send_and_wait('Sweetiebot: yt pfudor')
     send_and_wait('Sweetiebot: banlist')
 
-def admin_disconnects(admin):
+def bot_kicks_test_user():
+    admin.send_message('Sweetiebot: kick test_user')
+    stay_awhile_and_listen()
+    stay_awhile_and_listen()
+
+def fake_user_disconnects(admin):
     print('trying to kill admin'+str(admin))
     if admin: admin.quit()
 
@@ -157,12 +169,15 @@ def bot_disconnects(bot):
 
 admin = None
 sweetie = None
+test_user = None
 
 def run_tests():
     global sweetie
     sweetie = bot_connects_to_chat()
     global admin
     admin = admin_connects_to_chat()
+    global test_user
+    test_user = test_user_connects_to_chat()
     #user_connects_to_chat()
 
     #TODO: make an attribute that logs method names automatically when they are run
@@ -172,6 +187,7 @@ def run_tests():
     print("bot pinged")
     print("bot processed")
     bot_responds_with_sass(admin)
+    bot_kicks_test_user()
     spam_bot_with_stuff(admin)
 
 if __name__ == '__main__':
@@ -181,14 +197,16 @@ if __name__ == '__main__':
         #logging.getLogger().setLevel(logging.DEBUG)
         #logging.getLogger('modules.Message').setLevel(logging.DEBUG)
         #logging.getLogger('modules.MUCJabberBot').setLevel(logging.DEBUG)
-        #logging.getLogger('sleekxmpp').setLevel(logging.DEBUG)
+        logging.getLogger('sleekxmpp').setLevel(logging.DEBUG)
+        logging.getLogger('modules.SweetieAdmin').setLevel(logging.DEBUG)
 
         run_tests()
     except:
         traceback.print_exc()
     finally:
         traceback.print_stack()
-        admin_disconnects(admin)
+        fake_user_disconnects(admin)
+        fake_user_disconnects(test_user)
         bot_disconnects(sweetie)
         if threading.active_count() != 1:
             print('waiting for all threads to end')
