@@ -10,6 +10,7 @@ from sweetiebot import build_sweetiebot
 import sleekxmpp
 import queue
 from utils import logerrors
+from threading import Event
 
 '''
 
@@ -37,6 +38,7 @@ class FakeXMPPUser():
         self.bot = bot
         self.timeout = timeout
         self.messages = queue.Queue()
+        self.has_joined_chat = Event()
         print('fake user connecting ..')
         if self.bot.connect():
             print('.. connected')
@@ -50,6 +52,7 @@ class FakeXMPPUser():
         self.bot.send_presence()
         print('fake user joining {} as {}'.format(self.chatroom, 'admin'))
         self.muc.joinMUC(self.chatroom, 'admin', wait=True)
+        self.has_joined_chat.set()
 
     def send_message(self, message):
         self.bot.send_message(mto=self.chatroom, mbody=message, mtype='groupchat')
@@ -106,8 +109,7 @@ def admin_connects_to_chat():
     password = config.admin_password
     admin = FakeXMPPUser(10, username, password)
     print("joining admin... ")
-    # todo: block on chatroom join
-    stay_awhile_and_listen()
+    assert admin.has_joined_chat.wait(10)
     return admin
 
 def when_bot_is_pinged(admin):
