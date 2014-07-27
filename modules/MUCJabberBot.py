@@ -115,6 +115,7 @@ class MUCJabberBot():
         else:
             user_jid = jid
             sender_nick = self.get_nick_from_jid(user_jid)
+        user_jid = JID(user_jid).bare
 
         if sender_nick == self.nick:
             log.debug('ignoring from nickname')
