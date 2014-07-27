@@ -9,6 +9,9 @@ from utils import randomstr
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
     RestartException, SweetieMarkov, PBLogHandler, SweetieDe, SweetiePings
+import time
+import os
+import traceback
 
 log = logging.getLogger(__name__)
 
@@ -35,11 +38,11 @@ class Sweetiebot(object):
 #        self.bot.join_room(room, nick)
 #        self.chatroom = room
 
-    def serve_forever(self):
-        self.bot.serve_forever()
-
     def unknown_command(self, message):
         return self.chat.random_chat(message)
+
+    def disconnect(self):
+        self.bot.disconnect()
 
 def build_sweetiebot(config=None):
     if config is None: import config
@@ -103,11 +106,12 @@ if __name__ == '__main__':
     while True:
         try:
             sweet = build_sweetiebot(config)
-
-            log.info(sweet.nickname + ' established!')
-            log.info('Joining Room:' + config.chatroom)
-            log.info('Joined!')
-            result = sweet.serve_forever()
+            while True: time.sleep(1)
         except RestartException:
             continue
+        except Exception:
+            traceback.print_exc()
+        finally:
+            if sweet is not None: sweet.disconnect()
         break
+
