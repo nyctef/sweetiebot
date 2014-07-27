@@ -2,7 +2,7 @@ import logging
 from utils import logerrors, randomstr, botcmd
 import re
 from datetime import datetime
-from sleekxmpp import Iq
+from sleekxmpp.exceptions import IqError, IqTimeout
 import xml.etree.ElementTree as ET
 
 log = logging.getLogger(__name__)
@@ -28,64 +28,6 @@ class SweetieAdmin(object):
         ele = ET.Element('{'+SweetieAdmin.QUERY_NS+'}query')
         return ele
 
-    @staticmethod
-    def iq_for_kickban(room, nick, jid, reason, kickban_type):
-        query = SweetieAdmin.query_element()
-        item = ET.SubElement(query, 'item')
-        if nick is not None:
-            item.set('nick', nick)
-        if jid is not None:
-            item.set('jid', jid)
-
-        if kickban_type is SweetieAdmin._kick:
-            item.set('role', 'none')
-        if kickban_type is SweetieAdmin._ban:
-            item.set('affiliation', 'outcast')
-        if kickban_type is SweetieAdmin._unban:
-            item.set('affiliation', 'none')
-
-        if reason is not None:
-            item.setTagData('reason', reason)
-        iq = Iq(xml=query)
-        return iq
-
-    def _kickban(self, room, nick=None, jid=None, reason=None,
-                 kickban_type=None, on_success=None, on_failure=None):
-        """Kicks user from muc
-        Works only with sufficient rights."""
-        log.debug('rm:{} nk{} jid{} rsn{} isBan{}'.format(
-            room, nick, jid, reason, kickban_type))
-
-        iq = SweetieAdmin.iq_for_kickban(room, nick, jid, reason, kickban_type)
-
-        self.bot.send_iq(iq, self._kickban_response_handler(on_success,
-                                                            on_failure))
-
-    def _kickban_response_handler(self, on_success, on_failure):
-        on_success = on_success or (lambda: None)
-        on_failure = on_failure or (lambda: None)
-        def handler(session, response):
-            if response is None:
-                self.chat("Did that work? I timed out for a moment there")
-                return
-            error = response.getTag('error')
-            if error is None:
-                on_success()
-                return
-            not_allowed = error.getTag('not-allowed')
-            if not_allowed is not None:
-                self.chat("I'm sorry, Dave. I'm afraid I can't do that.")
-                on_failure()
-                return
-            text = error.getTag('text')
-            if text is None:
-                self.chat('Something\'s fucky...')
-                on_failure()
-                return
-            self.chat(str(text))
-            on_failure()
-        return handler
-
     def get_nick_reason(self, args):
         nick = None
         reason = None
@@ -104,6 +46,35 @@ class SweetieAdmin(object):
     def banlist(self, message):
         """List the current bans. Requires admin"""
         return self.listbans(message)
+
+    def set_affiliation(self, jid=None, nick=None, affiliation=None, reason=None,
+            on_success=None, on_failure=None):
+        """ Change room affiliation."""
+        if affiliation not in ('outcast', 'member', 'admin', 'owner', 'none'):
+            raise TypeError
+        query = ET.Element('{http://jabber.org/protocol/muc#admin}query')
+        if nick is not None:
+            item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {'affiliation':affiliation, 'nick':nick})
+        else:
+            item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {'affiliation':affiliation, 'jid':jid})
+        query.append(item)
+        if reason is not None:
+            r = ET.Element('{http://jabber.org/protocol/muc#admin}reason')
+            r.text = reason
+            item.append(r)
+        id = 'setaffil'+randomstr()
+        iq = self.bot.create_iq(id, 'set', query)
+
+        try:
+            iq.send()
+            if on_success is not None: on_success()
+        except IqError as iqe:
+            if on_failure is not None: on_failure()
+            return iqe.text
+        except IqTimeout:
+            if on_failure is not None: on_failure()
+            return 'did that work? I timed out for a moment there'
+        return None
 
     @botcmd
     @logerrors
@@ -148,10 +119,10 @@ class SweetieAdmin(object):
         if not len(reason):
             return "A reason must be provided"
 
+        full_reason = 'Banned by '+message.sender_nick + ': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y")
+
         log.debug("trying to ban "+nick+" with reason "+reason)
-        self._kickban(self.chatroom, nick, None, 'Banned by '+message.sender_nick +
-                    ': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y"),
-                      kickban_type=self._ban)
+        return self.set_affiliation(nick=nick, affiliation='outcast', reason=full_reason)
 
     @botcmd(name='unban')
     @logerrors
@@ -164,7 +135,7 @@ class SweetieAdmin(object):
 
         if message.user_jid in self.mods:
             log.debug("trying to unban "+jid)
-            self._kickban(self.chatroom, jid=jid, kickban_type=self._unban)
+            return self.set_affiliation(jid=jid, affiliation='none')
         else:
             return "noooooooope."
 
@@ -182,22 +153,16 @@ class SweetieAdmin(object):
             return "noooooooope."
 
         log.debug("trying to kick "+nick+" with reason "+reason)
-        self._kickban(self.chatroom, nick=nick, reason=reason,
-                      kickban_type=self._kick)
+
+        return self.set_affiliation(nick=nick, affiliation='none', reason=reason)
 
     def kick(self, nick, reason, on_success=None, on_failure=None):
-        self._kickban(self.chatroom, nick=nick, reason=reason,
-                      kickban_type=self._kick, on_success=on_success,
-                      on_failure=on_failure)
+        return self.set_affiliation(nick=nick, reason=reason, affiliation='none',
+                on_success=on_success, on_failure=on_failure)
 
     def kick_jid(self, jid, reason, on_success=None, on_failure=None):
-        nick = self.bot.get_nick_from_jid(jid)
-        if nick is None:
-            self.bot.chat('Could not find nick matching '+jid)
-            return
-        self._kickban(self.chatroom, nick=nick, reason=reason,
-                      kickban_type=self._kick, on_success=on_success,
-                      on_failure=on_failure)
+        return self.set_affiliation(jid=jid, reason=reason, on_success=on_success,
+                on_failure=on_failure)
 
     @botcmd
     @logerrors
