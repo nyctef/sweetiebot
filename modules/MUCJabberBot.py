@@ -129,7 +129,8 @@ class MUCJabberBot():
 
         reply = self.message_processor.process_message(parsed_message)
         if reply:
-            self.send_groupchat_message(reply)
+            if is_pm: self.send_pm_to_jid(jid, reply)
+            else: self.send_groupchat_message(reply)
 
     def send_pm_to_jid(self, jid, pm):
         print('sending {} to {}'.format(pm, jid))
