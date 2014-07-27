@@ -139,7 +139,11 @@ class MUCJabberBot():
         return self._muc.getJidProperty(self.room, nick, 'jid').bare
 
     def get_nick_from_jid(self, jid):
-        if jid in self.jids_to_nicks: return self.jids_to_nicks[jid]
+        room_details = self._muc.rooms[self.room]
+        log.debug('room details '+str(room_details))
+        for nick, props in room_details.items():
+            if JID(props['jid']).bare == JID(jid).bare:
+                return nick
 
     def load_commands_from(self, target):
         import inspect

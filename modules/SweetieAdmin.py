@@ -157,8 +157,24 @@ class SweetieAdmin(object):
         return self.set_affiliation(nick=nick, reason=reason, type='role', value='none',
                 on_success=on_success, on_failure=on_failure)
 
+    @botcmd(name='kickjid')
+    @logerrors
+    def remove_jid(self, message):
+        jid, reason = self.get_nick_reason(message.args)
+
+        if message.user_jid not in self.mods:
+            log.debug('failing kick because {} is not registered as a mod'.format(message.sender_nick))
+            return "noooooooope."
+
+        log.debug("trying to kick "+jid+" with reason "+reason)
+
+        self.kick_jid(jid, reason)
+
     def kick_jid(self, jid, reason, on_success=None, on_failure=None):
-        return self.set_affiliation(jid=jid, type='role', value='none', reason=reason, on_success=on_success,
+        log.debug('finding nick for jid '+jid)
+        nick = self.bot.get_nick_from_jid(jid)
+        log.debug('got nick '+nick)
+        return self.set_affiliation(nick=nick, type='role', value='none', reason=reason, on_success=on_success,
                 on_failure=on_failure)
 
     @botcmd
