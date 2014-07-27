@@ -92,10 +92,6 @@ class SweetieAdmin(object):
 
         @logerrors
         def handleBanlist(response):
-            print('handleBanlist')
-            print(response)
-            if response is None:
-                return "timed out waiting for banlist"
             res = ""
             items = response.findall('.//{'+self.QUERY_NS+'}item')
             print('items: '+str(items))
@@ -103,8 +99,6 @@ class SweetieAdmin(object):
                 if item.get('jid') is not None:
                     res += "\n" + item.get('jid') + ": "+str(item[0].text)
             self.chat(res)
-
-        print('created iq {}'.format(iq))
 
         iq.send(callback=handleBanlist)
 
