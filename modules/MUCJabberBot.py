@@ -43,6 +43,8 @@ class MUCJabberBot():
 
         bot.register_plugin('xep_0045')
         self._muc = bot.plugin['xep_0045']
+        bot.register_plugin('xep_0199')
+        bot.plugin['xep_0199'].enable_keepalive(30, 30)
 
         self.unknown_command_callback = None
 
