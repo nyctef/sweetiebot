@@ -46,12 +46,13 @@ class SweetieDe(object):
 
     @logerrors
     def log_deowl(self, speaker, success):
+        speaker = JID(speaker)
         timestamp = datetime.utcnow()
         mq_message = {
             'deowl':True,
-            'room':speaker.getNode(),
-            'server':speaker.getDomain(),
-            'speaker': speaker.getResource(),
+            'room':speaker.user,
+            'server':speaker.domain,
+            'speaker': speaker.resource,
             'timestamp': timestamp.isoformat(' '),
             'success': success,
             }
