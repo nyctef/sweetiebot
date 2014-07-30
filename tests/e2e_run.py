@@ -138,7 +138,7 @@ def spam_bot_with_stuff(admin):
     send_and_wait('<a href="http://google.com/">google ?q=&#x192;</a>')
     send_and_wait('Sweetiebot: roll 1d20')
     send_and_wait('/me pets Sweetiebot')
-    send_and_wait('Sweetiebot: jita plex')
+    send_and_wait('Sweetiebot: jita tayra')
     send_and_wait('Sweetiebot: woon')
     send_and_wait('Sweetiebot: spin')
     send_and_wait('Sweetiebot: subscribe')
