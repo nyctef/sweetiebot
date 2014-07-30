@@ -3,6 +3,7 @@ from datetime import datetime
 import logging
 import random
 import json
+from sleekxmpp.xmlstream.jid import JID
 
 log = logging.getLogger(__name__)
 
