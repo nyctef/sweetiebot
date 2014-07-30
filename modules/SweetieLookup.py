@@ -59,17 +59,16 @@ class SweetieLookup(object):
         return r
 
     def read_ids(self):
-        f = open('data/typeid.txt')
-        line = f.readline()
-        line = line.replace("\n", "")
         id_dic = {}
-        while(len(line) > 0):
-            typeid, item_name = line.split('=', 1)
-            try:
-                id_dic[str(item_name, 'utf-8').upper()] = int(typeid)
-            except UnicodeDecodeError:
-                log.warning('failed to utf-8 decode line: '+typeid+' (skipping)')
-            line = f.readline().replace("\n", "")
+        
+        with open('data/typeid.txt', 'rb') as f:
+            for line in f:
+                try:
+                    line = line.decode('utf-8').replace("\n", "")
+                    typeid, item_name = line.split('=', 1)
+                    id_dic[item_name.upper()] = int(typeid)
+                except Exception as e:
+                    log.warning('failed to decode line: (skipping) '+str(e))
         f.close()
         return id_dic
 
@@ -87,7 +86,6 @@ class SweetieLookup(object):
             return 29668, name
         test = name
         test = test.upper()
-        test = test.encode('utf-8')
         reply = None
         i_id = None
         i_name = None
