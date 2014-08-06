@@ -28,7 +28,7 @@ class SweetiePings:
         if not len(targets):
             return "no users found in group '{}'".format(group)
         for target in targets:
-            self.bot.send_pm_to_jid(target, formatted_message)
+            self.bot.send_pm_to_jid(target.decode('utf-8'), formatted_message)
         return "ping sent to {} users".format(len(targets))
 
     @botcmd
@@ -64,6 +64,7 @@ class SweetiePings:
         for group in self.store.keys('ping:*'):
             num_in_group = self.store.scard(group)
             if num_in_group:
-                group_name = group[len('ping:'):]
+                group_name = group[len('ping:'):].decode('utf-8')
                 result.append(group_name + ' ({})'.format(num_in_group))
         return 'Available groups: {}'.format(', '.join(result))
+
