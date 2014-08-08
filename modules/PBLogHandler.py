@@ -1,5 +1,6 @@
 import pushbullet
 import logging
+import traceback
 
 class PBLogHandler(logging.Handler):
 
@@ -14,4 +15,6 @@ class PBLogHandler(logging.Handler):
 
     def emit(self, record):
         if self.pb is not None:
-            self.pb.push_note("Sweetiebot", record.message)
+            title = "Sweetiebot: "+record.message
+            body = ''.join(traceback.format_exception(*record.exc_info))
+            self.pb.push_note(title, body)
