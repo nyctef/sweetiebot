@@ -3,6 +3,7 @@ import logging
 from utils import logerrors
 from sleekxmpp import ClientXMPP
 from sleekxmpp.xmlstream.jid import JID
+from cgi import escape as html_escape
 
 log = logging.getLogger(__name__)
 
@@ -74,7 +75,8 @@ class MUCJabberBot():
 
     def send_groupchat_message(self, message, room=None):
         room = room or self.room
-        self._bot.send_message(mto=self.room, mbody=message, mhtml=message, mtype='groupchat')
+        html_message = html_escape(message)
+        self._bot.send_message(mto=self.room, mbody=message, mhtml=html_message, mtype='groupchat')
 
     @logerrors
     def on_message(self, message_stanza):
