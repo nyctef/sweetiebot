@@ -109,8 +109,11 @@ if __name__ == '__main__':
             while True: time.sleep(1)
         except RestartException:
             continue
+        except KeyboardInterrupt:
+            sys.exit(0)
         except Exception:
             traceback.print_exc()
+            sys.exit(1)
         finally:
             if sweet is not None: sweet.disconnect()
         break
