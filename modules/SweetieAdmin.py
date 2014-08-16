@@ -171,6 +171,7 @@ class SweetieAdmin(object):
     def kick_jid(self, jid, reason, on_success=None, on_failure=None):
         log.debug('finding nick for jid '+jid)
         nick = self.bot.get_nick_from_jid(jid)
+        if nick is None: return 'User does not appear to be in chat'
         log.debug('got nick '+nick)
         return self.set_affiliation(nick=nick, type='role', value='none', reason=reason, on_success=on_success,
                 on_failure=on_failure)
