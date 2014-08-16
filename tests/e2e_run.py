@@ -139,9 +139,17 @@ def spam_bot_with_stuff(admin):
     send_and_wait('https://www.youtube.com/watch?v=-hZY8ibqKyA')
     send_and_wait('Sweetiebot: roll 1d20')
     send_and_wait('/me pets Sweetiebot')
-    send_and_wait('Sweetiebot: jita tayra')
-    send_and_wait('Sweetiebot: woon')
     send_and_wait('Sweetiebot: spin')
+
+def test_admin(admin):
+    send_and_wait('Sweetiebot: banlist')
+
+def test_lookup(admin):
+    send_and_wait('Sweetiebot: yt pfudor')
+    send_and_wait('Sweetiebot: woon')
+    send_and_wait('Sweetiebot: jita tayra')
+
+def test_pings(admin):
     send_and_wait('Sweetiebot: subscribe')
     send_and_wait('Sweetiebot: subscribe test_ping')
     send_and_wait('Sweetiebot: subscribe   test_ping')
@@ -153,8 +161,6 @@ def spam_bot_with_stuff(admin):
     send_and_wait('Sweetiebot: unsubscribe test_ping')
     send_and_wait('Sweetiebot: ping test_ping should not ping anyone')
     send_and_wait('Sweetiebot: groups')
-    send_and_wait('Sweetiebot: yt pfudor')
-    send_and_wait('Sweetiebot: banlist')
 
 def bot_kicks_test_user():
     admin.send_message('Sweetiebot: kick test_user')
@@ -191,6 +197,9 @@ def run_tests():
     bot_responds_with_sass(admin)
     bot_kicks_test_user()
     spam_bot_with_stuff(admin)
+    test_pings(admin)
+    test_lookup(admin)
+    test_admin(admin)
 
 if __name__ == '__main__':
     try:
