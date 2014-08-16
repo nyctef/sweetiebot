@@ -1,6 +1,7 @@
 from modules import MUCJabberBot
 from utils import logerrors, botcmd
 from datetime import datetime
+from sleekxmpp.xmlstream.jid import JID
 
 class SweetiePings:
     def __init__(self, bot, store):
@@ -68,3 +69,14 @@ class SweetiePings:
                 result.append(group_name + ' ({})'.format(num_in_group))
         return 'Available groups: {}'.format(', '.join(result))
 
+    @botcmd
+    @logerrors
+    def users(self, message):
+        if not message.args:
+            return 'Usage: users group_name'
+        group = message.args
+        targets = self.store.smembers(self.key(group))
+        if not len(targets):
+            return "no users found in group '{}'".format(group)
+        usernames = map(lambda x: JID(x.decode('utf-8')).user, targets)
+        return 'Users in {}: {}'.format(group, ', '.join(usernames))
