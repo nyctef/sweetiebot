@@ -167,6 +167,17 @@ def bot_kicks_test_user():
     stay_awhile_and_listen()
     stay_awhile_and_listen()
 
+def bot_kicks_missing_user():
+    send_and_wait('Sweetiebot: kick nobody')
+
+def bot_kicks_missing_jid():
+    send_and_wait('Sweetiebot: kickjid nobody@friendshipismagicsquad.com')
+
+def bot_kicks_test_user_by_jid():
+    admin.send_message('Sweetiebot: kickjid sweetietest@friendshipismagicsquad.com')
+    stay_awhile_and_listen()
+    stay_awhile_and_listen()
+
 def fake_user_disconnects(admin):
     print('trying to kill admin'+str(admin))
     if admin: admin.quit()
@@ -195,7 +206,11 @@ def run_tests():
     print("bot pinged")
     print("bot processed")
     bot_responds_with_sass(admin)
+    bot_kicks_missing_user()
     bot_kicks_test_user()
+    test_user = test_user_connects_to_chat()
+    bot_kicks_missing_jid()
+    bot_kicks_test_user_by_jid()
     spam_bot_with_stuff(admin)
     test_pings(admin)
     test_lookup(admin)
