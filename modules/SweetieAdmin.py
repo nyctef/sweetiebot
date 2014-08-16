@@ -42,9 +42,9 @@ class SweetieAdmin(object):
     def chat(self, message):
         self.bot.send_groupchat_message(message)
 
-    @botcmd
+    @botcmd(hidden=True)
     def banlist(self, message):
-        """List the current bans. Requires admin"""
+        '''List currently-banned users'''
         return self.listbans(message)
 
     def set_affiliation(self, jid=None, nick=None, type='role', value=None, reason=None,
@@ -82,7 +82,7 @@ class SweetieAdmin(object):
     @botcmd
     @logerrors
     def listbans(self, message):
-        """List the current bans. Requires admin"""
+        '''List currently-banned users'''
         print('banlist')
         id = 'banlist'+randomstr()
         query = SweetieAdmin.query_element()
@@ -105,9 +105,8 @@ class SweetieAdmin(object):
     @botcmd(name='ban')
     @logerrors
     def ban(self, message):
-        '''bans user. Requires admin and a reason
-
-        nick can be wrapped in single or double quotes'''
+        '''[nick] [reason] Bans a user from the chat
+        nick can be wrapped in quotes'''
 
         nick, reason = self.get_nick_reason(message.args)
 
@@ -124,9 +123,8 @@ class SweetieAdmin(object):
     @botcmd(name='unban')
     @logerrors
     def un(self, message):
-        '''unbans a user. Requires admin and a jid (check listbans)
-
-        nick can be wrapped in single or double quotes'''
+        '''[jid] Unbans a user from the chat.
+        Use listbans to find jids'''
 
         jid = message.args
 
@@ -139,9 +137,8 @@ class SweetieAdmin(object):
     @botcmd(name='kick')
     @logerrors
     def remove(self, message):
-        '''kicks user. Requires admin and a reason
-
-        nick can be wrapped in single or double quotes'''
+        '''[nick] [reason-optional] Kicks a user from the chat
+        nick can be wrapped in quotes'''
 
         nick, reason = self.get_nick_reason(message.args)
 
@@ -160,6 +157,7 @@ class SweetieAdmin(object):
     @botcmd(name='kickjid')
     @logerrors
     def remove_jid(self, message):
+        '''[jid] [reason-optional] Kicks a user by their jid from the chat'''
         jid, reason = self.get_nick_reason(message.args)
 
         if message.user_jid not in self.mods:
@@ -180,6 +178,7 @@ class SweetieAdmin(object):
     @botcmd
     @logerrors
     def sudo(self, message):
+        '''[command] Escalate privileges'''
         return message.sender_nick + " is not in the sudoers file. This "+\
                 "incident will be reported."
 

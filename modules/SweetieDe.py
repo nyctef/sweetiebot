@@ -19,6 +19,7 @@ class SweetieDe(object):
     @botcmd
     @logerrors
     def deowl(self, message):
+        '''Your friendly neigh-bourhood pest control. Has a cooldown'''
         speaker = message.sender_jid
         '''Only kicks :owl, long cooldown'''
         if self.last_owl_kick:
@@ -60,13 +61,14 @@ class SweetieDe(object):
 
         self.mq.send(json.dumps(mq_message))
 
-    @botcmd
+    @botcmd(hidden=True)
     def deoctavia(self, message):
         self.detavi(message)
 
     @botcmd
     @logerrors
     def detavi(self, message):
+        '''For when there's too much of a good thing'''
         speaker = message.sender_nick
         log.debug("trying to kick "+speaker)
         target = 'Octavia' if self.admin.message_is_from_mod(message) else speaker

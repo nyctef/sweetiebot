@@ -199,7 +199,7 @@ class SweetieChat(object):
 
     @botcmd
     def sass(self, message):
-        '''Remembers some sass to say back next time it is mentioned'''
+        '''[message] Remembers some sass to say back next time it is mentioned'''
         if len(message.args) > 400:
             return "Sass too long :sweetiedust"
         if not message.args.strip():

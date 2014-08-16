@@ -131,19 +131,19 @@ class SweetieLookup(object):
             return result.title.text + ' - ' + result.GetHtmlLink().href
         return "No results found, sorry"
 
-    @botcmd
+    @botcmd(hidden=True)
     @logerrors
     def nerd3(self, message):
         '''Search for a video by NerdCubed'''
         return self.youtube_search(message.args, 'OfficialNerdCubed')
 
-    @botcmd
+    @botcmd(hidden=True)
     @logerrors
     def tb(self, message):
         '''Search for a video by TotalBiscuit'''
         return self.youtube_search(message.args, 'TotalHalibut')
 
-    @botcmd
+    @botcmd(hidden=True)
     @logerrors
     def yt(self, message):
         '''Search for a video on youtube'''
@@ -164,7 +164,7 @@ class SweetieLookup(object):
     @botcmd
     @logerrors
     def jita(self, message):
-        '''Looks up Jita Prices, use !jita [ITEM NAME]'''
+        '''[item name] Look up prices in jita'''
         id, name = self.id_lookup(message.args)
         if id is None:
             return 'Couldn\'t find any matches'
@@ -174,7 +174,7 @@ class SweetieLookup(object):
 
     @botcmd
     def roll(self, message):
-        '''Accepts rolls in the form of 'roll 1d6' and similar -- max 25 dice'''
+        '''[eg 5d20] Roll some dice'''
         brup = message.args.split(' ')
         reply = ''
         for args in brup:
@@ -220,6 +220,7 @@ class SweetieLookup(object):
     @botcmd
     @logerrors
     def woon(self, message):
+        '''loona woona'''
         luna_data = self.get('http://www.reddit.com/r/luna/new.json')
         if luna_data is None: raise Exception('failed to call reddit api')
         link_data = self.get_children_of_type(json.loads(luna_data), 't3')

@@ -15,6 +15,7 @@ class SweetiePings:
     @botcmd
     @logerrors
     def ping(self, message):
+        '''[group] [message] Ping users in a group'''
         split = message.args.split(None, 1)
         if len(split) != 2:
             return 'Usage: ping group_name message'
@@ -35,6 +36,7 @@ class SweetiePings:
     @botcmd
     @logerrors
     def subscribe(self, message):
+        '''[group] Add yourself to a pingable group'''
         group = message.args
         if not group or group.isspace():
             return 'Usage: subscribe group_name'
@@ -48,6 +50,7 @@ class SweetiePings:
     @botcmd
     @logerrors
     def unsubscribe(self, message):
+        '''[group] Remove yourself from a pingable group'''
         group = message.args
         if not group or group.isspace():
             return 'Usage: unsubscribe group_name'
@@ -61,6 +64,7 @@ class SweetiePings:
     @botcmd
     @logerrors
     def groups(self, message):
+        '''List available groups for pings'''
         result = []
         for group in self.store.keys('ping:*'):
             num_in_group = self.store.scard(group)
@@ -72,6 +76,7 @@ class SweetiePings:
     @botcmd
     @logerrors
     def users(self, message):
+        '''[group] Lists users currently in a pingable group'''
         if not message.args:
             return 'Usage: users group_name'
         group = message.args
