@@ -55,8 +55,8 @@ class FakeXMPPUser():
         self.muc.joinMUC(self.chatroom, self.nick, wait=True)
         self.has_joined_chat.set()
 
-    def send_message(self, message):
-        self.bot.send_message(mto=self.chatroom, mbody=message, mtype='groupchat')
+    def send_message(self, message, html=None):
+        self.bot.send_message(mto=self.chatroom, mbody=message, mhtml=html, mtype='groupchat')
 
     def has_received_message(self, message_re=None, sender=None):
         return self.messages.get(True, self.timeout)
@@ -129,7 +129,7 @@ def bot_responds_with_sass(admin):
 
 def send_and_wait(message):
     global admin
-    admin.send_message(message)
+    admin.send_message(message, message)
     admin.has_received_message()
 
 def spam_bot_with_stuff(admin):
