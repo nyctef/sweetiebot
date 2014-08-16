@@ -169,7 +169,7 @@ class SweetieChat(object):
         if is_ping:
             return self.quote(mess)
 
-    @botcmd
+    @botcmd(hidden=True)
     def quiet(self, message):
         '''I will only respond to pings'''
         self.chattiness = 0
@@ -186,7 +186,7 @@ class SweetieChat(object):
             return "Oh my! A dragon! :sweetie: Of course I'll be quiet"
         return sender + ': Sorry! I\'ll be quiet'
 
-    @botcmd(name='chat')
+    @botcmd(name='chat', hidden=True)
     def unquiet(self, message):
         '''I will chat every once in a while'''
         self.chattiness = .025
