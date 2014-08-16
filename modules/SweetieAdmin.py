@@ -166,7 +166,7 @@ class SweetieAdmin(object):
 
         log.debug("trying to kick "+jid+" with reason "+reason)
 
-        self.kick_jid(jid, reason)
+        return self.kick_jid(jid, reason)
 
     def kick_jid(self, jid, reason, on_success=None, on_failure=None):
         log.debug('finding nick for jid '+jid)
