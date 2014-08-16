@@ -200,6 +200,7 @@ if __name__ == '__main__':
         #logging.getLogger('modules.Message').setLevel(logging.DEBUG)
         #logging.getLogger('modules.MUCJabberBot').setLevel(logging.DEBUG)
         logging.getLogger('sleekxmpp').setLevel(logging.DEBUG)
+        logging.getLogger('sleekxmpp.xmlstream.xmlstream').setLevel(logging.FATAL)
         logging.getLogger('modules.SweetieAdmin').setLevel(logging.DEBUG)
 
         run_tests()
