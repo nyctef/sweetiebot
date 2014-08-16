@@ -28,7 +28,7 @@ class SweetiePings:
         if not len(targets):
             return "no users found in group '{}'".format(group)
         for target in targets:
-            self.bot.send_pm_to_jid(target.decode('utf-8'), formatted_message)
+            self.bot.send_chat_message(formatted_message, target.decode('utf-8'))
         return "ping sent to {} users".format(len(targets))
 
     @botcmd

@@ -9,6 +9,7 @@ import re
 from xml.etree import ElementTree as ET
 from utils import logerrors, botcmd
 from random import randint
+from modules.MessageResponse import MessageResponse
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ class SweetieLookup(object):
 
     def read_ids(self):
         id_dic = {}
-        
+
         with open('data/typeid.txt', 'rb') as f:
             for line in f:
                 try:
@@ -232,7 +233,9 @@ class SweetieLookup(object):
         link = random.choice(link_data)['data']['url']
         text = random.choice(link_title_data)['data']['body']
         text = re.split('\.|!|\?', text)[0]
-        return '<a href="{}">{}</a>'.format(link, text)
+        html = '<a href="{}">{}</a>'.format(link, text)
+        plain = '{} [{}]'.format(text, link)
+        return MessageResponse(plain, None, html=html)
 
     def get_children_of_type(self, reddit_data, kind):
         if type(reddit_data) is dict:

@@ -1,4 +1,5 @@
 from modules.Message import Message
+from modules.MessageResponse import MessageResponse
 import logging
 from utils import logerrors
 from sleekxmpp import ClientXMPP
@@ -73,11 +74,6 @@ class MUCJabberBot():
         print('sb join {} as {}'.format(self.room, self.nick))
         self._muc.joinMUC(self.room, self.nick, wait=True)
 
-    def send_groupchat_message(self, message, room=None):
-        room = room or self.room
-        html_message = html.escape(message)
-        self._bot.send_message(mto=self.room, mbody=message, mhtml=html_message, mtype='groupchat')
-
     @logerrors
     def on_message(self, message_stanza):
 
@@ -134,12 +130,21 @@ class MUCJabberBot():
 
         reply = self.message_processor.process_message(parsed_message)
         if reply:
-            if is_pm: self.send_pm_to_jid(jid, reply)
+            if is_pm: self.send_chat_message(reply, jid)
             else: self.send_groupchat_message(reply)
 
-    def send_pm_to_jid(self, jid, pm):
-        print('sending {} to {}'.format(pm, jid))
-        self._bot.send_message(mto=jid, mbody=pm)
+    def send_chat_message(self, message, jid):
+        self.send_message(message, jid, 'chat')
+
+    def send_groupchat_message(self, message):
+        self.send_message(message, self.room, 'groupchat')
+
+    def send_message(self, message, default_destination, mtype):
+        message = MessageResponse(message, default_destination)
+        self._bot.send_message(mto=message.destination,
+                               mbody=message.plain,
+                               mhtml=message.html,
+                               mtype=mtype)
 
     def get_jid_from_nick(self, nick):
         return self._muc.getJidProperty(self.room, nick, 'jid').bare
