@@ -106,7 +106,6 @@ class MUCJabberBot():
         is_pm = message_stanza['type'] == 'chat'
         message_html = str(message_stanza['html']['body'])
         message = message_stanza['body']
-        print(str(type(Message)))
         parsed_message = Message(self.nick, sender_nick, jid, user_jid, message,
                                  message_html, is_pm)
 
