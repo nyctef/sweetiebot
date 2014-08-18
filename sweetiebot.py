@@ -29,15 +29,6 @@ class Sweetiebot(object):
         self.sweetiede = SweetieDe
         self.pings = pings
 
-#    def join_room(self, room, nick):
-#        connection = self.bot.connect()
-#        if connection is None:
-#            sleep(5)
-#            log.error('connection failed .. sleeping for 5')
-#            raise RestartException()
-#        self.bot.join_room(room, nick)
-#        self.chatroom = room
-
     def unknown_command(self, message):
         return self.chat.random_chat(message)
 
