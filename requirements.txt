@@ -1,7 +1,6 @@
 argparse==1.2.1
 azure==0.8.1
 beautifulsoup4==4.3.2
-gdata==2.0.18
 pushbullet.py==0.4.1
 redis==2.10.1
 requests==2.3.0
