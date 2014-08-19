@@ -137,19 +137,19 @@ class SweetieLookup(object):
 
         return title + ' - ' + link
 
-    @botcmd(hidden=True)
+    @botcmd
     @logerrors
     def nerd3(self, message):
         '''Search for a video by NerdCubed'''
         return self.youtube_search(message.args, 'OfficialNerdCubed')
 
-    @botcmd(hidden=True)
+    @botcmd
     @logerrors
     def tb(self, message):
         '''Search for a video by TotalBiscuit'''
         return self.youtube_search(message.args, 'TotalHalibut')
 
-    @botcmd(hidden=True)
+    @botcmd
     @logerrors
     def yt(self, message):
         '''Search for a video on youtube'''
