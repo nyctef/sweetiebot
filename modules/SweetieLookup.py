@@ -112,24 +112,30 @@ class SweetieLookup(object):
     def youtube_search(self, keyword, channel):
         if not keyword or keyword.isspace():
             return "https://www.youtube.com/watch?v=qRC4Vk6kisY"
-        import gdata.youtube
-        import gdata.youtube.service
 
-        client = gdata.youtube.service.YouTubeService()
-        query = gdata.youtube.service.YouTubeVideoQuery()
-
-        query.vq = keyword
-        query.max_results = 1
-        query.start_index = 1
-        query.racy = 'include'
-        query.orderby = 'relevance'
+        url = 'http://gdata.youtube.com/feeds/api/videos?max-results=1&alt=json&safeSearch=none'
+        url += '&q={}'.format(keyword)
         if (channel):
-            query.author = channel
-        feed = client.YouTubeQuery(query)
+            url += '&author={}'.format(channel)
+        log.debug('requesting {}'.format(url))
 
-        for result in feed.entry:
-            return result.title.text + ' - ' + result.GetHtmlLink().href
-        return "No results found, sorry"
+        response = self.get(url, {'GData-Version': '2'})
+        if response is None:
+            return "Request failed. Something's fucky ..."
+        log.debug(response)
+
+        result = json.loads(response)
+        entries = result['feed']['entry']
+        if not entries: return "No results found, sorry"
+        entry = entries[0]
+        log.debug('entry found: '+str(entry))
+        title = entry['title']['$t']
+        links = entry['link']
+        links = filter(lambda x: x['rel'] == 'alternate', links)
+        links = map(lambda x: x['href'], links)
+        link = next(links)
+
+        return title + ' - ' + link
 
     @botcmd(hidden=True)
     @logerrors
@@ -255,13 +261,15 @@ class SweetieLookup(object):
                 result.append(child)
         return result
 
-    def get(self, url):
+    def get(self, url, extra_headers={}):
         try:
             headers = {
                     'user-agent': 'sweetiebot',
                     'cache-control': 'no-cache'
-                }
-            res = requests.get(url, timeout=5, headers = headers)
+            }
+            headers.update(extra_headers)
+            log.debug('requesting {} with headers {}'.format(url, str(headers)))
+            res = requests.get(url, timeout=5, headers=headers)
             return res.text
         except Exception as e:
             log.warning("error fetching url "+url+" : "+str(e))

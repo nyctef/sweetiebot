@@ -226,6 +226,7 @@ if __name__ == '__main__':
         logging.getLogger('sleekxmpp').setLevel(logging.DEBUG)
         logging.getLogger('sleekxmpp.xmlstream.xmlstream').setLevel(logging.FATAL)
         logging.getLogger('modules.SweetieAdmin').setLevel(logging.DEBUG)
+        logging.getLogger('modules.SweetieLookup').setLevel(logging.DEBUG)
 
         run_tests()
     except:
