@@ -29,6 +29,14 @@ class MessageProcessor():
     def help(self):
         commands = self.commands.values()
         result = []
+        prefix = \
+'''
+'''
+        postfix = \
+'''
+---
+see source code or report issues at https://github.com/nyctef/sweetiebot
+'''
         for command in commands:
             if not hasattr(command, '_bot_command'):
                 continue
@@ -37,6 +45,6 @@ class MessageProcessor():
             command_name = command._bot_command_name
             docs = (getdoc(command) or '\n').splitlines()[0]
             result.append(command_name + ': ' + docs)
-        return '\n'+'\n'.join(sorted(result))
+        return prefix+'\n'.join(sorted(result))+postfix
 
 
