@@ -23,9 +23,9 @@ class SweetieMQ(object):
     def send(self, message):
         if self.bus_service is None:
             return
-        log.debug('Sending message '+message)
+        log.debug('Sending message '+str(message))
         msg = Message(message)
         try:
             self.bus_service.send_topic_message(self.topic, msg)
         except Exception as e:
-            log.warning("MESSAGE DELIVERY FAILED: "+str(e))
+            log.error("MESSAGE DELIVERY FAILED: "+str(e))
