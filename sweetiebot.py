@@ -68,6 +68,7 @@ def build_sweetiebot(config=None):
 
 def setup_logging(config):
     logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().handlers = []
 
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
     streamhandler = logging.StreamHandler()
