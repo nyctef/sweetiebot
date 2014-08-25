@@ -28,7 +28,7 @@ class SweetieLookup(object):
     @logerrors
     def argue(self, message):
         '''Start a tumblr argument courtesy of lokaltog.github.io/tumblr-argument-generator'''
-        res = requests.get('http://tumblraas.azurewebsites.net/', timeout=5)
+        res = requests.get('http://tumblraas.azurewebsites.net/', timeout=10)
         return res.text.strip()
 
     @botcmd
@@ -36,7 +36,7 @@ class SweetieLookup(object):
     def rant(self, message):
         '''Rant for a while, courtesy of lokaltog.github.io/tumblr-argument-generator'''
         res = requests.get(
-            'http://tumblraas.azurewebsites.net/rant', timeout=5)
+            'http://tumblraas.azurewebsites.net/rant', timeout=10)
         return res.text.strip()
 
     def get_prices(self, id, system):
@@ -269,7 +269,7 @@ class SweetieLookup(object):
             }
             headers.update(extra_headers)
             log.debug('requesting {} with headers {}'.format(url, str(headers)))
-            res = requests.get(url, timeout=5, headers=headers)
+            res = requests.get(url, timeout=10, headers=headers)
             return res.text
         except Exception as e:
             log.warning("error fetching url "+url+" : "+str(e))

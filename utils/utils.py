@@ -1,5 +1,6 @@
 import logging
 import random
+import requests
 
 def logerrors(func):
     from functools import wraps
@@ -7,11 +8,14 @@ def logerrors(func):
     def logged(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
-        except Exception:
+        except requests.exceptions.Timeout:
+            return "[timeout] The internet is problematic :sweetieskeptical:"
+        except Exception as e:
             print('\n\n####\n\n')
             logging.exception('Error in '+func.__name__)
             print('\n\n####\n\n')
-            return "My code is problematic :sweetieoops:"
+            return "[{}] My code is problematic :sweetieoops:".format(
+                    type(e).__name__)
     return logged
 
 def randomstr():
