@@ -154,5 +154,7 @@ class MUCJabberBot():
         iq.set_payload(xml)
         return iq
 
-
+    def add_recurring_task(self, callback, secs):
+        self._bot.scheduler.add('custom task '+callback.__name__, secs,
+                                callback, repeat=True)
 

@@ -8,7 +8,8 @@ from utils import randomstr
 #from time import sleep
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
-    RestartException, SweetieMarkov, PBLogHandler, SweetieDe, SweetiePings
+    RestartException, SweetieMarkov, PBLogHandler, SweetieDe, SweetiePings, \
+    TwitterClient
 import time
 import os
 import traceback
@@ -17,7 +18,7 @@ log = logging.getLogger(__name__)
 
 class Sweetiebot(object):
     def __init__(self, nickname, bot, lookup, mq, admin, chat, roulette,
-                 sweetiede, pings):
+                 sweetiede, pings, watchers):
         self.nickname = nickname
         self.bot = bot
         self.bot.unknown_command_callback = self.unknown_command
@@ -28,6 +29,16 @@ class Sweetiebot(object):
         self.roulette = roulette
         self.sweetiede = SweetieDe
         self.pings = pings
+        self.watchers = watchers
+        self.bot.add_recurring_task(self.check_watchers, 5*60)
+
+    def check_watchers(self):
+        # TODO not sure this method really belongs here
+        for w in self.watchers:
+            tweet = w.get_next_tweet()
+            if tweet:
+                self.bot.send_groupchat_message('@{}: {}'.format(
+                    w.username, tweet['text']))
 
     def unknown_command(self, message):
         return self.chat.random_chat(message)
@@ -61,9 +72,11 @@ def build_sweetiebot(config=None):
     chat = SweetieChat(bot, actions, sass, config.chatroom, markov)
     roulette = SweetieRoulette(bot, admin)
     pings = SweetiePings(bot, redis_conn)
+    twitter = TwitterClient.get_client(config.twitter_key, config.twitter_secret)
+    watchers = [twitter.get_timeline_watcher('EVE_Status')]
 
     sweet = Sweetiebot(config.nickname, bot, lookup, mq, admin, chat, roulette,
-                       de, pings)
+                       de, pings, watchers)
     return sweet
 
 def setup_logging(config):

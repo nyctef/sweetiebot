@@ -33,3 +33,5 @@ mods = [
     "big_macintosh@friendshipismagicsquad.com",
     "nyctef@friendshipismagicsquad.com",
 ]
+twitter_key = '0000000000000000000000000'
+twitter_secret = '00000000000000000000000000000000000000000000000000'

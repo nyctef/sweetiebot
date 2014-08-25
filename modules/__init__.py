@@ -13,3 +13,4 @@ from .SweetiePings import SweetiePings
 from .Message import Message
 from .MessageResponse import MessageResponse
 from .MessageProcessor import MessageProcessor
+from .TwitterClient import get_client
