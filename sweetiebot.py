@@ -73,7 +73,7 @@ def build_sweetiebot(config=None):
     roulette = SweetieRoulette(bot, admin)
     pings = SweetiePings(bot, redis_conn)
     twitter = TwitterClient.get_client(config.twitter_key, config.twitter_secret)
-    watchers = [twitter.get_timeline_watcher('EVE_Status')]
+    watchers = list(map(twitter.get_timeline_watcher, ['EVE_Status', 'EVEOnline']))
 
     sweet = Sweetiebot(config.nickname, bot, lookup, mq, admin, chat, roulette,
                        de, pings, watchers)
