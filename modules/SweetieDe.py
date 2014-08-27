@@ -59,7 +59,7 @@ class SweetieDe(object):
             'success': success,
             }
 
-        self.mq.send(json.dumps(mq_message))
+        self.mq.send(json.dumps(mq_message).encode('utf-8'))
 
     @botcmd(hidden=True)
     def deoctavia(self, message):
