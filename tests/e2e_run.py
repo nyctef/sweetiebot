@@ -162,6 +162,10 @@ def test_pings(admin):
     send_and_wait('Sweetiebot: ping test_ping should not ping anyone')
     send_and_wait('Sweetiebot: groups')
 
+def bot_tries_to_kick_admin():
+    admin.send_message('Sweetiebot: kick admin')
+    stay_awhile_and_listen()
+
 def bot_kicks_test_user():
     admin.send_message('Sweetiebot: kick test_user')
     stay_awhile_and_listen()
@@ -211,6 +215,8 @@ def run_tests():
     test_user = test_user_connects_to_chat()
     bot_kicks_missing_jid()
     bot_kicks_test_user_by_jid()
+    bot_tries_to_kick_admin()
+
     spam_bot_with_stuff(admin)
     test_pings(admin)
     test_lookup(admin)

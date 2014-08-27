@@ -73,7 +73,12 @@ class SweetieAdmin(object):
             if on_success is not None: on_success()
         except IqError as iqe:
             if on_failure is not None: on_failure()
-            return iqe.text
+            if iqe.text:
+                return iqe.text
+            error_condition = iqe.iq['error']['condition']
+            if error_condition:
+                return 'Failed to kick {}: {}'.format(nick or jid, error_condition)
+            return 'Failed to kick {}'.format(nick or jid)
         except IqTimeout:
             if on_failure is not None: on_failure()
             return 'did that work? I timed out for a moment there'
