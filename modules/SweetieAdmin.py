@@ -47,18 +47,18 @@ class SweetieAdmin(object):
         '''List currently-banned users'''
         return self.listbans(message)
 
-    def set_affiliation(self, jid=None, nick=None, type='role', value=None, reason=None,
+    def set_affiliation(self, jid=None, nick=None, atype='role', value=None, reason=None,
             on_success=None, on_failure=None):
         """ Change room affiliation."""
         if value not in ('outcast', 'member', 'admin', 'owner', 'none'):
             raise TypeError
-        if type not in ('role', 'affiliation'):
+        if atype not in ('role', 'affiliation'):
             raise TypeError
         query = ET.Element('{http://jabber.org/protocol/muc#admin}query')
         if nick is not None:
-            item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {type:value, 'nick':nick})
+            item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {atype:value, 'nick':nick})
         else:
-            item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {type:value, 'jid':jid})
+            item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {atype:value, 'jid':jid})
         query.append(item)
         if reason is not None:
             r = ET.Element('{http://jabber.org/protocol/muc#admin}reason')
@@ -118,7 +118,7 @@ class SweetieAdmin(object):
         full_reason = 'Banned by '+message.sender_nick + ': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y")
 
         log.debug("trying to ban "+nick+" with reason "+reason)
-        return self.set_affiliation(nick=nick, type='affiliation', value='outcast', reason=full_reason)
+        return self.set_affiliation(nick=nick, atype='affiliation', value='outcast', reason=full_reason)
 
     @botcmd(name='unban')
     @logerrors
@@ -130,7 +130,7 @@ class SweetieAdmin(object):
 
         if message.user_jid in self.mods:
             log.debug("trying to unban "+jid)
-            return self.set_affiliation(jid=jid, type='affiliation', value='none')
+            return self.set_affiliation(jid=jid, atype='affiliation', value='none')
         else:
             return "noooooooope."
 
@@ -148,10 +148,10 @@ class SweetieAdmin(object):
 
         log.debug("trying to kick "+nick+" with reason "+reason)
 
-        return self.set_affiliation(nick=nick, type='role', value='none', reason=reason)
+        return self.set_affiliation(nick=nick, atype='role', value='none', reason=reason)
 
     def kick(self, nick, reason, on_success=None, on_failure=None):
-        return self.set_affiliation(nick=nick, reason=reason, type='role', value='none',
+        return self.set_affiliation(nick=nick, reason=reason, atype='role', value='none',
                 on_success=on_success, on_failure=on_failure)
 
     @botcmd(name='kickjid')
@@ -173,7 +173,7 @@ class SweetieAdmin(object):
         nick = self.bot.get_nick_from_jid(jid)
         if nick is None: return 'User does not appear to be in chat'
         log.debug('got nick '+nick)
-        return self.set_affiliation(nick=nick, type='role', value='none', reason=reason, on_success=on_success,
+        return self.set_affiliation(nick=nick, atype='role', value='none', reason=reason, on_success=on_success,
                 on_failure=on_failure)
 
     @botcmd
