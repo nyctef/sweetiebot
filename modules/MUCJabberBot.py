@@ -131,6 +131,7 @@ class MUCJabberBot():
         return self._muc.getJidProperty(self.room, nick, 'jid').bare
 
     def get_nick_from_jid(self, jid):
+        # sleekxmpp has a method for this but it uses full jids
         room_details = self._muc.rooms[self.room]
         log.debug('room details '+str(room_details))
         for nick, props in room_details.items():
