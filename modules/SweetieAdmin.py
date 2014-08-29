@@ -122,10 +122,12 @@ class SweetieAdmin(object):
         if not len(reason):
             return "A reason must be provided"
 
-        full_reason = 'Banned by '+message.sender_nick + ': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y")
+        full_reason = 'banned by '+message.sender_nick + ': ['+reason+'] at '+datetime.now().strftime("%I:%M%p on %B %d, %Y")
 
         log.debug("trying to ban "+nick+" with reason "+reason)
-        return self.set_affiliation(nick=nick, atype='affiliation', value='outcast', reason=full_reason)
+        return self.set_affiliation(nick=nick, atype='affiliation',
+                                    value='outcast', reason=full_reason) or \
+            (nick + ' ' + full_reason)
 
     @botcmd(name='unban')
     @logerrors
@@ -137,7 +139,9 @@ class SweetieAdmin(object):
 
         if message.user_jid in self.mods:
             log.debug("trying to unban "+jid)
-            return self.set_affiliation(jid=jid, atype='affiliation', value='none')
+            return self.set_affiliation(jid=jid, atype='affiliation',
+                                        value='none') or \
+                ('unbanned '+jid)
         else:
             return "noooooooope."
 
