@@ -129,9 +129,9 @@ class SweetieAdmin(object):
                                     value='outcast', reason=full_reason) or \
             (nick + ' ' + full_reason)
 
-    @botcmd(name='unban')
+    @botcmd
     @logerrors
-    def un(self, message):
+    def unban(self, message):
         '''[jid] Unbans a user from the chat.
         Use listbans to find jids'''
 
