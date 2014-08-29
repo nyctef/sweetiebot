@@ -1,6 +1,7 @@
 from modules.Message import Message
 from modules.MessageResponse import MessageResponse
 from modules.MessageProcessor import MessageProcessor
+from modules.Presence import Presence
 import logging
 from utils import logerrors
 from sleekxmpp import ClientXMPP
@@ -19,11 +20,14 @@ class MUCJabberBot():
         self.nick = nick
         self.room = room
         self.jid = JID(jid)
+        self._presence_callbacks = []
+        self._message_callbacks = []
 
         bot = ClientXMPP(jid, password)
 
         bot.add_event_handler('session_start', self.on_start)
         bot.add_event_handler('message', self.on_message)
+        bot.add_event_handler('groupchat_presence', self.on_presence)
 
         bot.register_plugin('xep_0045')
         self._muc = bot.plugin['xep_0045']
@@ -114,6 +118,21 @@ class MUCJabberBot():
             if is_pm: self.send_chat_message(reply, jid)
             else: self.send_groupchat_message(reply)
 
+        for callback in self._message_callbacks:
+            callback(parsed_message)
+
+    @logerrors
+    def on_presence(self, presence_stanza):
+        user = JID(presence_stanza['muc']['jid'])
+        muc_jid = JID(presence_stanza['from'])
+        nick = presence_stanza['muc']['nick']
+        status_text = presence_stanza['status']
+        ptype = presence_stanza['type']
+
+        presence = Presence(muc_jid, user, ptype, status_text)
+        for callback in self._presence_callbacks:
+            callback(presence)
+
     def send_chat_message(self, message, jid):
         self.send_message(message, jid, 'chat')
 
@@ -128,7 +147,9 @@ class MUCJabberBot():
                                mtype=mtype)
 
     def get_jid_from_nick(self, nick):
-        return self._muc.getJidProperty(self.room, nick, 'jid').bare
+        jid = self._muc.getJidProperty(self.room, nick, 'jid')
+        if jid is None: return None
+        return jid.bare
 
     def get_nick_from_jid(self, jid):
         # sleekxmpp has a method for this but it uses full jids
@@ -159,3 +180,8 @@ class MUCJabberBot():
         self._bot.scheduler.add('custom task '+callback.__name__, secs,
                                 callback, repeat=True)
 
+    def add_presence_handler(self, callback):
+        self._presence_callbacks.append(callback)
+
+    def add_message_handler(self, callback):
+        self._message_callbacks.append(callback)
