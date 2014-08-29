@@ -146,6 +146,10 @@ def spam_bot_with_stuff(admin):
 
 def test_admin(admin):
     send_and_wait('Sweetiebot: banlist')
+    send_and_wait('Sweetiebot: ban test_user for science')
+    send_and_wait('Sweetiebot: listbans')
+    send_and_wait('Sweetiebot: unban sweetietest@friendshipismagicsquad.com')
+    send_and_wait('Sweetiebot: listbans')
 
 def test_lookup(admin):
     send_and_wait('Sweetiebot: yt pfudor')
@@ -232,11 +236,11 @@ if __name__ == '__main__':
         #logging.getLogger().setLevel(logging.DEBUG)
         #logging.getLogger('modules.Message').setLevel(logging.DEBUG)
         #logging.getLogger('modules.MUCJabberBot').setLevel(logging.DEBUG)
-        logging.getLogger('sleekxmpp').setLevel(logging.DEBUG)
+        #logging.getLogger('sleekxmpp').setLevel(logging.DEBUG)
         logging.getLogger('sleekxmpp.xmlstream.xmlstream').setLevel(logging.FATAL)
-        #logging.getLogger('modules.SweetieAdmin').setLevel(logging.DEBUG)
+        logging.getLogger('modules.SweetieAdmin').setLevel(logging.DEBUG)
         #logging.getLogger('modules.SweetieLookup').setLevel(logging.DEBUG)
-        logging.getLogger('modules.SweetieSeen').setLevel(logging.DEBUG)
+        #logging.getLogger('modules.SweetieSeen').setLevel(logging.DEBUG)
 
         run_tests()
     except:
