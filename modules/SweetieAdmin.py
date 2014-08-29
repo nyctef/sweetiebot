@@ -71,8 +71,9 @@ class SweetieAdmin(object):
         log.debug('created affiliation iq: '+str(iq))
 
         try:
-            iq.send()
+            response = iq.send()
             if on_success is not None: on_success()
+            log.debug('got affiliation response: '+str(response))
         except IqError as iqe:
             if on_failure is not None: on_failure()
             if iqe.text:
@@ -84,7 +85,6 @@ class SweetieAdmin(object):
         except IqTimeout:
             if on_failure is not None: on_failure()
             return 'did that work? I timed out for a moment there'
-        return None
 
     @botcmd
     @logerrors
