@@ -140,6 +140,9 @@ def spam_bot_with_stuff(admin):
     send_and_wait('Sweetiebot: roll 1d20')
     send_and_wait('/me pets Sweetiebot')
     send_and_wait('Sweetiebot: spin')
+    send_and_wait('Sweetiebot: seen')
+    send_and_wait('Sweetiebot: seen test_user')
+    send_and_wait('Sweetiebot: seen admin')
 
 def test_admin(admin):
     send_and_wait('Sweetiebot: banlist')
@@ -231,8 +234,9 @@ if __name__ == '__main__':
         #logging.getLogger('modules.MUCJabberBot').setLevel(logging.DEBUG)
         logging.getLogger('sleekxmpp').setLevel(logging.DEBUG)
         logging.getLogger('sleekxmpp.xmlstream.xmlstream').setLevel(logging.FATAL)
-        logging.getLogger('modules.SweetieAdmin').setLevel(logging.DEBUG)
-        logging.getLogger('modules.SweetieLookup').setLevel(logging.DEBUG)
+        #logging.getLogger('modules.SweetieAdmin').setLevel(logging.DEBUG)
+        #logging.getLogger('modules.SweetieLookup').setLevel(logging.DEBUG)
+        logging.getLogger('modules.SweetieSeen').setLevel(logging.DEBUG)
 
         run_tests()
     except:

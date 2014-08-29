@@ -9,7 +9,7 @@ from utils import randomstr
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
     RestartException, SweetieMarkov, PBLogHandler, SweetieDe, SweetiePings, \
-    TwitterClient
+    TwitterClient, SweetieSeen
 import time
 import os
 import traceback
@@ -74,6 +74,7 @@ def build_sweetiebot(config=None):
     pings = SweetiePings(bot, redis_conn)
     twitter = TwitterClient.get_client(config.twitter_key, config.twitter_secret)
     watchers = list(map(twitter.get_timeline_watcher, ['EVE_Status', 'EVEOnline']))
+    seen = SweetieSeen(bot, redis_conn)
 
     sweet = Sweetiebot(config.nickname, bot, lookup, mq, admin, chat, roulette,
                        de, pings, watchers)
