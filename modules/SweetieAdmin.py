@@ -109,7 +109,7 @@ class SweetieAdmin(object):
 
         iq.send(callback=handleBanlist)
 
-    @botcmd(name='ban')
+    @botcmd
     @logerrors
     def ban(self, message):
         '''[nick] [reason] Bans a user from the chat
