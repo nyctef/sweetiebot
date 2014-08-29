@@ -21,7 +21,7 @@ class SweetiePings:
             return 'Usage: ping group_name message'
         group = split[0]
         ping_message = split[1]
-        sender = message.sender_nick
+        sender = message.sender_nick or JID(message.sender_jid).bare
         time = datetime.now()
         formatted_message = '''{}
 
