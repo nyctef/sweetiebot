@@ -80,8 +80,8 @@ class SweetieAdmin(object):
                 return iqe.text
             error_condition = iqe.iq['error']['condition']
             if error_condition:
-                return 'Failed to kick {}: {}'.format(nick or jid, error_condition)
-            return 'Failed to kick {}'.format(nick or jid)
+                return 'Operation failed on {}: {}'.format(nick or jid, error_condition)
+            return 'Operation failed on {}'.format(nick or jid)
         except IqTimeout:
             if on_failure is not None: on_failure()
             return 'did that work? I timed out for a moment there'
