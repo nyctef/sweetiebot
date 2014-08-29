@@ -90,7 +90,6 @@ class SweetieAdmin(object):
     @logerrors
     def listbans(self, message):
         '''List currently-banned users'''
-        print('banlist')
         id = 'banlist'+randomstr()
         query = SweetieAdmin.query_element()
         item = ET.SubElement(query, 'item')
@@ -100,7 +99,7 @@ class SweetieAdmin(object):
         response = iq.send()
         res = ""
         items = response.findall('.//{'+self.QUERY_NS+'}item')
-        print('items: '+str(items))
+        log.debug('banlist items: '+str(items))
         for item in items:
             if item.get('jid') is not None:
                 res += "\n" + item.get('jid') + ": "+str(item[0].text)
