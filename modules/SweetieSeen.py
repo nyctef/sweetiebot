@@ -17,6 +17,10 @@ class SweetieSeen:
         return datetime.now().strftime('%Y-%m-%d %H:%M %Z')
 
     def set(self, name, response):
+        if name is None or response is None:
+            # TODO: find out why we hit this branch
+            log.debug('skipping setting {} to {}'.format(name, response))
+            return
         log.debug('setting {} to {}'.format(name, response))
         self.store.set('seen:'+name, response)
 
