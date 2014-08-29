@@ -10,6 +10,16 @@ class FakeRedis(object):
     def __init__(self):
         self.data = {}
 
+    def set(self, key, value):
+        key = enc(key)
+        value = enc(value)
+        self.data[key] = value
+
+    def get(self, key):
+        key = enc(key)
+        if not key in self.data: return None
+        return self.data[key]
+
     def keys(self, pattern):
         return [x for x in list(self.data.keys()) if fnmatch(x.decode('utf-8'), pattern)]
 
