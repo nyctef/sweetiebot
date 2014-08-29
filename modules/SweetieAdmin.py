@@ -141,7 +141,7 @@ class SweetieAdmin(object):
             log.debug("trying to unban "+jid)
             return self.set_affiliation(jid=jid, atype='affiliation',
                                         value='none') or \
-                ('unbanned '+jid)
+                ('cleared ban from '+jid)
         else:
             return "noooooooope."
 
