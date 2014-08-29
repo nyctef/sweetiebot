@@ -97,17 +97,15 @@ class SweetieAdmin(object):
         item.set('affiliation', 'outcast')
         iq = self.bot.create_iq(id, 'get', query)
 
-        @logerrors
-        def handleBanlist(response):
-            res = ""
-            items = response.findall('.//{'+self.QUERY_NS+'}item')
-            print('items: '+str(items))
-            for item in items:
-                if item.get('jid') is not None:
-                    res += "\n" + item.get('jid') + ": "+str(item[0].text)
-            self.chat(res)
-
-        iq.send(callback=handleBanlist)
+        response = iq.send()
+        res = ""
+        items = response.findall('.//{'+self.QUERY_NS+'}item')
+        print('items: '+str(items))
+        for item in items:
+            if item.get('jid') is not None:
+                res += "\n" + item.get('jid') + ": "+str(item[0].text)
+        if not res: return 'Bans list is empty'
+        return res
 
     @botcmd
     @logerrors
