@@ -50,10 +50,12 @@ class SweetieAdmin(object):
     def set_affiliation(self, jid=None, nick=None, atype='role', value=None, reason=None,
             on_success=None, on_failure=None):
         """ Change room affiliation."""
-        if value not in ('outcast', 'member', 'admin', 'owner', 'none'):
-            raise TypeError
-        if atype not in ('role', 'affiliation'):
-            raise TypeError
+        values = ('outcast', 'member', 'admin', 'owner', 'none')
+        if value not in values:
+            raise TypeError('value must be one of '+repr(values))
+        atypes = ('role', 'affiliation')
+        if atype not in atypes:
+            raise TypeError('atype must be one of '+repr(atypes))
         query = ET.Element('{http://jabber.org/protocol/muc#admin}query')
         if nick is not None:
             item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {atype:value, 'nick':nick})
