@@ -15,12 +15,13 @@ class MessageProcessor():
 
     @logerrors
     def process_message(self, message):
-        if message.command == 'help':
-            return self.help()
         if message.command is not None:
-            if message.command in self.commands:
-                log.debug('running command '+message.command)
-                return self.commands[message.command](message)
+            command = message.command.lower()
+            if command == 'help':
+                return self.help()
+            if command in self.commands:
+                log.debug('running command '+command)
+                return self.commands[command](message)
 
         if self.unknown_command_callback is not None:
             return self.unknown_command_callback(message)

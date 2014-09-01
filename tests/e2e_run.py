@@ -133,11 +133,11 @@ def send_and_wait(message):
     admin.has_received_message()
 
 def spam_bot_with_stuff(admin):
-    send_and_wait('Sweetiebot: help')
+    send_and_wait('Sweetiebot: hElp')
     send_and_wait('Sweetiebot: confirmed c/d')
     send_and_wait('<a href="http://google.com/">google ?q=&#x192;</a>')
     send_and_wait('https://www.youtube.com/watch?v=-hZY8ibqKyA')
-    send_and_wait('Sweetiebot: roll 1d20')
+    send_and_wait('Sweetiebot: Roll 1d20')
     send_and_wait('/me pets Sweetiebot')
     send_and_wait('Sweetiebot: spin')
     send_and_wait('Sweetiebot: seen')
