@@ -16,39 +16,54 @@ class SweetieSeen:
     def timestamp(self):
         return datetime.now().strftime('%Y-%m-%d %H:%M %Z')
 
-    def set(self, name, response):
+    def set(self, prefix, name, response):
         if name is None or response is None:
             # TODO: find out why we hit this branch
-            log.debug('skipping setting {} to {}'.format(name, response))
+            log.warning('skipping setting {} to {}'.format(name, response))
             return
-        log.debug('setting {} to {}'.format(name, response))
-        self.store.set('seen:'+name, response)
+        log.debug('setting {} {} to {}'.format(prefix, name, response))
+        self.store.set(prefix+':'+name, response)
 
     def on_presence(self, presence):
         log.debug('recieved presence: {} from {}'.format(presence.presence_type,
                                                          presence.user_jid))
+        user = presence.user_jid.bare
+        nickname = presence.muc_jid.resource
         if presence.presence_type == 'unavailable':
-            response = 'leaving the room at {}'.format(self.timestamp())
-            self.set(presence.muc_jid.resource, response)
-            self.set(presence.user_jid.bare, response)
+            response = self.timestamp()
+            self.set('seen', user, response)
+            self.set('seen', nickname, response)
 
     def on_message(self, message):
-        response = 'chatting at {}'.format(self.timestamp())
-        self.set(message.sender_nick, response)
-        self.set(message.sender_jid.bare, response)
+        if message.is_pm: return
+
+        response = self.timestamp()
+        nickname = message.sender_nick
+        user = message.user_jid.bare
+        self.set('spoke', nickname, response)
+        self.set('spoke', user, response)
 
     @botcmd
     @logerrors
     def seen(self, message):
         '''[nick/jid] Report when a user was last seen'''
-        target = message.args
-        jidtarget = JID(self.bot.get_jid_from_nick(target)).bare or target
 
-        response = self.store.get('seen:'+target) or \
-            self.store.get('seen:'+jidtarget)
-        if response:
-            response = response.decode('utf-8')
-            return 'User {} last seen {}'.format(target, response)
+        # TODO: I'm not totally convinced about the logic around jidtarget/
+        # other if statements below.
+        args = message.args
+        jidtarget = JID(self.bot.get_jid_from_nick(args)).bare
+        target = jidtarget or args
+
+        seen = self.store.get('seen:'+target)
+        spoke = self.store.get('spoke:'+target)
+
+        if jidtarget and self.bot.jid_is_in_room(jidtarget) and spoke:
+            spoke = spoke.decode('utf-8')
+            return '{} last seen speaking at {}'.format(args, spoke)
+        elif seen:
+            seen = seen.decode('utf-8')
+            return '{} last seen in room at {}'.format(args, seen)
         else:
-            return 'No records found for user {}'.format(target)
+            return "No records found for user '{}'".format(args)
+
 

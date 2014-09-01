@@ -1,4 +1,5 @@
 import logging
+from sleekxmpp import JID
 
 log = logging.getLogger(__name__)
 
@@ -6,10 +7,11 @@ class Message(object):
     def __init__(self, nickname, sender_nick, sender_jid, user_jid, message_text, message_html, is_pm):
         self.nickname = nickname
         self.sender_nick = sender_nick
-        self.sender_jid = sender_jid
-        self.user_jid = user_jid
+        self.sender_jid = JID(sender_jid)
+        self.user_jid = JID(user_jid)
         self.message_text = message_text
         self.message_html = message_html
+        self.is_pm = is_pm
         if self._is_command(nickname, message_text) or is_pm:
             self.command, self.args = self._get_command_and_args(message_text)
         else:

@@ -159,6 +159,9 @@ class MUCJabberBot():
             if JID(props['jid']).bare == JID(jid).bare:
                 return nick
 
+    def jid_is_in_room(self, jid):
+        return self.get_nick_from_jid(jid) is not None
+
     def load_commands_from(self, target):
         import inspect
         for name, value in inspect.getmembers(target, inspect.ismethod):
