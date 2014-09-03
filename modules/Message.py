@@ -4,6 +4,9 @@ from sleekxmpp import JID
 log = logging.getLogger(__name__)
 
 class Message(object):
+
+    prefix = '!'
+
     def __init__(self, nickname, sender_nick, sender_jid, user_jid, message_text, message_html, is_pm):
         self.nickname = nickname
         self.sender_nick = sender_nick
@@ -33,12 +36,18 @@ class Message(object):
     def _get_command_and_args(self, message_text):
         message_after_ping = self._fix_ping(message_text)
         if ' ' in message_after_ping:
-            return [x.strip() for x in message_after_ping.split(None, 1)]
+            command, args = [x.strip() for x in message_after_ping.split(None, 1)]
         else:
-            return message_after_ping, ''
+            command, args = message_after_ping, ''
+
+        if command.startswith(self.prefix):
+            command = command[1:]
+
+        return command, args
 
     def _is_command(self, nickname, message):
-        return message.lower().strip().startswith(nickname.lower())
+        return message.lower().strip().startswith(nickname.lower()) or \
+                message.startswith(self.prefix)
 
     def _fix_ping(self, message):
         message = message.strip()
