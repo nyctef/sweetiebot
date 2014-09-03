@@ -40,6 +40,11 @@ class MessageParsingTests(unittest.TestCase):
     def test_command_can_have_nickname_and_colon_and_prefix(self):
         message = create_message('Sweetiebot: !roll some dice')
         self.should_roll_some_dice(message)
+
+    def test_commands_are_case_insensitive(self):
+        message = create_message('Sweetiebot: rOlL some dice')
+        self.should_roll_some_dice(message)
+
     
 
     def should_roll_some_dice(self, message):

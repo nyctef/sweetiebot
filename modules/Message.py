@@ -42,6 +42,7 @@ class Message(object):
 
         if command.startswith(self.prefix):
             command = command[1:]
+        command = command.lower()
 
         return command, args
 
