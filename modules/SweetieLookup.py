@@ -223,15 +223,38 @@ class SweetieLookup(object):
         reply = message.sender_nick + ': ' + reply
         return reply
 
+    @logerrors
+    def random_reddit_link(self, subreddit, domain_filter=None):
+        luna_data = self.get('http://www.reddit.com/r/{}/new.json?limit=100'
+                .format(subreddit))
+        if luna_data is None: raise Exception('failed to call reddit api')
+        link_data = self.get_children_of_type(json.loads(luna_data), 't3')
+        if domain_filter:
+            link_data = list(filter(
+                lambda x: x['data']['domain'] in domain_filter,
+                link_data))
+        log.info('choosing one of {} links'.format(len(link_data)))
+        choice = random.choice(link_data)
+        link = choice['data']['url']
+        text = choice['data']['title']
+        html = '<a href="{}">{}</a>'.format(link, text)
+        plain = '{} [{}]'.format(text, link)
+        return MessageResponse(plain, None, html=html)
+
+    @botcmd
+    @logerrors
+    def ferret(self, message):
+        return self.random_reddit_link('ferret', ('imgur.com', 'i.imgur.com'))
+
     @botcmd
     @logerrors
     def woon(self, message):
         '''loona woona'''
-        luna_data = self.get('http://www.reddit.com/r/luna/new.json')
+        luna_data = self.get('http://www.reddit.com/r/luna/new.json?limit=100')
         if luna_data is None: raise Exception('failed to call reddit api')
         link_data = self.get_children_of_type(json.loads(luna_data), 't3')
 
-        kyuu_data = self.get('http://www.reddit.com/user/kyuuketsuki.json?count=100')
+        kyuu_data = self.get('http://www.reddit.com/user/kyuuketsuki.json?limit=100')
         if kyuu_data is None: raise Exception('failed to call reddit api')
         link_title_data = self.get_children_of_type(json.loads(kyuu_data), 't1')
 
