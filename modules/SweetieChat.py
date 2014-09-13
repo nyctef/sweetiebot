@@ -193,11 +193,6 @@ class SweetieChat(object):
         return message.sender_nick + ': Ok, I\'ll start chatting again'
 
     @botcmd
-    def quote(self, message):
-        '''Replays sass'''
-        return self.sass.get_next()
-
-    @botcmd
     def sass(self, message):
         '''[message] Remembers some sass to say back next time it is mentioned'''
         if len(message.args) > 400:
