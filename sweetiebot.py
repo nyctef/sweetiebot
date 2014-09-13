@@ -72,8 +72,11 @@ def build_sweetiebot(config=None):
     chat = SweetieChat(bot, actions, sass, config.chatroom, markov)
     roulette = SweetieRoulette(bot, admin)
     pings = SweetiePings(bot, redis_conn)
-    twitter = TwitterClient.get_client(config.twitter_key, config.twitter_secret)
-    watchers = list(map(twitter.get_timeline_watcher, ['EVE_Status', 'EVEOnline']))
+    if hasattr(config, 'twitter_key'):
+        twitter = TwitterClient.get_client(config.twitter_key, config.twitter_secret)
+        watchers = list(map(twitter.get_timeline_watcher, ['EVE_Status', 'EVEOnline']))
+    else:
+        watchers = []
     seen = SweetieSeen(bot, redis_conn)
 
     sweet = Sweetiebot(config.nickname, bot, lookup, mq, admin, chat, roulette,
