@@ -54,6 +54,7 @@ class TimelineWatcher:
         response = requests.get(url, params=data, headers=headers).json()
         return response
 
+    @logerrors
     def get_next_tweet(self):
         # we don't actually want any tweets for our first request -
         # we're just discarding earlier tweets
