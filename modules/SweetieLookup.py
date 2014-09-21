@@ -253,7 +253,7 @@ class SweetieLookup(object):
         link = choice['data']['url']
         text = choice['data']['title']
         html = '<a href="{}">{}</a>'.format(link, text)
-        plain = '{} [{}]'.format(text, link)
+        plain = '{} [ {} ]'.format(text, link)
         return MessageResponse(plain, None, html=html)
 
     @botcmd
@@ -280,7 +280,7 @@ class SweetieLookup(object):
         text = random.choice(link_title_data)['data']['body']
         text = re.split('\.|!|\?', text)[0]
         html = '<a href="{}">{}</a>'.format(link, text)
-        plain = '{} [{}]'.format(text, link)
+        plain = '{} [ {} ]'.format(text, link)
         return MessageResponse(plain, None, html=html)
 
     def get_children_of_type(self, reddit_data, kind):
