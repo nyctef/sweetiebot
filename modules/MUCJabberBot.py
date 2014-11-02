@@ -56,7 +56,7 @@ class MUCJabberBot():
     def on_start(self, event):
         print('sb on_start')
         self._bot.get_roster()
-        self._bot.send_presence()
+        self._bot.send_presence(ppriority=100)
         print('sb join {} as {}'.format(self.room, self.nick))
         self._muc.joinMUC(self.room, self.nick, wait=True)
 
