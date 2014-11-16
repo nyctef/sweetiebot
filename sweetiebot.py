@@ -38,7 +38,7 @@ class Sweetiebot(object):
             tweet = w.get_next_tweet()
             if tweet:
                 self.bot.send_groupchat_message('@{}: {}'.format(
-                    w.username, tweet['text']))
+                    w.username, tweet))
 
     def unknown_command(self, message):
         return self.chat.random_chat(message)

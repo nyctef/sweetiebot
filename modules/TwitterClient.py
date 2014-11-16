@@ -64,12 +64,14 @@ class TimelineWatcher:
         #print(str(tweet))
 
         if tweets:
+            if isinstance(tweets, str):
+                raise Exception(tweets)
             #print(tweet[0]['text'])
             tweet = tweets[0]
             self.latest_tweet = tweet['id']
             #print('setting latest tweet to '+str(self.latest_tweet))
             if should_return:
-                return tweet
+                return tweet['text']
 
 if __name__ == '__main__':
     import config
