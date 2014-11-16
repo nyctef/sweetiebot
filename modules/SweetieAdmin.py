@@ -75,6 +75,7 @@ class SweetieAdmin(object):
             if on_success is not None: on_success()
             log.debug('got affiliation response: '+str(response))
         except IqError as iqe:
+            log.debug('got iqerror: '+str(iqe))
             if on_failure is not None: on_failure()
             if iqe.text:
                 return iqe.text

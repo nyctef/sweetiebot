@@ -30,7 +30,7 @@ class SweetieRoulette(object):
         self.current_chamber += 1
         self.current_chamber = self.current_chamber % 6
         if self.current_chamber == 0:
-            self.admin.kick(speaker, '*BANG*')
+            return self.admin.kick(speaker, '*BANG*')
             self._spin()
         else:
             return '*click*'
