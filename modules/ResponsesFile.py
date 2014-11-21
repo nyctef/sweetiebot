@@ -47,6 +47,12 @@ class ResponsesFile(object):
                 random.shuffle(self.responses)
             self.sass_index = -1
         self.sass_index += 1
+
+        if self.sass_index >= len(self.responses):
+            log.debug("reshuffling sass")
+            random.shuffle(self.responses)
+            self.sass_index = 0
+
         response = self.responses[self.sass_index]
         log.debug("returning response {}: {}".format(self.sass_index, response))
         return response
