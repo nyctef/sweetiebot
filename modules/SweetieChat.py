@@ -138,9 +138,7 @@ class SweetieChat(object):
             return titles
 
         if ":lunaglee:" in message.lower():
-            log.debug(self.get_sender_username(mess))
-            self.bot.kick(self.chatroom, sender,
-                          'Don\'t upset my big sister! :sweetiemad:')
+            self.bot.kick(sender, 'Don\'t upset my big sister! :sweetiemad:')
             return
 
         if "c/d" in message.lower():
