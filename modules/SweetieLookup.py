@@ -178,15 +178,34 @@ class SweetieLookup(object):
         reply = message.sender_nick + ': '+name.title() + ' - ' + reply
         return reply
 
+    class Bunch:
+        __init__ = lambda self, **kw: setattr(self, '__dict__', kw)
+
+    def parse_dice(self, dice):
+        split = dice.split('d', 1)
+        try:
+            dice = int(split[0])
+        except:
+            return SweetieLookup.Bunch(error="Sorry, don't know how to roll '{}' dice".format(split[0]))
+        try:
+            sides = int(split[1])
+        except:
+            return SweetieLookup.Bunch(error="Sorry, don't know how to roll '{}'".format(split[1]))
+        return SweetieLookup.Bunch(dice=dice, sides=sides)
+
     @botcmd
     def roll(self, message):
         '''[eg 5d20] Roll some dice'''
         brup = message.args.split(' ')
         for args in brup:
             try:
-                dice, sides = list(map(int, args.split('d', 1)))
-            except:
-                log.error('bad dice')
+                dice_spec = self.parse_dice(args)
+                if (dice_spec.error):
+                    return dice_spec.error
+                dice = dice_spec.dice
+                sides = dice_spec.sides
+            except Exception as e:
+                log.error('bad dice '+str(e))
                 return "Error parsing input"
             if dice > 25:
                 return "Too many variables in possibilty space, abort!"

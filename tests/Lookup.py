@@ -17,4 +17,12 @@ class LookupTests(unittest.TestCase):
 
         self.assertIsNotNone(response)
 
+    def test_fails_nicely_with_unrecognised_dice(self):
+        response = self.lookup.roll(create_message('!roll 1dbutts'))
+        self.assertEqual("Sorry, don't know how to roll 'butts'", response)
+
+    def test_fails_nicely_with_bad_dice_count(self):
+        response = self.lookup.roll(create_message('!roll oned20'))
+        self.assertEqual("Sorry, don't know how to roll 'one' dice", response)
+
 
