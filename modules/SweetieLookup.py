@@ -249,7 +249,7 @@ class SweetieLookup(object):
                 return "How do you make a dice with less than two sides?"
             if dice < 1:
                 return "You want me to roll...less than one dice?"
-            rolls = self.roll_prim(dice, sides)
+            rolls = self.get_rolls(dice, sides)
         log.debug("roll result: {}".format(rolls))
         roll_list = ', '.join(map(str, rolls))
         if dice_spec.threshold:
@@ -260,7 +260,7 @@ class SweetieLookup(object):
             roll_list += " (sum {})".format(dice_sum)
         return roll_list
 
-    def roll_prim(self, dice=1, sides=6):
+    def get_rolls(self, dice=1, sides=6):
         try:
             return [randint(1, sides) for i in range(dice)]
         except:
