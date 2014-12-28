@@ -76,6 +76,11 @@ class SweetieChat(object):
         try:
             headers = { 'user-agent': 'sweetiebot' }
             res = requests.get(url, timeout=5, headers=headers)
+            # don't try and download big things
+            content = res.raw.read(100000+1, decode_content=True)
+            if len(content) > 100000:
+                log.warning('skipping download of {} due to content-length > 100000')
+                return
             if not 'html' in res.headers['content-type']:
                 return
             soup = BeautifulSoup(res.text)
