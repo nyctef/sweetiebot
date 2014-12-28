@@ -47,5 +47,9 @@ class LookupTests(unittest.TestCase):
         response = self.lookup.roll(create_message('!roll 1d6>5='))
         self.assertIn("(sum ", response)
 
+    def test_can_parse_5d5_sum_ge5(self):
+        dice_spec = self.lookup.parse_dice('5d5=>5')
+        self.assertTrue(dice_spec.show_sum)
+        self.assertEqual(5, dice_spec.threshold)
 
 

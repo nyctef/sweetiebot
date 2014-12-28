@@ -196,7 +196,7 @@ class SweetieLookup(object):
         except:
             return self.dice_error("Sorry, don't know how to roll '{}' dice", dice_count)
         try:
-            split_modifiers = re.split(r'(\d+)', dice_type)
+            split_modifiers = re.split(r'(\d+|=|>)', dice_type)
             split_modifiers = list(filter(len, split_modifiers))
             sides = int(split_modifiers[0])
             current_modifier = None
