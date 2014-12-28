@@ -208,3 +208,6 @@ class SweetieChat(object):
         self.sass.add_to_file(message.args)
         return reply
 
+    @botcmd
+    def choose(self, message):
+        return random.choice(list(map(lambda e: e.strip(), message.args.split(","))))
