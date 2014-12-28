@@ -274,8 +274,8 @@ class SweetieLookup(object):
         def add_roll(self, roll):
             self.rolls.append(int(roll))
             return self
-        def __str__(self):
-            return str(sum(self.rolls))
+        def sum(self):
+            return sum(self.rolls)
 
     def explode_dice(self, rolls, sides):
         sides = int(sides)
@@ -288,7 +288,7 @@ class SweetieLookup(object):
             rerolls = self.get_rolls(len(unexploded_rolls), sides)
             unexploded_rolls = list(map(add_roll, unexploded_rolls, rerolls))
 
-        return list(map(int, map(str, rolls)))
+        return list(map(lambda x: x.sum(), rolls))
 
     def get_rolls(self, dice=1, sides=6):
         try:
