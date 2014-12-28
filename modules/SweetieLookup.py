@@ -196,12 +196,13 @@ class SweetieLookup(object):
         except:
             return self.dice_error("Sorry, don't know how to roll '{}' dice", dice_count)
         try:
-            split_modifiers = re.split(r'(\d+|=|>)', dice_type)
+            split_modifiers = re.split(r'(\d+|=|>|!)', dice_type)
             split_modifiers = list(filter(len, split_modifiers))
             sides = int(split_modifiers[0])
             current_modifier = None
             threshold = None
             show_sum = False
+            explode = False
             # iterate over dice spec, remembering what the last modifier was 
             # in order to interpret the different numbers
             for modifier in split_modifiers:
@@ -216,11 +217,14 @@ class SweetieLookup(object):
                     current_modifier = modifier
                 elif modifier == '=':
                     show_sum = True
+                elif modifier == '!':
+                    explode = True
                 else:
                     raise "unknown modifier"
 
             return SweetieLookup.Bunch(dice=dice, sides=sides,
-                    threshold=threshold, show_sum=show_sum)
+                    threshold=threshold, show_sum=show_sum,
+                    explode=explode)
         except:
             return self.dice_error("Sorry, don't know how to roll '{}'", dice_type)
         return SweetieLookup.Bunch(dice=dice, sides=sides)
@@ -250,6 +254,8 @@ class SweetieLookup(object):
             if dice < 1:
                 return "You want me to roll...less than one dice?"
             rolls = self.get_rolls(dice, sides)
+            if dice_spec.explode:
+                rolls = self.explode_dice(rolls, sides)
         log.debug("roll result: {}".format(rolls))
         roll_list = ', '.join(map(str, rolls))
         if dice_spec.threshold:
@@ -259,6 +265,30 @@ class SweetieLookup(object):
             dice_sum = sum(rolls)
             roll_list += " (sum {})".format(dice_sum)
         return roll_list
+
+    class ExplodingDice:
+        def __init__(self, initialValue):
+            self.rolls = [int(initialValue)]
+        def last_roll(self):
+            return self.rolls[-1]
+        def add_roll(self, roll):
+            self.rolls.append(int(roll))
+            return self
+        def __str__(self):
+            return str(sum(self.rolls))
+
+    def explode_dice(self, rolls, sides):
+        sides = int(sides)
+        rolls = list(map(SweetieLookup.ExplodingDice, rolls))
+        should_explode = lambda r: r.last_roll() == sides
+        add_roll = lambda r, n: r.add_roll(n)
+        unexploded_rolls = list(rolls)
+        while any(unexploded_rolls):
+            unexploded_rolls = list(filter(should_explode, unexploded_rolls))
+            rerolls = self.get_rolls(len(unexploded_rolls), sides)
+            unexploded_rolls = list(map(add_roll, unexploded_rolls, rerolls))
+
+        return list(map(int, map(str, rolls)))
 
     def get_rolls(self, dice=1, sides=6):
         try:

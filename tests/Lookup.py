@@ -1,6 +1,6 @@
 from modules import Message, SweetieLookup
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 def create_message(input, is_pm=False):
     return Message('Sweetiebot', 'sender', 'chat@jabber.org/sender', 'sender@jabber.org', input, input, is_pm)
@@ -52,4 +52,38 @@ class LookupTests(unittest.TestCase):
         self.assertTrue(dice_spec.show_sum)
         self.assertEqual(5, dice_spec.threshold)
 
+    def rolls(self, *rolls):
+        rolls = list(rolls)
+        def mock_function(self, dice=1, sides=6):
+            result = rolls.pop(0)
+            assert(len(result) == dice)
+            return result
+        return mock_function
+
+    def test_can_mock_out_get_rolls(self):
+        with patch.object(SweetieLookup, 'get_rolls', 
+                self.rolls([1,2,3], [2, 4, 6])):
+            response = self.lookup.roll(create_message('!roll 3d3'))
+            self.assertEqual("1, 2, 3", response)
+            response = self.lookup.roll(create_message('!roll 3d3'))
+            self.assertEqual("2, 4, 6", response)
+
+    def test_can_parse_exploding_dice(self):
+        dice_spec = self.lookup.parse_dice('10d6!')
+        self.assertTrue(dice_spec.explode)
+
+    def test_dice_can_explode(self):
+        """exploding dice means that if a dice is rolled at the max value,
+        it is re-rolled and the value of that dice is extended with the 
+        new roll value. This can happen multiple times per dice"""
+        with patch.object(SweetieLookup, 'get_rolls',
+                self.rolls([1, 1, 1, 6, 6, 6], [1, 1, 6], [1], [])):
+            response = self.lookup.roll(create_message('!roll 6d6!'))
+            self.assertEqual("1, 1, 1, 7, 7, 13", response)
+
+    def test_can_roll_some_shadowrun_dice(self):
+        with patch.object(SweetieLookup, 'get_rolls',
+                self.rolls([1, 1, 1, 6, 6, 6], [1, 1, 6], [1], [])):
+            response = self.lookup.roll(create_message('!roll 6d6!>5='))
+            self.assertEqual("1, 1, 1, 7, 7, 13 (3 successes) (sum 30)", response)
 
