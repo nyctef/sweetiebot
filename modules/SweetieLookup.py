@@ -180,17 +180,49 @@ class SweetieLookup(object):
 
     class Bunch:
         __init__ = lambda self, **kw: setattr(self, '__dict__', kw)
+        __getattr__ = lambda self, name: None
+
+    def dice_error(self, message, *args):
+        return SweetieLookup.Bunch(error=message.format(*args))
 
     def parse_dice(self, dice):
         split = dice.split('d', 1)
+        if len(split) < 2:
+            return self.dice_error("Dice need to be specified in the form 2d20")
+        dice_count = split[0]
+        dice_type = split[1]
         try:
-            dice = int(split[0])
+            dice = int(dice_count)
         except:
-            return SweetieLookup.Bunch(error="Sorry, don't know how to roll '{}' dice".format(split[0]))
+            return self.dice_error("Sorry, don't know how to roll '{}' dice", dice_count)
         try:
-            sides = int(split[1])
+            split_modifiers = re.split(r'(\d+)', dice_type)
+            split_modifiers = list(filter(len, split_modifiers))
+            sides = int(split_modifiers[0])
+            current_modifier = None
+            threshold = None
+            show_sum = False
+            # iterate over dice spec, remembering what the last modifier was 
+            # in order to interpret the different numbers
+            for modifier in split_modifiers:
+                if modifier.isdigit():
+                    if current_modifier == '>':
+                        threshold = int(modifier)
+                        current_modifier = None
+                    else: 
+                        assert(current_modifier is None)
+                        sides = int(modifier)
+                elif modifier == '>':
+                    current_modifier = modifier
+                elif modifier == '=':
+                    show_sum = True
+                else:
+                    raise "unknown modifier"
+
+            return SweetieLookup.Bunch(dice=dice, sides=sides,
+                    threshold=threshold, show_sum=show_sum)
         except:
-            return SweetieLookup.Bunch(error="Sorry, don't know how to roll '{}'".format(split[1]))
+            return self.dice_error("Sorry, don't know how to roll '{}'", dice_type)
         return SweetieLookup.Bunch(dice=dice, sides=sides)
 
     @botcmd
@@ -200,7 +232,7 @@ class SweetieLookup(object):
         for args in brup:
             try:
                 dice_spec = self.parse_dice(args)
-                if (dice_spec.error):
+                if dice_spec.error:
                     return dice_spec.error
                 dice = dice_spec.dice
                 sides = dice_spec.sides
@@ -219,7 +251,14 @@ class SweetieLookup(object):
                 return "You want me to roll...less than one dice?"
             rolls = self.roll_prim(dice, sides)
         log.debug("roll result: {}".format(rolls))
-        return ', '.join(map(str, rolls))
+        roll_list = ', '.join(map(str, rolls))
+        if dice_spec.threshold:
+            success_count = len(list(filter(lambda x: x >= dice_spec.threshold, rolls)))
+            roll_list += " ({} successes)".format(success_count)
+        if dice_spec.show_sum:
+            dice_sum = sum(rolls)
+            roll_list += " (sum {})".format(dice_sum)
+        return roll_list
 
     def roll_prim(self, dice=1, sides=6):
         try:
