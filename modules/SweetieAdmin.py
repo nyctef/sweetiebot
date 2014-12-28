@@ -59,8 +59,10 @@ class SweetieAdmin(object):
         query = ET.Element('{http://jabber.org/protocol/muc#admin}query')
         if nick is not None:
             item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {atype:value, 'nick':nick})
-        else:
+        elif jid is not None:
             item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {atype:value, 'jid':jid})
+        else:
+            raise Exception("nick or jid needs to be set")
         query.append(item)
         if reason is not None:
             r = ET.Element('{http://jabber.org/protocol/muc#admin}reason')
