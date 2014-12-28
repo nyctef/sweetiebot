@@ -182,7 +182,6 @@ class SweetieLookup(object):
     def roll(self, message):
         '''[eg 5d20] Roll some dice'''
         brup = message.args.split(' ')
-        reply = ''
         for args in brup:
             try:
                 dice, sides = list(map(int, args.split('d', 1)))
@@ -200,15 +199,8 @@ class SweetieLookup(object):
             if dice < 1:
                 return "You want me to roll...less than one dice?"
             rolls = self.roll_prim(dice, sides)
-            if len(rolls) < 1:
-                return
-            new_dice = ', '.join(map(str, rolls))
-            if not reply:
-                reply = new_dice
-            else:
-                reply = reply + " ~ " + new_dice
-        log.debug("roll result: {}".format(reply))
-        return reply
+        log.debug("roll result: {}".format(rolls))
+        return ', '.join(map(str, rolls))
 
     def roll_prim(self, dice=1, sides=6):
         try:
