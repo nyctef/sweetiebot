@@ -155,7 +155,7 @@ class SweetieAdmin(object):
 
         if message.user_jid not in self.mods:
             log.debug('failing kick because {} is not registered as a mod'.format(message.sender_nick))
-            return "noooooooope."
+            return "Do you have a flag? No flag, no kick. You can't have one!"
 
         log.debug("trying to kick "+nick+" with reason "+reason)
 
@@ -173,7 +173,7 @@ class SweetieAdmin(object):
 
         if message.user_jid not in self.mods:
             log.debug('failing kick because {} is not registered as a mod'.format(message.sender_nick))
-            return "noooooooope."
+            return "Do you have a flag? No flag, no kick. You can't have one!"
 
         log.debug("trying to kick "+jid+" with reason "+reason)
 
