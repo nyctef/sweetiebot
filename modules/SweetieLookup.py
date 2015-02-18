@@ -76,12 +76,16 @@ class SweetieLookup(object):
     def id_lookup(self, name):
         ''' Lookup a typeid in typeid.txt
 
-        To generate this file, open a recent sqlite data dump with sqlite3
-        and run
+        To generate this file, run
 
+        wget https://www.fuzzwork.co.uk/dump/sqlite-latest.sqlite.bz2
+        bzip2 -d sqlite-latest.sqlite.bz2
+        sqlite3 sqlite-latest.sqlite
         .output typeid.txt
-
         select typeID || '=' || typeName from invTypes where published = 1;
+        .quit
+        rm sqlite-latest.sqlite
+
         '''
         if name.lower() == 'plex' or name.lower() == '30 day':
             return 29668, name
