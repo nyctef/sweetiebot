@@ -103,6 +103,8 @@ class SweetieChat(object):
     def title_filter(self, result):
         if (result.strip() == 'imgur: the simple image sharer'):
             return False
+        if (result.strip() == 'Imgur'):
+            return False
         if (result.strip() == 'Error - Test Forums Please Ignore'):
             return False
         return True
