@@ -11,16 +11,25 @@ class SweetieDe(object):
     kick_owl_delay = 7200
     last_owl_kick = 0
 
-    def __init__(self, bot, admin, mq):
+    def __init__(self, bot, admin, mq, failure_messages):
         bot.load_commands_from(self)
         self.admin = admin
         self.mq = mq
+        
+        self.failures = failure_messages
+
+    def chance(self, probability):
+        return random.random() < probability
 
     @botcmd
     @logerrors
     def deowl(self, message):
         '''Your friendly neigh-bourhood pest control. Has a cooldown'''
         speaker = message.sender_jid
+        
+        if self.chance(0.3):
+            return self.failures.get_next()
+
         '''Only kicks :owl, long cooldown'''
         if self.last_owl_kick:
             if (datetime.now() - self.last_owl_kick).seconds < self.kick_owl_delay:
