@@ -144,9 +144,9 @@ class SweetieChat(object):
         if titles:
             return titles
 
-        if ":lunaglee:" in message.lower():
-            self.bot.kick(sender, 'Don\'t upset my big sister! :sweetiemad:')
-            return
+        #if ":lunaglee:" in message.lower():
+        #    self.bot.kick(sender, 'Don\'t upset my big sister! :sweetiemad:')
+        #    return
 
         if "c/d" in message.lower():
             return sender + ": " + random.choice(["c", "d"])
