@@ -60,33 +60,27 @@ class SweetieLookup(object):
         return r
 
     def read_ids(self):
-        id_dic = {}
-
-        with open('data/typeid.txt', 'rb') as f:
-            for line in f:
-                try:
-                    line = line.decode('utf-8').replace("\n", "")
-                    typeid, item_name = line.split('=', 1)
-                    id_dic[item_name.upper()] = int(typeid)
-                except Exception as e:
-                    log.warning('failed to decode line: (skipping) '+str(e))
-        f.close()
-        return id_dic
+        result = {}
+        types_href_regex = re.compile('http://public-crest.eveonline.com/types/(\d+)/')
+        types_url = 'http://public-crest.eveonline.com/types/'
+        while types_url:
+            try:
+                types_res = requests.get(types_url, timeout=10)
+                types = json.loads(types_res.text)
+                for type in types['items']:
+                    id = types_href_regex.match(type['href']).group(1)
+                    name = type['name'].upper()
+                    result[name] = id
+                if 'next' in types:
+                    types_url = types['next']['href']
+                else:
+                    types_url = None
+            except Exception as e:
+                log.exception(e)
+        log.info('found {} typeid results'.format(len(result)))
+        return result
 
     def id_lookup(self, name):
-        ''' Lookup a typeid in typeid.txt
-
-        To generate this file, run
-
-        wget https://www.fuzzwork.co.uk/dump/sqlite-latest.sqlite.bz2
-        bzip2 -d sqlite-latest.sqlite.bz2
-        sqlite3 sqlite-latest.sqlite
-        .output typeid.txt
-        select typeID || '=' || typeName from invTypes where published = 1;
-        .quit
-        rm sqlite-latest.sqlite
-
-        '''
         if name.lower() == 'plex' or name.lower() == '30 day':
             return 29668, name
         test = name
