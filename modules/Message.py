@@ -29,6 +29,7 @@ class Message(object):
         is_ping: {}'''.format(self.nickname, self.sender_nick, self.sender_jid,
             self.user_jid, self.message_text, self.message_html, self.command, self.args,
             self.is_ping))
+        log.info('{}: {}'.format(self.sender_nick, self.message_text))
 
     def _is_ping(self, nickname, message):
         return nickname.lower() in message.lower()

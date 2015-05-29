@@ -42,9 +42,9 @@ class MUCJabberBot():
                 return self.unknown_command_callback(message)
         self.message_processor = MessageProcessor(on_unknown_callback)
 
-        print('sb connect')
+        log.info('sb connect')
         if bot.connect():
-            print('sb process')
+            log.info('sb process')
             bot.process()
         else:
             raise 'could not connect'
@@ -58,10 +58,10 @@ class MUCJabberBot():
         print('\n=============\ndisconnected\n============\n')
 
     def on_start(self, event):
-        print('sb on_start')
+        log.info('sb on_start')
         self._bot.get_roster()
         self._bot.send_presence(ppriority=100)
-        print('sb join {} as {}'.format(self.room, self.nick))
+        log.info('sb join {} as {}'.format(self.room, self.nick))
         self._muc.joinMUC(self.room, self.nick, wait=True)
 
     @logerrors

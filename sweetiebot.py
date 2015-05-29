@@ -103,6 +103,8 @@ def setup_logging(config):
     errorhandler.setFormatter(formatter)
     logging.getLogger().addHandler(errorhandler)
 
+    logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARNING)
+
 if __name__ == '__main__':
     import config
     setup_logging(config)
