@@ -18,6 +18,8 @@ class SweetieRoulette(object):
     @logerrors
     def spin(self, message):
         """Spin the barrel (see also: roulette)"""
+        if message.is_pm:
+            return ':lyraahem: no tampering with the gun under the table now'
         self._spin()
         return '*WHIIIIiiiiirr...*'
 
@@ -25,6 +27,8 @@ class SweetieRoulette(object):
     @logerrors
     def roulette(self, message):
         """Six bullets, one chamber (see also: spin)"""
+        if message.is_pm:
+            return ':lyraahem: suicide should be a social activity'
         speaker = message.sender_nick
 
         self.current_chamber += 1
