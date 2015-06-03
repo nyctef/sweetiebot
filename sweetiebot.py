@@ -64,8 +64,8 @@ def build_sweetiebot(config=None):
     admin = SweetieAdmin(bot, config.chatroom, config.mods)
     mq = SweetieMQ(config)
     de = SweetieDe(bot, admin, mq, ResponsesFile('data/deowl_fails.txt'))
-    actions = ResponsesFile('data/Sweetiebot.actions')
-    sass = ResponsesFile('data/Sweetiebot.sass')
+    actions = ResponsesFile('data/actions.txt')
+    sass = ResponsesFile('data/sass.txt')
     markov = SweetieMarkov(redis_conn, 'data/banned_keywords.txt',
                            'data/preferred_keywords.txt',
                            'data/swap_words.txt')
