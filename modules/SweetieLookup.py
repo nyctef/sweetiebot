@@ -45,11 +45,12 @@ class SweetieLookup(object):
               "&typeid=" + \
               str(id)
         log.debug('asking for prices at '+url)
-        apiresult = urllib.request.urlopen(url).read()
         try:
+            apiresult = requests.get(url).text
             root = ET.fromstring(apiresult)
-        except:
-            log.exception('error parsing evecentral xml')
+        except Exception as e:
+            print(e)
+            log.exception(e, 'error parsing evecentral xml')
             return "EveCentral is unhappy: "+apiresult[:200]
 
         buy = root.find('marketstat/type/buy/max').text
