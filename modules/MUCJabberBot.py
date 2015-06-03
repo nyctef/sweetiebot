@@ -55,7 +55,9 @@ class MUCJabberBot():
         self._bot.disconnect()
 
     def on_disconnected(self, event):
-        print('\n=============\ndisconnected\n============\n')
+        log.error('\n=============\ndisconnected\n============\n')
+        # do we need to do this?
+        #self._bot.scheduler.quit()
 
     def on_start(self, event):
         log.info('sb on_start')

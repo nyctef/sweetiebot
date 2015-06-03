@@ -15,6 +15,10 @@ class PBLogHandler(logging.Handler):
 
     def emit(self, record):
         if self.pb is not None:
-            title = "Sweetiebot: "+record.message
-            body = ''.join(traceback.format_exception(*record.exc_info))
-            self.pb.push_note(title, body)
+            try:
+                title = "Sweetiebot: "+record.message
+                body = ''.join(traceback.format_exception(*record.exc_info))
+                self.pb.push_note(title, body)
+            except:
+                print('exception in PBLogHandler')
+                pass
