@@ -311,6 +311,7 @@ class SweetieLookup(object):
     @logerrors
     def quote(self, message):
         '''Cheesy fortune files are the highest form of wit'''
+        return "quote is broken while iheartquotes.com is down"
         data = self.get('http://www.iheartquotes.com/api/v1/random?format=json&max_lines=3')
         data = json.loads(data)
         text = data['quote']
