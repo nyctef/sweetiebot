@@ -25,6 +25,9 @@ class SweetieDe(object):
     @logerrors
     def deowl(self, message):
         '''Your friendly neigh-bourhood pest control. Has a cooldown'''
+        if message.is_pm:
+            return "But owl isn't here ... :sweetieskeptical:"
+
         speaker = message.sender_jid
         
         if self.chance(0.3):
