@@ -1,6 +1,7 @@
 from datetime import datetime
 import urllib.request, urllib.parse, urllib.error
 import requests
+from requests.exceptions import Timeout
 import logging
 import difflib
 import json
@@ -62,8 +63,8 @@ class SweetieLookup(object):
 
     def read_ids(self):
         result = {}
-        types_href_regex = re.compile('http://public-crest.eveonline.com/types/(\d+)/')
-        types_url = 'http://public-crest.eveonline.com/types/'
+        types_href_regex = re.compile('https://public-crest.eveonline.com/types/(\d+)/')
+        types_url = 'https://public-crest.eveonline.com/types/'
         while types_url:
             try:
                 types_res = requests.get(types_url, timeout=10)
@@ -76,6 +77,8 @@ class SweetieLookup(object):
                     types_url = types['next']['href']
                 else:
                     types_url = None
+            except Timeout as t:
+                raise
             except Exception as e:
                 log.exception(e)
         log.info('found {} typeid results'.format(len(result)))
