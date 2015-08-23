@@ -50,6 +50,7 @@ def build_sweetiebot(config=None):
     if config is None: import config
     resource = config.nickname + randomstr()
     if config.fake_redis:
+        log.debug('faking out redis')
         redis_conn = FakeRedis()
     else:
         redis_conn = redis.Redis('localhost')

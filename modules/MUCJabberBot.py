@@ -7,6 +7,7 @@ from utils import logerrors
 from sleekxmpp import ClientXMPP
 from sleekxmpp.xmlstream.jid import JID
 import html
+from time import sleep
 
 log = logging.getLogger(__name__)
 
@@ -29,6 +30,7 @@ class MUCJabberBot():
         bot.add_event_handler('message', self.on_message)
         bot.add_event_handler('groupchat_presence', self.on_presence)
         bot.add_event_handler('disconnected', self.on_disconnected)
+        bot.add_event_handler('groupchat_subject', self.on_room_joined)
 
         bot.register_plugin('xep_0045')
         self._muc = bot.plugin['xep_0045']
@@ -49,6 +51,8 @@ class MUCJabberBot():
         else:
             raise 'could not connect'
 
+        self.add_presence_handler(self.rejoin_if_kicked)
+
         self._bot = bot
 
     def disconnect(self):
@@ -64,7 +68,17 @@ class MUCJabberBot():
         self._bot.get_roster()
         self._bot.send_presence(ppriority=100)
         log.info('sb join {} as {}'.format(self.room, self.nick))
+        self.join_room()
+
+    def join_room(self):
         self._muc.joinMUC(self.room, self.nick, wait=True)
+
+    def on_room_joined(self, room_join_message):
+        '''Note that this event might actually be called multiple
+        times due to the room name being changed. This method
+        needs to be idempotent'''
+        log.debug('on_room_joined with {}'.format(room_join_message))
+        self._rejoining = False
 
     @logerrors
     def on_message(self, message_stanza):
@@ -129,11 +143,15 @@ class MUCJabberBot():
 
     @logerrors
     def on_presence(self, presence_stanza):
-        user = JID(presence_stanza['muc']['jid'])
+        log.debug('creating Presence from {}'.format(presence_stanza))
         muc_jid = JID(presence_stanza['from'])
-        nick = presence_stanza['muc']['nick']
-        status_text = presence_stanza['status']
+        user = JID(presence_stanza['to'])
         ptype = presence_stanza['type']
+        status_text = presence_stanza['status']
+        log.debug('created muc_jid={} user={} ptype={} status_text={}'.format(
+            muc_jid, user, ptype, status_text))
+
+        nick = presence_stanza['muc']['nick']
 
         presence = Presence(muc_jid, user, ptype, status_text)
         for callback in self._presence_callbacks:
@@ -185,12 +203,34 @@ class MUCJabberBot():
         iq.set_payload(xml)
         return iq
 
-    def add_recurring_task(self, callback, secs):
-        self._bot.scheduler.add('custom task '+callback.__name__, secs,
-                                callback, repeat=True)
+    def add_recurring_task(self, callback, secs, repeat=True):
+        task_name = 'custom task '+callback.__name__
+        self._bot.scheduler.remove(task_name)
+        self._bot.scheduler.add(task_name, secs, callback, repeat)
 
     def add_presence_handler(self, callback):
         self._presence_callbacks.append(callback)
 
     def add_message_handler(self, callback):
         self._message_callbacks.append(callback)
+
+    def rejoin_if_kicked(self, presence):
+        log.debug(presence)
+        log.debug('recieved presence: {} from {}'.format(presence.presence_type,
+                                                         presence.user_jid))
+        if presence.presence_type != 'unavailable':
+            return
+        user = presence.user_jid.bare
+        if user == self.jid.bare:
+            log.debug('looks like we were kicked, rejoining...')
+            self._rejoining = True
+            self.rejoin()
+        else:
+            log.debug('{} was kicked'.format(user))
+
+    def rejoin(self):
+        if self._rejoining == False: return
+        log.debug('attempting a room rejoin... (self._rejoining={})'.format(self._rejoining))
+        self.join_room()
+        self.add_recurring_task(self.rejoin, 5, repeat=False)
+
