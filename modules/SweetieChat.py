@@ -105,6 +105,8 @@ class SweetieChat(object):
             return False
         if (result.strip() == 'Imgur'):
             return False
+        if (result.strip() == 'Imgur: The most awesome images on the Internet'):
+            return False
         if (result.strip() == 'Error - Test Forums Please Ignore'):
             return False
         return True
