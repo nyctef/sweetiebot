@@ -71,7 +71,7 @@ class MUCJabberBot():
         self.join_room()
 
     def join_room(self):
-        self._muc.joinMUC(self.room, self.nick, wait=True)
+        self._muc.joinMUC(self.room, self.nick)
 
     def on_room_joined(self, room_join_message):
         '''Note that this event might actually be called multiple
