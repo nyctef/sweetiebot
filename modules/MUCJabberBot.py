@@ -206,7 +206,7 @@ class MUCJabberBot():
     def add_recurring_task(self, callback, secs, repeat=True):
         task_name = 'custom task '+callback.__name__
         self._bot.scheduler.remove(task_name)
-        self._bot.scheduler.add(task_name, secs, callback, repeat)
+        self._bot.scheduler.add(task_name, secs, callback, repeat=repeat)
 
     def add_presence_handler(self, callback):
         self._presence_callbacks.append(callback)
