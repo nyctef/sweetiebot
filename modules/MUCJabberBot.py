@@ -145,7 +145,7 @@ class MUCJabberBot():
     def on_presence(self, presence_stanza):
         log.debug('creating Presence from {}'.format(presence_stanza))
         muc_jid = JID(presence_stanza['from'])
-        user = JID(presence_stanza['to'])
+        user = JID(presence_stanza['muc']['jid'])
         ptype = presence_stanza['type']
         status_text = presence_stanza['status']
         log.debug('created muc_jid={} user={} ptype={} status_text={}'.format(
