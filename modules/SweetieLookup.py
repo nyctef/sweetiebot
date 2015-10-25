@@ -259,22 +259,6 @@ class SweetieLookup(object):
         reply = message.sender_nick + ': ' + reply
         return reply
 
-    @botcmd(hidden=True)
-    @logerrors
-    def kwote(self, message):
-        return self.quote(message)
-
-    @botcmd
-    @logerrors
-    def quote(self, message):
-        '''Cheesy fortune files are the highest form of wit'''
-        return "quote is broken while iheartquotes.com is down"
-        data = self.get('http://www.iheartquotes.com/api/v1/random?format=json&max_lines=3')
-        data = json.loads(data)
-        text = data['quote']
-        html = text.replace('\n', '<br/>')
-        return MessageResponse(text, None, html=html)
-
     @logerrors
     def random_reddit_link(self, subreddit, domain_filter=None):
         luna_data = self.get('http://www.reddit.com/r/{}/new.json?limit=100'
