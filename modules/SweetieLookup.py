@@ -111,52 +111,6 @@ class SweetieLookup(object):
                     i_name = maybe[0]
         return i_id, i_name
 
-    def youtube_search(self, keyword, channel):
-        if not keyword or keyword.isspace():
-            return "https://www.youtube.com/watch?v=qRC4Vk6kisY"
-
-        url = 'http://gdata.youtube.com/feeds/api/videos?max-results=1&alt=json&safeSearch=none'
-        url += '&q={}'.format(keyword)
-        if (channel):
-            url += '&author={}'.format(channel)
-        log.debug('requesting {}'.format(url))
-
-        response = self.get(url, {'GData-Version': '2'})
-        if response is None:
-            return "Request failed. Something's fucky ..."
-        log.debug(response)
-
-        result = json.loads(response)
-        entries = result['feed']['entry']
-        if not entries: return "No results found, sorry"
-        entry = entries[0]
-        log.debug('entry found: '+str(entry))
-        title = entry['title']['$t']
-        links = entry['link']
-        links = filter(lambda x: x['rel'] == 'alternate', links)
-        links = map(lambda x: x['href'], links)
-        link = next(links)
-
-        return title + ' - ' + link
-
-    @botcmd
-    @logerrors
-    def nerd3(self, message):
-        '''Search for a video by NerdCubed'''
-        return self.youtube_search(message.args, 'OfficialNerdCubed')
-
-    @botcmd
-    @logerrors
-    def tb(self, message):
-        '''Search for a video by TotalBiscuit'''
-        return self.youtube_search(message.args, 'TotalHalibut')
-
-    @botcmd
-    @logerrors
-    def yt(self, message):
-        '''Search for a video on youtube'''
-        return self.youtube_search(message.args, None)
-
     @logerrors
     def hype(self, message):
         """Get hype! Print time until S4 starts"""
