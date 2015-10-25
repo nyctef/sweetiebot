@@ -214,4 +214,5 @@ class SweetieChat(object):
 
     @botcmd
     def choose(self, message):
+        '''[choices] Choose one of a (comma-separated) list of options'''
         return random.choice(list(map(lambda e: e.strip(), message.args.split(","))))
