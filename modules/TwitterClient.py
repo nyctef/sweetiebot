@@ -36,7 +36,6 @@ class TimelineWatcher:
         self.username = username
         self.latest_tweet = None
 
-    @logerrors
     def get_timeline(self, since_id, count):
         url = 'https://api.twitter.com/1.1/statuses/user_timeline.json'
         data = {
@@ -56,22 +55,25 @@ class TimelineWatcher:
 
     @logerrors
     def get_next_tweet(self):
-        # we don't actually want any tweets for our first request -
-        # we're just discarding earlier tweets
-        should_return = self.latest_tweet is not None
+        try:
+            # we don't actually want any tweets for our first request -
+            # we're just discarding earlier tweets
+            should_return = self.latest_tweet is not None
 
-        tweets = self.get_timeline(self.latest_tweet, 1)
-        #print(str(tweet))
+            tweets = self.get_timeline(self.latest_tweet, 1)
+            #print(str(tweet))
 
-        if tweets:
-            if isinstance(tweets, str):
-                raise Exception(tweets)
-            #print(tweet[0]['text'])
-            tweet = tweets[0]
-            self.latest_tweet = tweet['id']
-            #print('setting latest tweet to '+str(self.latest_tweet))
-            if should_return:
-                return tweet['text']
+            if tweets:
+                if isinstance(tweets, str):
+                    raise Exception(tweets)
+                #print(tweet[0]['text'])
+                tweet = tweets[0]
+                self.latest_tweet = tweet['id']
+                #print('setting latest tweet to '+str(self.latest_tweet))
+                if should_return:
+                    return tweet['text']
+        except Exception as e:
+            log.exception('Error pulling tweets from twitter')
 
 if __name__ == '__main__':
     import config
