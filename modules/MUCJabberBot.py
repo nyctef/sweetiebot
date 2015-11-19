@@ -29,7 +29,6 @@ class MUCJabberBot():
         bot.add_event_handler('session_start', self.on_start)
         bot.add_event_handler('message', self.on_message)
         bot.add_event_handler('groupchat_presence', self.on_presence)
-        bot.add_event_handler('disconnected', self.on_disconnected)
         bot.add_event_handler('groupchat_subject', self.on_room_joined)
 
         bot.register_plugin('xep_0045')
@@ -57,11 +56,6 @@ class MUCJabberBot():
 
     def disconnect(self):
         self._bot.disconnect()
-
-    def on_disconnected(self, event):
-        log.error('\n=============\ndisconnected\n============\n')
-        # do we need to do this?
-        #self._bot.scheduler.quit()
 
     def on_start(self, event):
         log.info('sb on_start')
