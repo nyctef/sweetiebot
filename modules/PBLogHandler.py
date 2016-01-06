@@ -10,8 +10,10 @@ class PBLogHandler(logging.Handler):
             config.pushbullet_device is None):
             self.pb = None
             return
-        self.pb = pushbullet.Device(config.pushbullet_api,
-                                    config.pushbullet_device)
+        pb_api = pushbullet.Pushbullet(config.pushbullet_api)
+        pb_devices = pb_api.devices
+        pb_device = next(filter(lambda x: x.device_iden == config.pushbullet_device, pb_devices))
+        self.pb = pb_device
 
     def emit(self, record):
         if self.pb is not None:
