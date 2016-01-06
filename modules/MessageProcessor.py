@@ -18,7 +18,7 @@ class MessageProcessor():
         if message.command is not None:
             command = message.command
             if command == 'help':
-                return self.help()
+                return self.help(message)
             if command in self.commands:
                 log.debug('running command '+command)
                 return self.commands[command](message)
@@ -27,7 +27,10 @@ class MessageProcessor():
             return self.unknown_command_callback(message)
 
     @logerrors
-    def help(self):
+    def help(self, message):
+        if not message.is_pm:
+            return "Hi! I'm Sweetiebot. Use 'help' in a PM for more details"
+
         commands = self.commands.values()
         result = []
         prefix = \
