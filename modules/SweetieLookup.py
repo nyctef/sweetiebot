@@ -287,7 +287,7 @@ class SweetieLookup(object):
     @logerrors
     def woon(self, message):
         '''loona woona'''
-        luna_data = self.get('http://www.reddit.com/r/luna/new.json?limit=100')
+        luna_data = self.get('http://www.reddit.com/r/princessluna/new.json?limit=100')
         if luna_data is None: raise Exception('failed to call reddit api')
         link_data = self.get_children_of_type(json.loads(luna_data), 't3')
 
