@@ -109,6 +109,8 @@ class SweetieChat(object):
             return False
         if (result.strip() == 'Error - Test Forums Please Ignore'):
             return False
+        if ('jiffier gifs through HTML5 Video Conversion' in result.strip()):
+            return False
         return True
 
     def remove_extra_whitespace(self, result):
