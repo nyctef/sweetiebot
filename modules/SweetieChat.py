@@ -132,7 +132,7 @@ class SweetieChat(object):
         devartregex = re.compile(r'^http(s)?://\w+\.deviantart\.[\w/]+-(\w+)\.\w+$')
         match = devartregex.match(link)
         if (match):
-            replacement = 'http://backend.deviantart.com/oembed?url=http://www.deviantart.com/gallery/%23/'+match.group(2)
+            replacement = 'http://backend.deviantart.com/oembed?url=http://fav.me/'+match.group(2)
             log.debug("replacing "+link+" with "+replacement)
             return replacement
         return link
