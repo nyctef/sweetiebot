@@ -24,7 +24,7 @@ class TwitterClient:
 
     def get_timeline_watcher(self, username):
         watcher = TimelineWatcher(self.bearer_token, username)
-        watcher.get_next_tweet()
+        watcher.get_next()
         return watcher
 
 # TODO: we'll probably want a search watcher as well (eg #sweetiebot)
@@ -54,7 +54,7 @@ class TimelineWatcher:
         return response
 
     @logerrors
-    def get_next_tweet(self):
+    def get_next(self):
         try:
             # we don't actually want any tweets for our first request -
             # we're just discarding earlier tweets
@@ -71,7 +71,7 @@ class TimelineWatcher:
                 self.latest_tweet = tweet['id']
                 #print('setting latest tweet to '+str(self.latest_tweet))
                 if should_return:
-                    return tweet['text']
+                    return '@{}: {}'.format(self.username, tweet['text'])
         except Exception as e:
             log.exception('Error pulling tweets from twitter')
 
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     #watcher = client.get_timeline_watcher('EVE_Status')
     watcher = client.get_timeline_watcher('RedScareBot')
     while True:
-        tweet = watcher.get_next_tweet()
+        tweet = watcher.get_next()
         if tweet: print(str(tweet['text']))
         time.sleep(10)
 

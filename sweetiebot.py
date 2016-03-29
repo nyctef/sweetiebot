@@ -33,12 +33,10 @@ class Sweetiebot(object):
         self.bot.add_recurring_task(self.check_watchers, 5*60)
 
     def check_watchers(self):
-        # TODO not sure this method really belongs here
         for w in self.watchers:
-            tweet = w.get_next_tweet()
-            if tweet:
-                self.bot.send_groupchat_message('@{}: {}'.format(
-                    w.username, tweet))
+            next = w.get_next()
+            if next:
+                self.bot.send_groupchat_message(next)
 
     def unknown_command(self, message):
         return self.chat.random_chat(message)
