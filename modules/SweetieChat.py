@@ -3,6 +3,7 @@ import re
 import random
 from random import randint
 from utils import logerrors, botcmd
+from pprint import pprint
 
 log = logging.getLogger(__name__)
 
@@ -76,6 +77,7 @@ class SweetieChat(object):
         try:
             headers = { 'user-agent': 'sweetiebot' }
             res = requests.get(url, timeout=5, headers=headers)
+            if res.status_code != 200: return None
             # don't try and download big things
             content = res.raw.read(100000+1, decode_content=True)
             if len(content) > 100000:
@@ -95,7 +97,6 @@ class SweetieChat(object):
             headers = { 'user-agent': 'sweetiebot' }
             res = requests.get(url, timeout=5, headers=headers)
             result = json.loads(res.text)
-            log.debug(result)
             return result['title'] + ' by ' +result['author_name']
         except Exception as e:
             log.warning("error fetching url "+url+" : "+str(e))
@@ -106,8 +107,6 @@ class SweetieChat(object):
         if (result.strip() == 'Imgur'):
             return False
         if (result.strip() == 'Imgur: The most awesome images on the Internet'):
-            return False
-        if (result.strip() == 'Error - Test Forums Please Ignore'):
             return False
         if ('jiffier gifs through HTML5 Video Conversion' in result.strip()):
             return False
