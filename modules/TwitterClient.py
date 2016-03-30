@@ -53,7 +53,6 @@ class TimelineWatcher:
         response = requests.get(url, params=data, headers=headers).json()
         return response
 
-    @logerrors
     def get_next(self):
         try:
             # we don't actually want any tweets for our first request -
