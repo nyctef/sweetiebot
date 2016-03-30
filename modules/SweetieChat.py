@@ -33,6 +33,7 @@ class SweetieChat(object):
     lunabeh_count = 0
     target = '<target>'
     chattiness = .02
+    cadance_musics_log = ResponsesFile('cadance_musics.log')
 
     def __init__(self, bot, actions, sass, chatroom, markov):
         self.bot = bot
@@ -135,6 +136,24 @@ class SweetieChat(object):
             log.debug("replacing "+link+" with "+replacement)
             return replacement
         return link
+    def has_youtube_link(self,link):
+        youtuberegex = re.complile(r'(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})')
+        match = youtuberegex.match(link)
+        log.debug("Matched youtube link")
+        if (match):
+            return True
+        return False
+    def do_cadance_musics(self, mess):
+        if (mess.sender_jid == "princess_cadence@friendshipismagicsquad.com"):
+            titles = self.get_page_titles(mess.message_text)
+            has_youtube = False            
+            for title in titles:
+                if (self.has_youtube_link(title)):
+                    has_youtube = True
+                    break
+            if (has_youtube):
+                cadance_musics_log.add_to_file(mess.message_text)
+                log.debug("Added music to log")
 
     @logerrors
     def random_chat(self, mess):
@@ -142,6 +161,9 @@ class SweetieChat(object):
         message = mess.message_text
         sender = mess.sender_nick
         self.markov.store_message(message)
+
+        #logs Cadance musics
+        self.do_cadance_musics(mess)
 
         titles = self.get_page_titles(message)
         if titles:
@@ -176,6 +198,10 @@ class SweetieChat(object):
 
         if is_ping:
             return self.sass.get_next()
+
+    @botcmd
+    def cadance(self, message):
+        return self.cadance_musics_log.get_next()
 
     @botcmd(hidden=True)
     def quiet(self, message):
