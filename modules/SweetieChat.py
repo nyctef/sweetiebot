@@ -33,9 +33,8 @@ class SweetieChat(object):
     lunabeh_count = 0
     target = '<target>'
     chattiness = .02
-    cadance_musics_log = ResponsesFile('cadance_musics.log')
 
-    def __init__(self, bot, actions, sass, chatroom, markov):
+    def __init__(self, bot, actions, sass, chatroom, markov, cadmusic):
         self.bot = bot
         self.bot.load_commands_from(self)
         self.nickname = self.bot.nick
@@ -43,6 +42,7 @@ class SweetieChat(object):
         self.sass = sass
         self.chatroom = chatroom
         self.markov = markov
+        self.cadance_musics_log = cadmusic
 
     def save_action(self, action_str):
         self.actions.add_to_file(action_str)
@@ -136,24 +136,18 @@ class SweetieChat(object):
             log.debug("replacing "+link+" with "+replacement)
             return replacement
         return link
-    def has_youtube_link(self,link):
-        youtuberegex = re.complile(r'(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})')
-        match = youtuberegex.match(link)
-        log.debug("Matched youtube link")
-        if (match):
-            return True
-        return False
+
+    def get_youtube_links(self, text):
+        youtuberegex = re.compile(r'(?:https?://)?(?:www\.)?(?:youtube|youtu|youtube-nocookie)\.(?:com|be)/(?:watch\?v=|embed/|v/|[^ ]+\?v=)?(?:[^&=%\?]{11})')
+        links = youtuberegex.findall(text)
+        if links: log.debug('found youtube links: {}'.format(links))
+        return links
+
     def do_cadance_musics(self, mess):
-        if (mess.sender_jid == "princess_cadence@friendshipismagicsquad.com"):
-            titles = self.get_page_titles(mess.message_text)
-            has_youtube = False            
-            for title in titles:
-                if (self.has_youtube_link(title)):
-                    has_youtube = True
-                    break
-            if (has_youtube):
-                cadance_musics_log.add_to_file(mess.message_text)
-                log.debug("Added music to log")
+        if mess.sender_jid == "princess_cadence@friendshipismagicsquad.com":
+            for link in self.get_youtube_links(mess.message_text):
+                self.cadance_musics_log.add_to_file(link)
+                log.info("Added {} to cadmusic".format(link))
 
     @logerrors
     def random_chat(self, mess):
@@ -201,7 +195,9 @@ class SweetieChat(object):
 
     @botcmd
     def cadance(self, message):
-        return self.cadance_musics_log.get_next()
+        return '{} {} :{}:'.format(self.cadance_musics_log.get_next(),
+                random.choice(['horse music', 'music for horses']),
+                random.choice(['3', 'cadancefilly', 'cadancehappy']))
 
     @botcmd(hidden=True)
     def quiet(self, message):

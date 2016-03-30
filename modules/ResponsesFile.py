@@ -15,8 +15,7 @@ class ResponsesFile(object):
             for line in in_f:
                 # not a duplicate
                 if line not in lines_seen and not ":lunaglee:" in line:
-                    if not any(i in line for i in ('#', '/', '\\')):
-                        lines_seen.add(line)
+                    lines_seen.add(line)
         with open(self.filename, "w") as out_f:
             out_f.writelines(sorted(lines_seen))
         return

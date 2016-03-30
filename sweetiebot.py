@@ -65,10 +65,11 @@ def build_sweetiebot(config=None):
     de = SweetieDe(bot, admin, mq, ResponsesFile('data/deowl_fails.txt'))
     actions = ResponsesFile('data/actions.txt')
     sass = ResponsesFile('data/sass.txt')
+    cadmusic = ResponsesFile('data/cadmusic.txt')
     markov = SweetieMarkov(redis_conn, 'data/banned_keywords.txt',
                            'data/preferred_keywords.txt',
                            'data/swap_words.txt')
-    chat = SweetieChat(bot, actions, sass, config.chatroom, markov)
+    chat = SweetieChat(bot, actions, sass, config.chatroom, markov, cadmusic)
     roulette = SweetieRoulette(bot, admin)
     pings = SweetiePings(bot, redis_conn)
     if hasattr(config, 'twitter_key'):
