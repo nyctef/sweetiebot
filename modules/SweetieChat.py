@@ -194,7 +194,8 @@ class SweetieChat(object):
             return self.sass.get_next()
 
     @botcmd
-    def cadance(self, message):
+    def cadmusic(self, message):
+        '''Cadance Simulator 2016'''
         return '{} {} :{}:'.format(self.cadance_musics_log.get_next(),
                 random.choice(['horse music', 'music for horses']),
                 random.choice(['3', 'cadancefilly', 'cadancehappy']))
