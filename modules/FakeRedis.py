@@ -70,11 +70,31 @@ class FakeRedis(object):
         hash[field] += increment
         #print(key, '=', field, hash[field])
 
+    def hset(self, key, field, value):
+        key = enc(key)
+        field = enc(field)
+        if not key in self.data:
+            self.data[key] = {}
+        hash = self.data[key]
+        hash[field] = value
+
     def hgetall(self, key):
         key = enc(key)
+        if not key in self.data:
+            self.data[key] = {}
         return self.data[key]
+
+    def hvals(self, key):
+        key = enc(key)
+        if not key in self.data:
+            self.data[key] = {}
+        return self.data[key].values()
 
     def exists(self, key):
         key = enc(key)
         return key in self.data
+
+    def delete(self, key):
+        key = enc(key)
+        del self.data[key]
 

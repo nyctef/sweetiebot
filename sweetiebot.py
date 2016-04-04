@@ -9,7 +9,7 @@ from utils import randomstr
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
     RestartException, SweetieMarkov, PBLogHandler, SweetieDe, SweetiePings, \
-    TwitterClient, SweetieSeen, AtomWatcher
+    TwitterClient, SweetieSeen, AtomWatcher, SweetieTell
 import time
 import os
 import traceback
@@ -69,7 +69,8 @@ def build_sweetiebot(config=None):
     markov = SweetieMarkov(redis_conn, 'data/banned_keywords.txt',
                            'data/preferred_keywords.txt',
                            'data/swap_words.txt')
-    chat = SweetieChat(bot, actions, sass, config.chatroom, markov, cadmusic)
+    tell = SweetieTell(bot, redis_conn)
+    chat = SweetieChat(bot, actions, sass, config.chatroom, markov, cadmusic, tell)
     roulette = SweetieRoulette(bot, admin)
     pings = SweetiePings(bot, redis_conn)
     if hasattr(config, 'twitter_key'):

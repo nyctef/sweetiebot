@@ -34,7 +34,7 @@ class SweetieChat(object):
     target = '<target>'
     chattiness = .02
 
-    def __init__(self, bot, actions, sass, chatroom, markov, cadmusic):
+    def __init__(self, bot, actions, sass, chatroom, markov, cadmusic, tell):
         self.bot = bot
         self.bot.load_commands_from(self)
         self.nickname = self.bot.nick
@@ -43,6 +43,7 @@ class SweetieChat(object):
         self.chatroom = chatroom
         self.markov = markov
         self.cadance_musics_log = cadmusic
+        self.tell = tell
 
     def save_action(self, action_str):
         self.actions.add_to_file(action_str)
@@ -159,6 +160,9 @@ class SweetieChat(object):
         #logs Cadance musics
         self.do_cadance_musics(mess)
 
+        tells = self.tell.get_messages_for(mess)
+        if tells: return tells
+
         titles = self.get_page_titles(message)
         if titles:
             return titles
@@ -240,3 +244,4 @@ class SweetieChat(object):
     def choose(self, message):
         '''[choices] Choose one of a (comma-separated) list of options'''
         return random.choice(list(map(lambda e: e.strip(), message.args.split(","))))
+

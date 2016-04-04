@@ -14,9 +14,10 @@ class SweetieChatTests(unittest.TestCase):
         self.sass = MagicMock()
         self.chatroom = MagicMock()
         self.markov = MagicMock()
+        self.cadmusic = MagicMock()
 
         self.chat = SweetieChat(self.bot, self.actions, self.sass,
-                self.chatroom, self.markov)
+                self.chatroom, self.markov, self.cadmusic)
 
     def test_can_choose_a_thing(self):
         response = self.chat.choose(create_message('!choose pizza,pie,calzone'))
