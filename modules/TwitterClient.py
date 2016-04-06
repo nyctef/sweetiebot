@@ -70,10 +70,20 @@ class TimelineWatcher:
                 self.latest_tweet = tweet['id']
                 #print('setting latest tweet to '+str(self.latest_tweet))
                 if should_return:
-                    text = html.unescape(tweet['text'])
-                    return '@{}: {}'.format(self.username, text)
+                    return self.format_tweet(tweet)
         except Exception as e:
             log.exception('Error pulling tweets from twitter')
+
+    def format_tweet(self, tweet):
+        try:
+            text = tweet['text']
+            if 'retweeted_status' in tweet:
+                retweet = tweet['retweeted_status']
+                text = '@{}: {}'.format(retweet['user']['screen_name'], retweet['text'])
+            text = html.unescape(text)
+            return '@{}: {}'.format(tweet['user']['screen_name'], text)
+        except Exception:
+            log.exception('Error formatting tweet ' + tweet)
 
 if __name__ == '__main__':
     import config
