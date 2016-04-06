@@ -24,6 +24,9 @@ class AtomWatcher:
 
             log.debug('downloading {}'.format(self.atom_url))
             feed = feedparser.parse(self.atom_url)
+            if not 'status' in feed or feed.status >= 400:
+                log.warning('Error downloading feed {}: {}'.format(self.atom_url, feed))
+                return None
             title = feed.feed.title
             if not feed.entries: 
                 log.error('found 0 entries in feed {}'.format(self.atom_url))
