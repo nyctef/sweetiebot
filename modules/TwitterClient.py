@@ -3,6 +3,7 @@ import time
 from base64 import b64encode
 import logging
 from utils import logerrors
+import html
 
 log = logging.getLogger(__name__)
 
@@ -65,12 +66,12 @@ class TimelineWatcher:
             if tweets:
                 if isinstance(tweets, str):
                     raise Exception(tweets)
-                #print(tweet[0]['text'])
                 tweet = tweets[0]
                 self.latest_tweet = tweet['id']
                 #print('setting latest tweet to '+str(self.latest_tweet))
                 if should_return:
-                    return '@{}: {}'.format(self.username, tweet['text'])
+                    text = html.unescape(tweet['text'])
+                    return '@{}: {}'.format(self.username, text)
         except Exception as e:
             log.exception('Error pulling tweets from twitter')
 
@@ -82,6 +83,6 @@ if __name__ == '__main__':
     watcher = client.get_timeline_watcher('RedScareBot')
     while True:
         tweet = watcher.get_next()
-        if tweet: print(str(tweet['text']))
+        if tweet: print(tweet)
         time.sleep(10)
 
