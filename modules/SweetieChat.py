@@ -14,20 +14,21 @@ class SweetieChat(object):
                           "-z0-9.-]+)((?:\/[\+~%\/.\w_-]*)?\??(?:[-\+=&:\/"+
                           ";%@.\w_]*)#?(?:[\w]*))?)")
 
-    emotes = [':sweetie:', ':sweetiecrack:',
-              ':sweetiederp:', ':sweetiedust:',
-              ':sweetieglee:', ':sweetieidea:',
-              ':sweetiemad:', ':sweetiepleased:',
-              ':sweetieoops:', ':sweetieread:',
-              ':sweetiescheme:', ':sweetieshake:',
-              ':sweetieshrug:', ':sweetiesmug:',
-              ':sweetiestare:', ':sweetietwitch:',
-              ':egstare:', ':sweetiesiren:',
+    emotes = [':sweetie:',          ':sweetiecrack:',
+              ':sweetiederp:',      ':sweetiedust:',
+              ':sweetieglee:',      ':sweetieidea:',
+              ':sweetiemad:',       ':sweetiepleased:',
+              ':sweetieoops:',      ':sweetieread:',
+              ':sweetiescheme:',    ':sweetieshake:',
+              ':sweetieshrug:',     ':sweetiesmug:',
+              ':sweetiestare:',     ':sweetietwitch:',
+              ':egstare:',          ':sweetiesiren:',
               ':sweetieskeptical:', ':sweetiedesk:',
-              ':sweetiesalute:', ':sweetieawesome:',
-              ':sweetiecreep:', ':sweetieeyes:',
-              ':sweetiefsjal:', ':sweetielod:',
-              ':sweetienom:', ':sweetieohyou:',
+              ':sweetiesalute:',    ':sweetieawesome:',
+              ':sweetiecreep:',     ':sweetieeyes:',
+              ':sweetiefsjal:',     ':sweetielod:',
+              ':sweetienom:',       ':sweetieohyou:',
+              ':sweetiesmeel:',     ':gsweetieread:'
               ]
 
     lunabeh_top = 10
