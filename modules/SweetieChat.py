@@ -5,6 +5,7 @@ import hashlib
 from random import randint
 from utils import logerrors, botcmd
 from pprint import pprint
+from modules.MessageResponse import MessageResponse
 
 log = logging.getLogger(__name__)
 
@@ -219,6 +220,26 @@ class SweetieChat(object):
                 y = match.group(2)
                 percent = self.hashpercent(x+y)
                 return '{}: {} [{}% {}]'.format(sender, y, percent, x)
+            if 'do you do' in mess.args.lower():
+                return 'How do you do?'
+
+            return 'to be honest, I\'m not sure'
+
+        if mess.command in ('will', 'should', 'do'):
+            chance = self.hashpercent(mess.args)
+            choices = [
+                    'Definitely', 'eh, maybe', 'possibly?',
+                    'I\'d give it a shot', 'Ask Luna', 'Get someone else to help you with this one',
+                    ]
+            return choices[int(chance) % len(choices)]
+
+        if mess.command == 'what' and \
+            mess.args.lower().startswith('is love'):
+            link = 'http://i.imgur.com/nhMLKUB.gif'
+            text = 'baby don\'t hurt me'
+            return MessageResponse('{} [ {} ]'.format(text, link),
+                    None,
+                    html='<a href="{}">{}</a>'.format(link, text))
 
     def hashpercent(self, input):
         return int(hashlib.md5(input.encode()).hexdigest(), 16) % 10000 / 100

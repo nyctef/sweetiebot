@@ -47,4 +47,10 @@ class SweetieChatTests(unittest.TestCase):
         self.assertEqual('sender: amazing people [79.86% amazing]', response3)
         response4 = self.chat.random_chat(create_message('Sweetiebot: how totally silly are silly people'))
         self.assertEqual('sender: silly people [45.24% totally silly]', response4)
+
+    def test_misc(self):
+        print(self.chat.random_chat(create_message('Sweetiebot: how do you do?')))
+        print(self.chat.random_chat(create_message('Sweetiebot: how do you want to play this?')))
+        print(self.chat.random_chat(create_message('Sweetiebot: what is love?')))
+        print(self.chat.random_chat(create_message('Sweetiebot: will she ever love me')))
         
