@@ -155,6 +155,7 @@ class SweetieChat(object):
         """Does things"""
         message = mess.message_text
         sender = mess.sender_nick
+        is_ping = mess.is_ping
         self.markov.store_message(message)
 
         #logs Cadance musics
@@ -167,11 +168,27 @@ class SweetieChat(object):
         if titles:
             return titles
 
+        random_junk = self.get_random_junk(mess)
+        if random_junk:
+            return random_junk
+
+        if False: #is_ping or random.random() < self.chattiness:
+            markov_response = self.markov.get_message(message)
+            if markov_response:
+                return markov_response
+
+        if is_ping:
+            return self.sass.get_next()
+
+    def get_random_junk(self, mess):
+        message = mess.message_text
+        sender = mess.sender_nick
+
         #if ":lunaglee:" in message.lower():
         #    self.bot.kick(sender, 'Don\'t upset my big sister! :sweetiemad:')
         #    return
 
-        if "c/d" in message.lower():
+        if re.findall(r'\bc/d\b', message):
             return sender + ": " + random.choice(["c", "d"])
 
         is_ping = mess.is_ping
@@ -188,14 +205,6 @@ class SweetieChat(object):
 
         if message.startswith('/me ') and is_ping:
             return self.cuddle(mess)
-
-        if False: #is_ping or random.random() < self.chattiness:
-            markov_response = self.markov.get_message(message)
-            if markov_response:
-                return markov_response
-
-        if is_ping:
-            return self.sass.get_next()
 
     @botcmd
     def cadmusic(self, message):

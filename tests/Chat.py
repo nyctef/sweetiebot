@@ -28,4 +28,8 @@ class SweetieChatTests(unittest.TestCase):
     def test_does_not_show_permission_failed_title(self):
         response = self.chat.random_chat(create_message('https://forum.pleaseignore.com/topic/83206/'))
         self.assertIsNone(response)
+
+    def test_does_not_cd_in_middle_of_word(self):
+        response = self.chat.random_chat(create_message('you\'re a medic/doctor, right?'))
+        self.assertIsNone(response)
         
