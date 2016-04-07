@@ -212,7 +212,7 @@ class SweetieChat(object):
             return mess.nickname + " yes! :sweetieglee:"
 
         if mess.command == 'how':
-            xisyre = r'(.*?)\s+is\s+(.*?)(?:\?)\s*'
+            xisyre = r'(.+?)\s+(?:is|are)\s+(.+?)\s*(?:\?)?\s*$'
             match = re.match(xisyre, mess.args)
             if match:
                 x = match.group(1)
