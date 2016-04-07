@@ -59,6 +59,7 @@ class SweetieTell(object):
     def get_messages_for(self, message):
         key = self._key(message.user_jid)
         messages = self.store.hvals(key)
+        messages = list(map(lambda x: x.decode('utf-8'), messages))
         if len(messages):
             self.store.delete(key)
             return "\n".join(messages)
