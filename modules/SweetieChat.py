@@ -1,6 +1,7 @@
 import logging
 import re
 import random
+import hashlib
 from random import randint
 from utils import logerrors, botcmd
 from pprint import pprint
@@ -205,6 +206,21 @@ class SweetieChat(object):
 
         if message.startswith('/me ') and is_ping:
             return self.cuddle(mess)
+
+        if mess.command and mess.command.lower() == 'no':
+            return mess.nickname + " yes! :sweetieglee:"
+
+        if mess.command == 'how':
+            xisyre = r'(.*?)\s+is\s+(.*?)(?:\?)\s*'
+            match = re.match(xisyre, mess.args)
+            if match:
+                x = match.group(1)
+                y = match.group(2)
+                percent = self.hashpercent(x+y)
+                return '{}: {} [{}% {}]'.format(sender, y, percent, x)
+
+    def hashpercent(self, input):
+        return int(hashlib.md5(input.encode()).hexdigest(), 16) % 10000 / 100
 
     @botcmd
     def cadmusic(self, message):

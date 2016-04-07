@@ -12,6 +12,7 @@ class SweetieChatTests(unittest.TestCase):
         self.bot = MagicMock()
         self.actions = MagicMock()
         self.sass = MagicMock()
+        self.sass.get_next = MagicMock(name='some sass')
         self.chatroom = MagicMock()
         self.markov = MagicMock()
         self.cadmusic = MagicMock()
@@ -32,4 +33,14 @@ class SweetieChatTests(unittest.TestCase):
     def test_does_not_cd_in_middle_of_word(self):
         response = self.chat.random_chat(create_message('you\'re a medic/doctor, right?'))
         self.assertIsNone(response)
+
+    def test_sweetiebot_yes(self):
+        response = self.chat.random_chat(create_message('Sweetiebot no'))
+        self.assertEqual('Sweetiebot yes! :sweetieglee:', response)
+
+    def test_how_x_is_y(self):
+        response  = self.chat.random_chat(create_message('Sweetiebot: how x is y?'))
+        self.assertEqual('sender: y [64.21% x]', response)
+        response2 = self.chat.random_chat(create_message('Sweetiebot: how x is y'))
+        self.assertEqual('sender: y [64.21% x]', response)
         
