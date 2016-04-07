@@ -226,12 +226,7 @@ class SweetieChat(object):
             return 'to be honest, I\'m not sure'
 
         if mess.command in ('will', 'should', 'do'):
-            chance = self.hashpercent(mess.args)
-            choices = [
-                    'Definitely', 'eh, maybe', 'possibly?',
-                    'I\'d give it a shot', 'Ask Luna', 'Get someone else to help you with this one',
-                    ]
-            return choices[int(chance) % len(choices)]
+            return self.eightball(mess)
 
         if mess.command == 'what' and \
             mess.args.lower().startswith('is love'):
@@ -243,6 +238,33 @@ class SweetieChat(object):
 
     def hashpercent(self, input):
         return int(hashlib.md5(input.encode()).hexdigest(), 16) % 10000 / 100
+
+    @botcmd(name='8ball')
+    def eightball(self, mess):
+        if not mess.args: return 'You need to ask something'
+        chance = self.hashpercent(mess.args)
+        choices = [
+                'Definitely maybe.', 'Eh, maybe.', 'Possibly?', 'Heh ... no.',
+                "I'd give it a shot", 'Ask Luna', 'Get someone else to help you with this one.',
+                "Try again ... actually don't bother trying again. It's not going to happen.",
+                'Someone might feel bad enough for you that things will work out in your favor.',
+                'Hope may not be warranted at this point.',
+                "Patience is only a virtue if you're not a fuckup.",
+                "Sometimes your best just isn't good enough. You still have to try, though.",
+                "Just because you're necessary doesn't mean you're important. I wouldn't worry about it."
+                "We do not anticipate further good news.",
+                "The outcome will likely be another failure. At least you're consistent.",
+                "Whatever you do, you still won't be worth a Wikipedia entry.",
+                "Video games are a poor substitute for life. You probably want to stick to playing video games.",
+                "Ask yourself if 10-year-old you would be proud of you.",
+                "Your pets will still only see you as a source of food.",
+                "You'll be surprised at what you can fuck up next. Other people won't be as surprised.",
+                "The outcome looks successful, but nothing meaningful will change",
+                "You can always stop procrastinating tomorrow.",
+                "Yeah ... I guess.",
+                "Hehe, *neigh*borhood :sweetieread: Oh, did you have a question?",
+                ]
+        return choices[int(chance) % len(choices)]
 
     @botcmd
     def cadmusic(self, message):
