@@ -62,7 +62,7 @@ class SweetieTell(object):
         messages = list(map(lambda x: x.decode('utf-8'), messages))
         if len(messages):
             self.store.delete(key)
-            return "\n".join(messages)
+            return message.sender_nick + ", " + "\n".join(messages)
 
     def set(self, jid, senderjid, message):
         self.store.hset(self._key(jid), str(senderjid), message)

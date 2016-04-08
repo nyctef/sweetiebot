@@ -35,7 +35,7 @@ class TellTests(unittest.TestCase):
         self.assertEqual('Message received for zhuli@jabber.org', response)
 
         response = self.tell.get_messages_for(create_message_zhuli('hello there'))
-        self.assertEqual('sender left you a message: Do the thing!', response)
+        self.assertEqual('ZhuLi, sender left you a message: Do the thing!', response)
 
         response = self.tell.get_messages_for(create_message_myself('anybody left me a message?'))
         self.assertIsNone(response)
