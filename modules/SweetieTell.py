@@ -51,7 +51,7 @@ class SweetieTell(object):
             return 'Talking to yourself is more efficient in real life than on jabber'
         if sendee_nick and mess:
             self.set(sendee_jid, sender_jid, '{} left you a message: {}'.format(sender_nick, mess))
-            return 'Message received for {}'.format(sendee_nick)
+            return 'Message received for {}'.format(sendee_jid)
 
     def _key(self, jid):
         return 'tell:{}'.format(str(jid))

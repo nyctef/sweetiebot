@@ -32,7 +32,7 @@ class TellTests(unittest.TestCase):
 
     def test_can_tell_someone_a_thing(self):
         response = self.tell.tell(create_message('!tell ZhuLi Do the thing!'))
-        self.assertEqual('Message received for ZhuLi', response)
+        self.assertEqual('Message received for zhuli@jabber.org', response)
 
         response = self.tell.get_messages_for(create_message_zhuli('hello there'))
         self.assertEqual('sender left you a message: Do the thing!', response)
