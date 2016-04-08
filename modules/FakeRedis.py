@@ -73,6 +73,7 @@ class FakeRedis(object):
     def hset(self, key, field, value):
         key = enc(key)
         field = enc(field)
+        value = enc(value)
         if not key in self.data:
             self.data[key] = {}
         hash = self.data[key]
