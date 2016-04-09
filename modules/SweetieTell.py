@@ -12,6 +12,7 @@ class SweetieTell(object):
         self.store = store
         self.bot = bot
         self.bot.load_commands_from(self)
+        self.nicktojid = NickToJidTracker(self.bot, self.store)
 
     def get_nick_message(self, args):
         nick = None
@@ -34,6 +35,7 @@ class SweetieTell(object):
         sender_nick = message.sender_nick
         sendee_nick, mess = self.get_nick_message(message.args)
         sendee_jid = self.bot.get_jid_from_nick(sendee_nick)
+        sendee_jid = sendee_jid or self.nicktojid.get_jid_from_nick(sendee_nick)
         sender_jid = message.user_jid
         existing_messages = self.get(sendee_jid)
         log.debug('sender_nick {} sendee_nick {} mess {} sendee_jid {} sender_jid {}'.format(
@@ -69,4 +71,26 @@ class SweetieTell(object):
 
     def get(self, jid):
         return self.store.hgetall(self._key(jid))
+
+class NickToJidTracker(object):
+    def __init__(self, bot, store):
+        self.store = store
+        self.bot = bot
+        self.bot.add_presence_handler(self.on_presence)
+
+    def on_presence(self, presence):
+        nick = presence.muc_jid.resource
+        jid = presence.user_jid.bare
+        log.debug('setting jid for nick {} to {}'.format(nick, jid))
+        self.set_jid_for_nick(nick, jid)
+
+    def get_jid_from_nick(self, nick):
+        result = self.store.get(self._key(nick))
+        if result: return result.decode('utf-8')
+
+    def set_jid_for_nick(self, nick, jid):
+        self.store.set(self._key(nick), jid)
+
+    def _key(self, nick):
+        return 'jidfornick:{}'.format(nick)
 

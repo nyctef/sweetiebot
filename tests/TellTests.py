@@ -1,4 +1,4 @@
-from modules import Message, SweetieTell, FakeRedis
+from modules import Message, SweetieTell, FakeRedis, Presence
 import unittest
 from unittest.mock import MagicMock, patch
 from pprint import pprint
@@ -64,3 +64,14 @@ class TellTests(unittest.TestCase):
     def test_denies_tell_to_unknown_person(self):
         response = self.tell.tell(create_message('!tell nobody to do a thing'))
         self.assertEqual('Sorry, I don\'t know who \'nobody\' is', response)
+
+    def test_can_remember_nicks_not_in_chat(self):
+        response = self.tell.tell(create_message('!tell AfkPerson to do a thing'))
+        self.assertEqual('Sorry, I don\'t know who \'AfkPerson\' is', response)
+
+        self.tell.nicktojid.on_presence(Presence('general@jabber.org/AfkPerson', 'afkperson@jabber.org', None, None))
+
+        response = self.tell.tell(create_message('!tell AfkPerson to do a thing'))
+        self.assertEqual('Message received for afkperson@jabber.org', response)
+
+        
