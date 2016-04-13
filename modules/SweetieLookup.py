@@ -111,18 +111,6 @@ class SweetieLookup(object):
                     i_name = maybe[0]
         return i_id, i_name
 
-    @logerrors
-    def hype(self, message):
-        """Get hype! Print time until S4 starts"""
-        # print 'getting hype ..'
-        hypetime = datetime.strptime('03:00PM 2013-11-23', '%I:%M%p %Y-%m-%d')
-        now = datetime.now()
-        diff = hypetime - now
-        message = 'GET HYPE! ONLY {0} DAYS, {1} HOURS, {2} MINUTES AND {3} SECONDS UNTIL SEASON FOUR!'\
-            .format(diff.days, diff.seconds // 3600, (diff.seconds//60) % 60, diff.seconds % 60)
-        # print message
-        return message
-
     @botcmd
     @logerrors
     def jita(self, message):
