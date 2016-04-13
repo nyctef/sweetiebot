@@ -55,3 +55,6 @@ class SweetieChatTests(unittest.TestCase):
         print(self.chat.random_chat(create_message('Sweetiebot: what is love?')))
         print(self.chat.random_chat(create_message('Sweetiebot: will she ever love me')))
         
+    def test_mlyp(self):
+        response = self.chat.random_chat(create_message('Freddy Mercury is gay'))
+        self.assertEqual('sender: mlyp', response)

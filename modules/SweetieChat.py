@@ -236,6 +236,10 @@ class SweetieChat(object):
                     None,
                     html='<a href="{}">{}</a>'.format(link, text))
 
+        if re.match(r'.+is gay\s*$', message) or \
+            re.match(r'^gay$', message):
+                return sender + ': mlyp'
+
     def hashpercent(self, input):
         return int(hashlib.md5(input.encode()).hexdigest(), 16) % 10000 / 100
 
