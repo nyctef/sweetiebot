@@ -148,7 +148,7 @@ class SweetieChat(object):
         return links
 
     def do_cadance_musics(self, mess):
-        if mess.sender_jid == "princess_cadence@friendshipismagicsquad.com":
+        if mess.user_jid == "princess_cadence@friendshipismagicsquad.com":
             for link in self.get_youtube_links(mess.message_text):
                 self.cadance_musics_log.add_to_file(link)
                 log.info("Added {} to cadmusic".format(link))
