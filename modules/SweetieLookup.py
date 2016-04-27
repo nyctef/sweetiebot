@@ -63,8 +63,8 @@ class SweetieLookup(object):
 
     def read_ids(self):
         result = {}
-        types_href_regex = re.compile('https://public-crest.eveonline.com/types/(\d+)/')
-        types_url = 'https://public-crest.eveonline.com/types/'
+        types_href_regex = re.compile('https://crest-tq.eveonline.com/types/(\d+)/')
+        types_url = 'https://crest-tq.eveonline.com/types/'
         while types_url:
             try:
                 types_res = requests.get(types_url, timeout=10)
