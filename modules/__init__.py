@@ -17,3 +17,4 @@ from .TwitterClient import get_client
 from .Presence import Presence
 from .SweetieSeen import SweetieSeen
 from .SweetieTell import SweetieTell
+from .SweetieCrest import SweetieCrest
