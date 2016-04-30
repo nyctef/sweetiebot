@@ -19,9 +19,10 @@ class SweetieLookup(object):
 
     id_dic = {"": ""}
 
-    def __init__(self, bot):
+    def __init__(self, bot, crest):
         self.bot = bot
         self.bot.load_commands_from(self)
+        self.crest = crest
 
     def get_sender_username(self, mess):
         return self.bot.get_sender_username(mess)
@@ -44,26 +45,29 @@ class SweetieLookup(object):
             'http://tumblraas.azurewebsites.net/rant', timeout=10)
         return res.text.strip()
 
-    def get_prices(self, id, system):
-        url = "http://api.eve-central.com/api/marketstat?usesystem=" + \
-              str(system) + \
-              "&typeid=" + \
-              str(id)
-        log.debug('asking for prices at '+url)
-        try:
-            apiresult = requests.get(url).text
-            root = ET.fromstring(apiresult)
-        except Exception as e:
-            print(e)
-            log.exception(e, 'error parsing evecentral xml')
-            return "EveCentral is unhappy: "+apiresult[:200]
+    def get_prices(self, id, region, station):
+        endpoint = '/market/{}/orders/?type=https://crest-tq.eveonline.com/types/{}/'.format(region, id)
 
-        buy = root.find('marketstat/type/buy/max').text
-        sell = root.find('marketstat/type/sell/min').text
-        buy = '{0:,}'.format(float(buy))
-        sell = '{0:,}'.format(float(sell))
-        r = 'buy: ' + buy + ' isk, sell: ' + sell + ' isk'
-        return r
+        log.debug('asking for prices at '+endpoint)
+        try:
+            apiresult = self.crest.get(endpoint).json()
+            buy = 0
+            sell = float("inf")
+            for item in apiresult['items']:
+                if item['location']['id'] != station: continue
+                price = item['price']
+                is_buy_order = item['buy']
+                if is_buy_order and price > buy: buy = price
+                if not is_buy_order and price < sell: sell = price
+
+            buy = '{0:,}'.format(float(buy))
+            sell = '{0:,}'.format(float(sell))
+            return 'buy: ' + buy + ' isk, sell: ' + sell + ' isk'
+        except Exception as e:
+            log.exception(e, 'error parsing CREST data')
+            if 'apiresult' in locals():
+                return "CREST is unhappy: "+apiresult[:200]
+            raise
 
     def read_ids(self):
         self.chat('Downloading latest typeid list from CREST (this might take a minute)')
@@ -123,7 +127,7 @@ class SweetieLookup(object):
         id, name = self.id_lookup(message.args)
         if id is None:
             return 'Couldn\'t find any matches'
-        reply = self.get_prices(id, 30000142)
+        reply = self.get_prices(id, 10000002, 60003760)
         reply = message.sender_nick + ': '+name.title() + ' - ' + reply
         return reply
 

@@ -9,7 +9,7 @@ from utils import randomstr
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
     RestartException, SweetieMarkov, PBLogHandler, SweetieDe, SweetiePings, \
-    TwitterClient, SweetieSeen, AtomWatcher, SweetieTell
+    TwitterClient, SweetieSeen, AtomWatcher, SweetieTell, SweetieCrest
 import time
 import os
 import traceback
@@ -59,7 +59,8 @@ def build_sweetiebot(config=None):
     password = config.password
 
     bot = MUCJabberBot(jid, password, room, nick)
-    lookup = SweetieLookup(bot)
+    crest = SweetieCrest(config.crest_base_url, config.crest_client_id, config.crest_client_secret, config.crest_refresh_token)
+    lookup = SweetieLookup(bot, crest)
     admin = SweetieAdmin(bot, config.chatroom, config.mods)
     mq = SweetieMQ(config)
     de = SweetieDe(bot, admin, mq, ResponsesFile('data/deowl_fails.txt'))

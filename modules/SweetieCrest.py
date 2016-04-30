@@ -33,7 +33,10 @@ class SweetieCrest:
             data={'grant_type':'refresh_token', 'refresh_token':self.refresh_token},
             headers={'Authorization': auth})
         log.info(result.text)
-        self.bearer_token = result.json()['access_token']
+        json = result.json()
+        if 'error_description' in json.keys():
+            raise Exception('crest error: '+str(json['error_description']))
+        self.bearer_token = json['access_token']
         self.bearer_token_age = datetime.now()
 
 
