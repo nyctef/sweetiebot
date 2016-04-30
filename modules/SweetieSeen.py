@@ -12,9 +12,10 @@ class SweetieSeen:
         self.bot.add_presence_handler(self.on_presence)
         self.bot.add_message_handler(self.on_message)
         self.bot.load_commands_from(self)
+        self.date_format = '%Y-%m-%d %H:%M'
 
     def timestamp(self):
-        return datetime.now().strftime('%Y-%m-%d %H:%M %Z')
+        return datetime.now().strftime(self.date_format)
 
     def set(self, prefix, name, response):
         if name is None or response is None:
@@ -57,13 +58,28 @@ class SweetieSeen:
         seen = self.store.get('seen:'+target)
         spoke = self.store.get('spoke:'+target)
 
+        now = datetime.now()
+
         if jidtarget and self.bot.jid_is_in_room(jidtarget) and spoke:
-            spoke = spoke.decode('utf-8')
-            return '{} last seen speaking at {}'.format(args, spoke)
+            spoke = spoke.decode('utf-8').strip()
+            spokedate = datetime.strptime(spoke, self.date_format)
+            ago = self.get_time_ago(now, spokedate)
+            return '{} last seen speaking at {} ({})'.format(args, spoke, ago)
         elif seen:
-            seen = seen.decode('utf-8')
-            return '{} last seen in room at {}'.format(args, seen)
+            seen = seen.decode('utf-8').strip()
+            seendate = datetime.strptime(seen, self.date_format)
+            ago = self.get_time_ago(now, seendate)
+            return '{} last seen in room at {} ({})'.format(args, seen, ago)
         else:
             return "No records found for user '{}'".format(args)
+
+    def get_time_ago(self, now, past):
+        td = now - past
+        if td.total_seconds() < 0: return 'in the future'
+        days = td.days
+        hours, remainder = divmod(td.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        return '{}d {}h {}m {}s ago'.format(days, hours, minutes, seconds)
+
 
 
