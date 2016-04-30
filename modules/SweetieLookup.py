@@ -1,4 +1,5 @@
 from datetime import datetime
+import pytz
 import urllib.request, urllib.parse, urllib.error
 import requests
 from requests.exceptions import Timeout
@@ -242,10 +243,19 @@ class SweetieLookup(object):
 
     @botcmd
     def date(self, message):
-        '''Returns the current date'''
-        reply = datetime.now().strftime('%Y-%m-%d')
-        reply = message.sender_nick + ': ' + reply
-        return reply
+        '''Returns the current datetime in a bunch of timezones'''
+        now = datetime.now(pytz.utc)
+        usptz = pytz.timezone('US/Pacific')
+        usetz = pytz.timezone('US/Eastern')
+        evetz = pytz.timezone('UTC')
+        uktz = pytz.timezone('Europe/London')
+        eutz = pytz.timezone('Europe/Brussels')
+        nztz = pytz.timezone('Pacific/Auckland')
+
+        format = '%Y-%m-%d %H:%M %Z'
+        dates = [now.astimezone(tz) for tz in [usptz, usetz, evetz, uktz, eutz, nztz]]
+        dates = [date.strftime(format) for date in dates]
+        return ('\n' + '\n'.join(dates)).replace('UTC', 'EVE')
 
     @logerrors
     def random_reddit_link(self, subreddit, domain_filter=None):
