@@ -26,6 +26,9 @@ class SweetieLookup(object):
     def get_sender_username(self, mess):
         return self.bot.get_sender_username(mess)
 
+    def chat(self, message):
+        self.bot.send_groupchat_message(message)
+
     @botcmd
     @logerrors
     def argue(self, message):
@@ -63,6 +66,7 @@ class SweetieLookup(object):
         return r
 
     def read_ids(self):
+        self.chat('Downloading latest typeid list from CREST (this might take a minute)')
         result = {}
         types_href_regex = re.compile('https://crest-tq.eveonline.com/types/(\d+)/')
         types_url = 'https://crest-tq.eveonline.com/types/'
