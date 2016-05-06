@@ -73,14 +73,14 @@ class SweetieLookup(object):
         self.chat('Downloading latest typeid list from CREST (this might take a minute)')
         result = {}
         types_href_regex = re.compile('https://crest-tq.eveonline.com/types/(\d+)/')
-        types_url = 'https://crest-tq.eveonline.com/types/'
+        types_url = 'https://crest-tq.eveonline.com/market/types/'
         while types_url:
             try:
                 types_res = requests.get(types_url, timeout=10)
                 types = json.loads(types_res.text)
                 for type in types['items']:
-                    id = types_href_regex.match(type['href']).group(1)
-                    name = type['name'].upper()
+                    id = types_href_regex.match(type['type']['href']).group(1)
+                    name = type['type']['name'].upper()
                     result[name] = id
                 if 'next' in types:
                     types_url = types['next']['href']
