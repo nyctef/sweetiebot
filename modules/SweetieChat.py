@@ -37,7 +37,7 @@ class SweetieChat(object):
     target = '<target>'
     chattiness = .02
 
-    def __init__(self, bot, actions, sass, chatroom, markov, cadmusic, tell):
+    def __init__(self, bot, actions, sass, chatroom, markov, cadmusic, tell, dictionary):
         self.bot = bot
         self.bot.load_commands_from(self)
         self.nickname = self.bot.nick
@@ -47,6 +47,7 @@ class SweetieChat(object):
         self.markov = markov
         self.cadance_musics_log = cadmusic
         self.tell = tell
+        self.dictionary = dictionary
 
     def save_action(self, action_str):
         self.actions.add_to_file(action_str)
@@ -235,6 +236,13 @@ class SweetieChat(object):
             return MessageResponse('{} [ {} ]'.format(text, link),
                     None,
                     html='<a href="{}">{}</a>'.format(link, text))
+
+        if mess.command == 'what':
+            whatisre = r'\s*(?:is|are)\s+(.+?)\s*(?:\?)?\s*$'
+            match = re.match(whatisre, mess.args)
+            if match:
+                term = match.group(1)
+                return self.dictionary.get_definition(term)
 
         if re.match(r'.+is gay\s*$', message) or \
             re.match(r'^gay$', message):

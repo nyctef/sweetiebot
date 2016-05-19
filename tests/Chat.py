@@ -18,9 +18,12 @@ class SweetieChatTests(unittest.TestCase):
         self.cadmusic = MagicMock()
         self.tell = MagicMock()
         self.tell.get_messages_for = MagicMock(return_value=None)
+        self.dictionary = MagicMock()
+        self.dictionary.get_definition = MagicMock(return_value='a picture of you')
 
         self.chat = SweetieChat(self.bot, self.actions, self.sass,
-                self.chatroom, self.markov, self.cadmusic, self.tell)
+                self.chatroom, self.markov, self.cadmusic, self.tell,
+                self.dictionary)
 
     def test_can_choose_a_thing(self):
         response = self.chat.choose(create_message('!choose pizza,pie,calzone'))
@@ -54,6 +57,10 @@ class SweetieChatTests(unittest.TestCase):
         print(self.chat.random_chat(create_message('Sweetiebot: how do you want to play this?')))
         print(self.chat.random_chat(create_message('Sweetiebot: what is love?')))
         print(self.chat.random_chat(create_message('Sweetiebot: will she ever love me')))
+
+    def test_dictionary(self):
+        response  = self.chat.random_chat(create_message('Sweetiebot: what is an idiot?'))
+        self.assertEqual('a picture of you', response)
         
     def test_mlyp(self):
         response = self.chat.random_chat(create_message('Freddy Mercury is gay'))
