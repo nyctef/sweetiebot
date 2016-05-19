@@ -9,7 +9,8 @@ class LookupTests(unittest.TestCase):
 
     def setUp(self):
         self.bot = MagicMock()
-        self.lookup = SweetieLookup(self.bot)
+        self.crest = MagicMock()
+        self.lookup = SweetieLookup(self.bot, self.crest)
 
     def test_can_roll_simple_dice(self):
         message = create_message('!roll 1d20')
