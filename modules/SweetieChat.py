@@ -249,7 +249,7 @@ class SweetieChat(object):
                 return sender + ': mlyp'
 
     def hashpercent(self, input):
-        return int(hashlib.md5(input.encode()).hexdigest(), 16) % 10000 / 100
+        return int(hashlib.md5(input.encode()).hexdigest(), 16) % 10001 / 100
 
     @botcmd(name='8ball')
     def eightball(self, mess):
