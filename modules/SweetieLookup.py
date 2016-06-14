@@ -45,8 +45,8 @@ class SweetieLookup(object):
             'http://tumblraas.azurewebsites.net/rant', timeout=10)
         return res.text.strip()
 
-    def get_prices(self, id, region, station):
-        endpoint = '/market/{}/orders/?type=https://crest-tq.eveonline.com/types/{}/'.format(region, id)
+    def get_prices(self, href, region, station):
+        endpoint = '/market/{}/orders/?type={}'.format(region, href)
 
         log.debug('asking for prices at '+endpoint)
         try:
@@ -72,16 +72,15 @@ class SweetieLookup(object):
     def read_ids(self):
         self.chat('Downloading latest typeid list from CREST (this might take a minute)')
         result = {}
-        types_href_regex = re.compile('https://crest-tq.eveonline.com/types/(\d+)/')
         types_url = 'https://crest-tq.eveonline.com/market/types/'
         while types_url:
             try:
                 types_res = requests.get(types_url, timeout=10)
                 types = json.loads(types_res.text)
                 for type in types['items']:
-                    id = types_href_regex.match(type['type']['href']).group(1)
+                    href = type['type']['href']
                     name = type['type']['name'].upper()
-                    result[name] = id
+                    result[name] = href
                 if 'next' in types:
                     types_url = types['next']['href']
                 else:
@@ -124,10 +123,10 @@ class SweetieLookup(object):
     @logerrors
     def jita(self, message):
         '''[item name] Look up prices in jita'''
-        id, name = self.id_lookup(message.args)
-        if id is None:
+        href, name = self.id_lookup(message.args)
+        if href is None:
             return 'Couldn\'t find any matches'
-        reply = self.get_prices(id, 10000002, 60003760)
+        reply = self.get_prices(href, 10000002, 60003760)
         reply = message.sender_nick + ': '+name.title() + ' - ' + reply
         return reply
 
