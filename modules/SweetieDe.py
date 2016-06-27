@@ -30,19 +30,9 @@ class SweetieDe(object):
 
         speaker = message.sender_jid
         
-        if self.chance(0.3):
+        if self.chance(0.7):
             return self.failures.get_next()
-
-        '''Only kicks :owl, long cooldown'''
-        if self.last_owl_kick:
-            if (datetime.now() - self.last_owl_kick).seconds < self.kick_owl_delay:
-                self.log_deowl(speaker, False)
-                return "I'm tired. Maybe another time?"
-        log.debug("trying to kick owl ...")
-        self.admin.kick_jid('owlowiscious@friendshipismagicsquad.com', ':sweetiestare:',
-                        on_success=self.deowl_success_handler(speaker),
-                        on_failure=self.deowl_failure_handler(speaker))
-        return
+        return "I'm tired. Maybe another time?"
 
     def deowl_success_handler(self, speaker):
         def handler():
