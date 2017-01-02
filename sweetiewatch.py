@@ -28,6 +28,9 @@ class SweetieWatch():
 
         bot = ClientXMPP(jid, password)
 
+        # disable ipv6 for now since we're getting errors using it
+        bot.use_ipv6 = False
+
         bot.add_event_handler('session_start', self.on_start)
         bot.add_event_handler('message', self.on_message)
 
