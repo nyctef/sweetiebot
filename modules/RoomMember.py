@@ -10,9 +10,15 @@ class RoomMemberList():
     def __repr__(self):
         return "RoomMemberList({})".format(repr(self.members))
 
+    def get_member_from_nickname(self, nickname):
+        result = next((x for x in self.members if x.nickname == nickname), None)
+        if not result:
+            log.warning("Couldn't find member entry for nickname %s", nickname)
+        return result
+
 class RoomMember():
-    def __init__(self, nick, jid, affiliation, role):
-        self.nick = nick
+    def __init__(self, nickname, jid, affiliation, role):
+        self.nickname = nickname
         self.jid = jid
         self.affiliation = affiliation
         self.role = role

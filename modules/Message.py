@@ -64,13 +64,7 @@ class Message(object):
             message = message[1:]
         return message.strip()
 
-    def _get_member_from_nickname(self, nickname=None):
-        if not nickname: nickname = self.nickname
-        result = next((x for x in self.room_member_list if x.nickname == nickname), None)
-        if not result:
-            log.warning("Couldn't find member entry for nickname %s", nickname)
-        return result
 
     def sender_can_do_admin_things(self):
-        member = self._get_member_from_nickname(self.sender_nick)
+        member = self.room_member_list.get_member_from_nickname(self.sender_nick)
         return member != None and member.can_do_admin_things()
