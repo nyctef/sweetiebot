@@ -80,3 +80,23 @@ class MessageParsingTests(unittest.TestCase):
     def test_nickreason_parses_multi_word_nicks_with_single_quotes(self):
         message = create_message("!kick 'a person' for reasons")
         self.assertEqual(message.nick_reason, ('a person', 'for reasons'))
+
+    def test_nickreason_parses_unquoted_multi_word_nicks_if_known(self):
+        # 'name with spaces' is in the known member list, so we should count that
+        message = create_message("!kick name with spaces for reasons")
+        self.assertEqual(message.nick_reason, ('name with spaces', 'for reasons'))
+
+    def test_nickreason_parses_unquoted_multi_word_nicks_if_known_ci(self):
+        # as above, but case-insensitive
+        message = create_message("!kick NAME WITH SPACES for reasons")
+        self.assertEqual(message.nick_reason, ('name with spaces', 'for reasons'))
+
+    def test_nickreason_parses_single_word_nicks_ci(self):
+        # as above, but case-insensitive
+        message = create_message("!kick TEST_USER for reasons")
+        self.assertEqual(message.nick_reason, ('test_user', 'for reasons'))
+
+    def test_nickreason_parses_multi_word_nicks_ci(self):
+        # as above, but case-insensitive
+        message = create_message("!kick 'NAME WITH SPACES' for reasons")
+        self.assertEqual(message.nick_reason, ('name with spaces', 'for reasons'))

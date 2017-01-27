@@ -16,6 +16,9 @@ class RoomMemberList():
             log.warning("Couldn't find member entry for nickname %s", nickname)
         return result
 
+    def get_nick_list(self):
+        return [x.nickname for x in self.members]
+
 class RoomMember():
     def __init__(self, nickname, jid, affiliation, role):
         self.nickname = nickname

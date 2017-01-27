@@ -69,6 +69,17 @@ class Message(object):
     def _get_nick_reason(self, args):
         if not args: return None
 
+        known_nicks = self.room_member_list.get_nick_list()
+        for known_nick in known_nicks:
+            # re.match only matches the start of the string
+            match = re.match("\s*'" + known_nick + "'(.*)", args, re.I) or\
+                    re.match('\s*"' + known_nick + '"(.*)', args, re.I) or\
+                     re.match("\s*" + known_nick + "(.*)", args, re.I)
+            if match:
+                nick = known_nick
+                reason = match.group(1).strip()
+                return nick, reason
+
         nick = None
         reason = None
         match = re.match("\s*'([^']*)'(.*)", args) or\
