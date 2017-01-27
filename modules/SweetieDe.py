@@ -73,6 +73,6 @@ class SweetieDe(object):
         '''For when there's too much of a good thing'''
         speaker = message.sender_nick
         log.debug("trying to kick "+speaker)
-        target = 'Octavia' if self.admin.message_is_from_mod(message) else speaker
+        target = 'Octavia' if message.sender_can_do_admin_things() else speaker
         self.admin.kick(target, ':lyraahem:')
         return

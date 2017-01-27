@@ -21,17 +21,5 @@ pushbullet_api = None
 # Optional: Device ID for pushbullet notifications
 pushbullet_device = None
 # pushbullet_device = 0000000000000000
-# A list of JIDs for people allowed to do admin tasks
-mods = [
-    "luna@friendshipismagicsquad.com",
-    "gielnor@friendshipismagicsquad.com",
-    "xyyxshard@friendshipismagicsquad.com",
-    "sykedoc@friendshipismagicsquad.com",
-    "twilight_sparkle@friendshipismagicsquad.com",
-    "princess_cadence@friendshipismagicsquad.com",
-    "seven@friendshipismagicsquad.com",
-    "big_macintosh@friendshipismagicsquad.com",
-    "nyctef@friendshipismagicsquad.com",
-]
 twitter_key = '0000000000000000000000000'
 twitter_secret = '00000000000000000000000000000000000000000000000000'
