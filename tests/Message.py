@@ -68,3 +68,15 @@ class MessageParsingTests(unittest.TestCase):
     def test_nickreason_parses_single_word_nicks(self):
         message = create_message('!kick someone')
         self.assertEqual(message.nick_reason, ('someone', ''))
+
+    def test_nickreason_parses_single_word_nicks_with_messages(self):
+        message = create_message('!kick someone for reasons')
+        self.assertEqual(message.nick_reason, ('someone', 'for reasons'))
+
+    def test_nickreason_parses_multi_word_nicks_with_double_quotes(self):
+        message = create_message('!kick "a person" for reasons')
+        self.assertEqual(message.nick_reason, ('a person', 'for reasons'))
+
+    def test_nickreason_parses_multi_word_nicks_with_single_quotes(self):
+        message = create_message("!kick 'a person' for reasons")
+        self.assertEqual(message.nick_reason, ('a person', 'for reasons'))
