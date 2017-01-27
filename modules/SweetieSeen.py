@@ -51,9 +51,14 @@ class SweetieSeen:
 
         # TODO: I'm not totally convinced about the logic around jidtarget/
         # other if statements below.
-        args = message.args
-        jidtarget = JID(self.bot.get_jid_from_nick(args)).bare
-        target = jidtarget or args
+        if not message.nick_reason:
+            return "A nickname or jid must be provided"
+        nick,reason = message.nick_reason
+        if reason:
+            log.warning("Wasn't expecting to get a reason in !seen: %r", message.nick_reason)
+
+        jidtarget = JID(self.bot.get_jid_from_nick(nick)).bare
+        target = jidtarget or nick
 
         seen = self.store.get('seen:'+target)
         spoke = self.store.get('spoke:'+target)
@@ -64,14 +69,14 @@ class SweetieSeen:
             spoke = spoke.decode('utf-8').strip()
             spokedate = datetime.strptime(spoke, self.date_format)
             ago = self.get_time_ago(now, spokedate)
-            return '{} last seen speaking at {} ({})'.format(args, spoke, ago)
+            return '{} last seen speaking at {} ({})'.format(nick, spoke, ago)
         elif seen:
             seen = seen.decode('utf-8').strip()
             seendate = datetime.strptime(seen, self.date_format)
             ago = self.get_time_ago(now, seendate)
-            return '{} last seen in room at {} ({})'.format(args, seen, ago)
+            return '{} last seen in room at {} ({})'.format(nick, seen, ago)
         else:
-            return "No records found for user '{}'".format(args)
+            return "No records found for user '{}'".format(nick)
 
     def get_time_ago(self, now, past):
         td = now - past
