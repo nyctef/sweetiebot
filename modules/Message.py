@@ -7,7 +7,8 @@ class Message(object):
 
     prefix = '!'
 
-    def __init__(self, nickname, sender_nick, sender_jid, user_jid, message_text, message_html, is_pm):
+    def __init__(self, nickname, sender_nick, sender_jid, user_jid,\
+            message_text, message_html, is_pm, room_member_list):
         self.nickname = nickname
         self.sender_nick = sender_nick
         self.sender_jid = JID(sender_jid)
@@ -15,6 +16,8 @@ class Message(object):
         self.message_text = message_text
         self.message_html = message_html
         self.is_pm = is_pm
+        self.room_member_list = room_member_list
+
         if self._is_command(nickname, message_text) or is_pm:
             self.command, self.args = self._get_command_and_args(message_text)
         else:
@@ -29,6 +32,7 @@ class Message(object):
         is_ping: {}'''.format(self.nickname, self.sender_nick, self.sender_jid,
             self.user_jid, self.message_text, self.message_html, self.command, self.args,
             self.is_ping))
+        log.debug('%r', self.room_member_list)
         log.info('{}: {}'.format(self.sender_nick, self.message_text))
 
     def _is_ping(self, nickname, message):
