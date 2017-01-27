@@ -1,8 +1,15 @@
 from modules import Message
+from modules.RoomMember import RoomMember, RoomMemberList
 import unittest
 
 def create_message(input, is_pm=False):
-    return Message('Sweetiebot', 'sender', 'chat@jabber.org/sender', 'sender@jabber.org', input, input, is_pm)
+    room_members = [
+            RoomMember('Sweetiebot', 'sweetiebot@jabber.org/asdf', 'owner', 'moderator'),
+            RoomMember('test_user', 'testuser@jabber.org/asdf', 'none', 'participant'),
+            RoomMember('sender', 'chat@jabber.org/sender', 'none', 'participant'),
+        ]
+    room_member_list = RoomMemberList(room_members)
+    return Message('Sweetiebot', 'sender', 'chat@jabber.org/sender', 'sender@jabber.org', input, input, is_pm, room_member_list)
 
 class MessageParsingTests(unittest.TestCase):
 
@@ -45,9 +52,11 @@ class MessageParsingTests(unittest.TestCase):
         message = create_message('Sweetiebot: rOlL some dice')
         self.should_roll_some_dice(message)
 
-    
-
     def should_roll_some_dice(self, message):
         self.assertEqual(message.command, 'roll')
         self.assertEqual(message.args, 'some dice')
+
+    def test_sender_can_not_do_admin_things(self):
+        message = create_message('!kick someone')
+        self.assertFalse(message.sender_can_do_admin_things())
     

@@ -1,9 +1,16 @@
 from modules import Message, SweetieLookup
+from modules.RoomMember import RoomMember, RoomMemberList
 import unittest
 from unittest.mock import MagicMock, patch
 
 def create_message(input, is_pm=False):
-    return Message('Sweetiebot', 'sender', 'chat@jabber.org/sender', 'sender@jabber.org', input, input, is_pm)
+    room_members = [
+            RoomMember('Sweetiebot', 'sweetiebot@jabber.org/asdf', 'owner', 'moderator'),
+            RoomMember('test_user', 'testuser@jabber.org/asdf', 'none', 'participant'),
+            RoomMember('sender', 'chat@jabber.org/sender', 'none', 'participant'),
+        ]
+    room_member_list = RoomMemberList(room_members)
+    return Message('Sweetiebot', 'sender', 'chat@jabber.org/sender', 'sender@jabber.org', input, input, is_pm, room_member_list)
 
 class LookupTests(unittest.TestCase):
 
