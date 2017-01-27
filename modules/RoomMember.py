@@ -28,5 +28,5 @@ class RoomMember():
         return self.affiliation in ('admin', 'owner')
 
     def __repr__(self):
-        return "RoomMember({},{},{},{})".format(self.nick, self.jid, self.affiliation, self.role)
+        return "RoomMember({},{},{},{})".format(self.nickname, self.jid, self.affiliation, self.role)
 
