@@ -44,13 +44,13 @@ class SweetieChatTests(unittest.TestCase):
 
     def test_how_x_is_y(self):
         response  = self.chat.random_chat(create_message('Sweetiebot: how x is y?'))
-        self.assertEqual('sender: y [64.21% x]', response)
+        self.assertEqual('sender: y [74.06% x]', response)
         response2 = self.chat.random_chat(create_message('Sweetiebot: how blue is red'))
-        self.assertEqual('sender: red [15.42% blue]', response2)
+        self.assertEqual('sender: red [51.89% blue]', response2)
         response3 = self.chat.random_chat(create_message('Sweetiebot: how amazing are amazing people'))
-        self.assertEqual('sender: amazing people [79.86% amazing]', response3)
+        self.assertEqual('sender: amazing people [13.67% amazing]', response3)
         response4 = self.chat.random_chat(create_message('Sweetiebot: how totally silly are silly people'))
-        self.assertEqual('sender: silly people [45.24% totally silly]', response4)
+        self.assertEqual('sender: silly people [11.49% totally silly]', response4)
 
     def test_misc(self):
         print(self.chat.random_chat(create_message('Sweetiebot: how do you do?')))
