@@ -24,17 +24,6 @@ class SweetieAdmin(object):
         ele = ET.Element('{'+SweetieAdmin.QUERY_NS+'}query')
         return ele
 
-    def get_nick_reason(self, args):
-        nick = None
-        reason = None
-        match = re.match("\s*'([^']*)'(.*)", args) or\
-            re.match("\s*\"([^\"]*)\"(.*)", args) or\
-            re.match("\s*(\S*)(.*)", args)
-        if match:
-            nick = match.group(1)
-            reason = match.group(2).strip()
-        return nick, reason
-
     def chat(self, message):
         self.bot.send_groupchat_message(message)
 
@@ -111,10 +100,11 @@ class SweetieAdmin(object):
         '''[nick] [reason] Bans a user from the chat
         nick can be wrapped in quotes'''
 
-        nick, reason = self.get_nick_reason(message.args)
-
         if not message.sender_can_do_admin_things():
             return "nooope"
+        if not message.nick_reason:
+            return "A nickname and reason must be provided"
+        nick, reason = message.nick_reason
         if not len(reason):
             return "A reason must be provided"
 
@@ -147,7 +137,9 @@ class SweetieAdmin(object):
         '''[nick] [reason-optional] Kicks a user from the chat
         nick can be wrapped in quotes'''
 
-        nick, reason = self.get_nick_reason(message.args)
+        if not message.nick_reason:
+            return "A nickname and reason must be provided"
+        nick, reason = message.nick_reason
 
         if not message.sender_can_do_admin_things():
             log.debug('failing kick because {} is not registered as a mod'.format(message.sender_nick))
@@ -165,7 +157,10 @@ class SweetieAdmin(object):
     @logerrors
     def remove_jid(self, message):
         '''[jid] [reason-optional] Kicks a user by their jid from the chat'''
-        jid, reason = self.get_nick_reason(message.args)
+
+        if not message.nick_reason:
+            return "A nickname and reason must be provided"
+        jid, reason = message.nick_reason
 
         if not message.sender_can_do_admin_things():
             log.debug('failing kick because {} is not registered as a mod'.format(message.sender_nick))

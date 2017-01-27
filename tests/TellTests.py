@@ -73,6 +73,10 @@ class TellTests(unittest.TestCase):
         response = self.tell.tell(create_message('!tell nobody to do a thing'))
         self.assertEqual('Sorry, I don\'t know who \'nobody\' is', response)
 
+    def test_denies_tell_with_empty_message(self):
+        response = self.tell.tell(create_message('!tell ZhuLi'))
+        self.assertEqual('A message is required', response)
+
     def test_can_remember_nicks_not_in_chat(self):
         response = self.tell.tell(create_message('!tell AfkPerson to do a thing'))
         self.assertEqual('Sorry, I don\'t know who \'AfkPerson\' is', response)
