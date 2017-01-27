@@ -7,6 +7,7 @@ def create_message(input, is_pm=False):
             RoomMember('Sweetiebot', 'sweetiebot@jabber.org/asdf', 'owner', 'moderator'),
             RoomMember('test_user', 'testuser@jabber.org/asdf', 'none', 'participant'),
             RoomMember('sender', 'chat@jabber.org/sender', 'none', 'participant'),
+            RoomMember('name with spaces', 'spacename@jabber.org/sender', 'none', 'participant'),
         ]
     room_member_list = RoomMemberList(room_members)
     return Message('Sweetiebot', 'sender', 'chat@jabber.org/sender', 'sender@jabber.org', input, input, is_pm, room_member_list)
@@ -59,4 +60,11 @@ class MessageParsingTests(unittest.TestCase):
     def test_sender_can_not_do_admin_things(self):
         message = create_message('!kick someone')
         self.assertFalse(message.sender_can_do_admin_things())
+
+    def test_nickreason_is_None_for_no_args(self):
+        message = create_message('!quote')
+        self.assertIsNone(message.nick_reason)
     
+    def test_nickreason_parses_single_word_nicks(self):
+        message = create_message('!kick someone')
+        self.assertEqual(message.nick_reason, ('someone', ''))

@@ -1,4 +1,5 @@
 import logging
+import re
 from sleekxmpp import JID
 
 log = logging.getLogger(__name__)
@@ -20,8 +21,9 @@ class Message(object):
 
         if self._is_command(nickname, message_text) or is_pm:
             self.command, self.args = self._get_command_and_args(message_text)
+            self.nick_reason = self._get_nick_reason(self.args)
         else:
-            self.command, self.args = None,None
+            self.command, self.args, self.nick_reason = None,None,None
         self.is_ping = self._is_ping(nickname, message_text) or is_pm
         log.debug('''creating message:
         self: {}
@@ -64,6 +66,18 @@ class Message(object):
             message = message[1:]
         return message.strip()
 
+    def _get_nick_reason(self, args):
+        if not args: return None
+
+        nick = None
+        reason = None
+        match = re.match("\s*'([^']*)'(.*)", args) or\
+            re.match("\s*\"([^\"]*)\"(.*)", args) or\
+            re.match("\s*(\S*)(.*)", args)
+        if match:
+            nick = match.group(1)
+            reason = match.group(2).strip()
+        return nick, reason
 
     def sender_can_do_admin_things(self):
         member = self.room_member_list.get_member_from_nickname(self.sender_nick)
