@@ -66,7 +66,11 @@ class TimelineWatcher:
             if tweets:
                 if isinstance(tweets, str):
                     raise Exception(tweets)
-                tweet = tweets[0]
+                try:
+                    tweet = tweets[0]
+                except KeyError as ke:
+                    log.exception('Error parsing timeline result from tweets of type %s : %r', type(tweets), tweets)
+                    return
                 self.latest_tweet = tweet['id']
                 #print('setting latest tweet to '+str(self.latest_tweet))
                 if should_return:

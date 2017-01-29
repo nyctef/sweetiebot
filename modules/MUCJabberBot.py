@@ -2,6 +2,7 @@ from modules.Message import Message
 from modules.MessageResponse import MessageResponse
 from modules.MessageProcessor import MessageProcessor
 from modules.Presence import Presence
+from modules.RoomMember import RoomMember, RoomMemberList
 import logging
 from utils import logerrors
 from sleekxmpp import ClientXMPP
@@ -124,11 +125,13 @@ class MUCJabberBot():
             log.debug('ignoring from nickname')
             return
 
+        room_member_list = self._get_room_member_list()
+
         is_pm = message_stanza['type'] == 'chat'
         message_html = str(message_stanza['html']['body'])
         message = message_stanza['body']
         parsed_message = Message(self.nick, sender_nick, jid, user_jid, message,
-                                 message_html, is_pm)
+                                 message_html, is_pm, room_member_list)
 
         reply = self.message_processor.process_message(parsed_message)
         if reply:
@@ -137,6 +140,15 @@ class MUCJabberBot():
 
         for callback in self._message_callbacks:
             callback(parsed_message)
+
+    def _get_room_member_list(self):
+        room_details = self._muc.rooms[self.room]
+        member_list = [self._get_room_member(nick, props) \
+                for (nick, props) in room_details.items()]
+        return RoomMemberList(member_list)
+
+    def _get_room_member(self, nick, props):
+        return RoomMember(nick, JID(props['jid']), props['affiliation'], props['role'])
 
     @logerrors
     def on_presence(self, presence_stanza):

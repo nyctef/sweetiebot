@@ -12,14 +12,10 @@ class SweetieAdmin(object):
     _ban = "ban"
     _unban = "unban"
 
-    def __init__(self, bot, chatroom, mods):
+    def __init__(self, bot, chatroom):
         self.bot = bot
         self.bot.load_commands_from(self)
         self.chatroom = chatroom
-        self.mods = mods
-
-    def message_is_from_mod(self, message):
-        return message.user_jid in self.mods
 
     QUERY_NS = 'http://jabber.org/protocol/muc#admin'
 
@@ -27,17 +23,6 @@ class SweetieAdmin(object):
     def query_element():
         ele = ET.Element('{'+SweetieAdmin.QUERY_NS+'}query')
         return ele
-
-    def get_nick_reason(self, args):
-        nick = None
-        reason = None
-        match = re.match("\s*'([^']*)'(.*)", args) or\
-            re.match("\s*\"([^\"]*)\"(.*)", args) or\
-            re.match("\s*(\S*)(.*)", args)
-        if match:
-            nick = match.group(1)
-            reason = match.group(2).strip()
-        return nick, reason
 
     def chat(self, message):
         self.bot.send_groupchat_message(message)
@@ -115,10 +100,11 @@ class SweetieAdmin(object):
         '''[nick] [reason] Bans a user from the chat
         nick can be wrapped in quotes'''
 
-        nick, reason = self.get_nick_reason(message.args)
-
-        if not message.user_jid in self.mods:
+        if not message.sender_can_do_admin_things():
             return "nooope"
+        if not message.nick_reason:
+            return "A nickname and reason must be provided"
+        nick, reason = message.nick_reason
         if not len(reason):
             return "A reason must be provided"
 
@@ -137,7 +123,7 @@ class SweetieAdmin(object):
 
         jid = message.args
 
-        if message.user_jid in self.mods:
+        if message.sender_can_do_admin_things():
             log.debug("trying to unban "+jid)
             return self.set_affiliation(jid=jid, atype='affiliation',
                                         value='none') or \
@@ -151,9 +137,11 @@ class SweetieAdmin(object):
         '''[nick] [reason-optional] Kicks a user from the chat
         nick can be wrapped in quotes'''
 
-        nick, reason = self.get_nick_reason(message.args)
+        if not message.nick_reason:
+            return "A nickname and reason must be provided"
+        nick, reason = message.nick_reason
 
-        if message.user_jid not in self.mods:
+        if not message.sender_can_do_admin_things():
             log.debug('failing kick because {} is not registered as a mod'.format(message.sender_nick))
             return "Do you have a flag? No flag, no kick. You can't have one!"
 
@@ -169,9 +157,12 @@ class SweetieAdmin(object):
     @logerrors
     def remove_jid(self, message):
         '''[jid] [reason-optional] Kicks a user by their jid from the chat'''
-        jid, reason = self.get_nick_reason(message.args)
 
-        if message.user_jid not in self.mods:
+        if not message.nick_reason:
+            return "A nickname and reason must be provided"
+        jid, reason = message.nick_reason
+
+        if not message.sender_can_do_admin_things():
             log.debug('failing kick because {} is not registered as a mod'.format(message.sender_nick))
             return "Do you have a flag? No flag, no kick. You can't have one!"
 

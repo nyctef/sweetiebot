@@ -14,17 +14,6 @@ class SweetieTell(object):
         self.bot.load_commands_from(self)
         self.nicktojid = NickToJidTracker(self.bot, self.store)
 
-    def get_nick_message(self, args):
-        nick = None
-        message = None
-        match = re.match("\s*'([^']*)'(.*)", args) or\
-            re.match("\s*\"([^\"]*)\"(.*)", args) or\
-            re.match("\s*(\S*)(.*)", args)
-        if match:
-            nick = match.group(1)
-            message = match.group(2).strip()
-        return nick, message
-
     def dec(self, bytes):
         return bytes.decode('utf-8')
 
@@ -32,8 +21,10 @@ class SweetieTell(object):
     def tell(self, message):
         '''[user] [message] Notify a user the next time they speak in chat'''
         if message.is_pm: return 'Sorry, you can\'t use !tell in a PM'
+        if not message.nick_reason: return "A target user and message are required"
         sender_nick = message.sender_nick
-        sendee_nick, mess = self.get_nick_message(message.args)
+        sendee_nick, mess = message.nick_reason
+        if not mess: return "A message is required"
         sendee_jid = self.bot.get_jid_from_nick(sendee_nick)
         sendee_jid = sendee_jid or self.nicktojid.get_jid_from_nick(sendee_nick)
         sender_jid = message.user_jid
