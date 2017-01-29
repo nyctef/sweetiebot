@@ -122,11 +122,19 @@ class SweetieLookup(object):
     @botcmd
     @logerrors
     def jita(self, message):
+        return self.get_prices_response(message, 10000002, 60003760)
+
+    @botcmd
+    @logerrors
+    def amarr(self, message):
+        return self.get_prices_response(message, 10000043, 60008494)
+
+    def get_prices_response(self, message, regionid, systemid):
         '''[item name] Look up prices in jita'''
         href, name = self.id_lookup(message.args)
         if href is None:
             return 'Couldn\'t find any matches'
-        reply = self.get_prices(href, 10000002, 60003760)
+        reply = self.get_prices(href, regionid, systemid)
         reply = message.sender_nick + ': '+name.title() + ' - ' + reply
         return reply
 
