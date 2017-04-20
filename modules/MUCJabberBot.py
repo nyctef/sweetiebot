@@ -30,6 +30,9 @@ class MUCJabberBot():
         # disable ipv6 for now since we're getting errors using it
         bot.use_ipv6 = False
 
+	# Fix certain Jabber clients not showing messages by giving them an ID
+	bot.use_message_ids = True
+
         bot.add_event_handler('session_start', self.on_start)
         bot.add_event_handler('message', self.on_message)
         bot.add_event_handler('groupchat_presence', self.on_presence)
