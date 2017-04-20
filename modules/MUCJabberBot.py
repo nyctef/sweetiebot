@@ -31,7 +31,7 @@ class MUCJabberBot():
         bot.use_ipv6 = False
 
 	# Fix certain Jabber clients not showing messages by giving them an ID
-	bot.use_message_ids = True
+        bot.use_message_ids = True
 
         bot.add_event_handler('session_start', self.on_start)
         bot.add_event_handler('message', self.on_message)
