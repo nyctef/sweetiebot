@@ -8,7 +8,6 @@ test_chatroom = 'sweetiebot_playground@conference.friendshipismagicsquad.com'
 password = 'correct pony battery staple'
 # Nickname to use in chatroom
 nickname = 'Sweetiebot'
-debug = False
 # Optional: An account key for Azure Service bus to chuck events at
 sb_account_key = None
 # sb_account_key = '66666666666666666666666666666666666666666666'
@@ -23,3 +22,10 @@ pushbullet_device = None
 # pushbullet_device = 0000000000000000
 twitter_key = '0000000000000000000000000'
 twitter_secret = '00000000000000000000000000000000000000000000000000'
+# details for connecting to EVE Online CREST API
+crest_base_url = 'https://crest-tq.eveonline.com'                        
+crest_client_id = '00000000000000000000000000000000'                     
+crest_client_secret = '0000000000000000000000000000000000000000'         
+crest_refresh_token = '00000000000000000000000000000000000000000000'     
+# A url for the redis instance to connect to in the form redis://[:password]@host:port/dbnum
+redis_url = 'redis://sbredis:6379/0'

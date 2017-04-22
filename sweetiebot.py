@@ -52,7 +52,7 @@ def build_sweetiebot(config=None):
         log.debug('faking out redis')
         redis_conn = FakeRedis()
     else:
-        redis_conn = redis.Redis('localhost')
+        redis_conn = redis.from_url(config.redis_url)
 
     jid = config.username + '/' + resource
     nick = config.nickname
