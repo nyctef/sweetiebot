@@ -37,14 +37,13 @@ class SweetieChat(object):
     target = '<target>'
     chattiness = .02
 
-    def __init__(self, bot, actions, sass, chatroom, markov, cadmusic, tell, dictionary):
+    def __init__(self, bot, actions, sass, chatroom, cadmusic, tell, dictionary):
         self.bot = bot
         self.bot.load_commands_from(self)
         self.nickname = self.bot.nick
         self.actions = actions
         self.sass = sass
         self.chatroom = chatroom
-        self.markov = markov
         self.cadance_musics_log = cadmusic
         self.tell = tell
         self.dictionary = dictionary
@@ -160,7 +159,6 @@ class SweetieChat(object):
         message = mess.message_text
         sender = mess.sender_nick
         is_ping = mess.is_ping
-        self.markov.store_message(message)
 
         #logs Cadance musics
         self.do_cadance_musics(mess)
@@ -175,11 +173,6 @@ class SweetieChat(object):
         random_junk = self.get_random_junk(mess)
         if random_junk:
             return random_junk
-
-        if False: #is_ping or random.random() < self.chattiness:
-            markov_response = self.markov.get_message(message)
-            if markov_response:
-                return markov_response
 
         if is_ping:
             return self.sass.get_next()

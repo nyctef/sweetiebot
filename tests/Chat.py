@@ -21,7 +21,6 @@ class SweetieChatTests(unittest.TestCase):
         self.sass = MagicMock()
         self.sass.get_next = MagicMock(name='some sass')
         self.chatroom = MagicMock()
-        self.markov = MagicMock()
         self.cadmusic = MagicMock()
         self.tell = MagicMock()
         self.tell.get_messages_for = MagicMock(return_value=None)
@@ -29,7 +28,7 @@ class SweetieChatTests(unittest.TestCase):
         self.dictionary.get_definition = MagicMock(return_value='a picture of you')
 
         self.chat = SweetieChat(self.bot, self.actions, self.sass,
-                self.chatroom, self.markov, self.cadmusic, self.tell,
+                self.chatroom, self.cadmusic, self.tell,
                 self.dictionary)
 
     def test_can_choose_a_thing(self):
