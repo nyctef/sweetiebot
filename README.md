@@ -25,6 +25,9 @@ docker run --detach --network=sbnet --name sbredis --volume "$(pwd)/data:/data" 
 
 # run sweetiebot
 docker run --detach --network=sbnet --name sweetiebot sweetiebot python sweetiebot.py
+
+# watch sweetiebot output
+docker logs --follow sweetiebot
 ```
 
 
