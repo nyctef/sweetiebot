@@ -21,7 +21,7 @@ docker build -t sweetiebot .
 docker create network sbnet
 
 # run a redis instance for sweetiebot to connect to
-docker run --detach --network=sbnet --name --volume data:/data sbredis redis
+docker run --detach --network=sbnet --name sbredis --volume "$(pwd)/data:/data" redis
 
 # run sweetiebot
 docker run --detach --network=sbnet --name sweetiebot sweetiebot
