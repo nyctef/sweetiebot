@@ -24,7 +24,7 @@ docker create network sbnet
 docker run --detach --network=sbnet --name sbredis --volume "$(pwd)/data:/data" redis
 
 # run sweetiebot
-docker run --detach --network=sbnet --name sweetiebot sweetiebot
+docker run --detach --network=sbnet --name sweetiebot sweetiebot python sweetiebot.py
 ```
 
 
