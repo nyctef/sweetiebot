@@ -18,7 +18,7 @@ running with docker:
 docker build -t sweetiebot .
 
 # create a docker network for connecting sweetiebot with redis
-docker create network sbnet
+docker network create sbnet
 
 # run a redis instance for sweetiebot to connect to
 docker run --detach --network=sbnet --name sbredis --volume "$(pwd)/data:/data" redis
