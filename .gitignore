@@ -8,3 +8,4 @@ env/
 *log.txt
 config.py
 tests/output.txt
+*.rdb
