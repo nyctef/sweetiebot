@@ -17,8 +17,13 @@ running with docker:
 # build sweetiebot docker container
 docker build -t sweetiebot .
 
-# create a docker network for connecting sweetiebot with redis
+# create a docker network
 docker network create sbnet
+
+# let's make a jabber server
+docker run --detach --network=sbnet --name ejabberd --publish 5222:5222 ejabberd/ecs
+# and create a user to connect as
+docker exec -it ejabberd /home/p1/ejabberd-api register --endpoint=http://127.0.0.1:5280/ --jid=admin@localhost --password=passw0rd
 
 # run a redis instance for sweetiebot to connect to
 docker run --detach --network=sbnet --name sbredis --volume "$(pwd)/data:/data" redis
