@@ -97,7 +97,6 @@ def bot_connects_to_chat():
     #password = open('password.txt', 'r').read().strip()
     import config
     config.fake_redis = True
-    config.chatroom = config.test_chatroom
     sweet = build_sweetiebot()
     stay_awhile_and_listen()
     return sweet

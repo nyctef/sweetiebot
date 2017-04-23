@@ -2,8 +2,6 @@
 username = 'sweetiebutt@friendshipismagicsquad.com'
 # The chatroom to join
 chatroom = 'general@conference.friendshipismagicsquad.com'
-# The chatroom to join in debug mode
-test_chatroom = 'sweetiebot_playground@conference.friendshipismagicsquad.com'
 # Account password
 password = 'correct pony battery staple'
 # Nickname to use in chatroom

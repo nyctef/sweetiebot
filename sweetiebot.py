@@ -112,7 +112,6 @@ if __name__ == '__main__':
     setup_logging(config)
     if '--test' in sys.argv:
         config.fake_redis = True
-        config.chatroom = config.test_chatroom
     else:
         config.fake_redis = False
 
