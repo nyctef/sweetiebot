@@ -21,9 +21,9 @@ docker build -t sweetiebot .
 docker network create sbnet
 
 # let's make a jabber server
-docker run --detach --name ejabberd -p 5222:5222 -p 5269:5269 -p 5280:5280 -e "EJABBERD_ADMINS=admin_user@localhost" -e "EJABBERD_USERS=admin_user@localhost:password1234 normal_user@localhost" -e "EJABBERD_MOD_MUC_ADMIN=true" rroemhild/ejabberd
+docker run --detach --name jabberserver -p 5222:5222 -p 5269:5269 -p 5280:5280 -e "XMPP_DOMAIN=jabberserver" -e "EJABBERD_ADMINS=admin_user@jabberserver" -e "EJABBERD_USERS=admin_user@jabberserver:password1234 normal_user@jabberserver:password1234 bot_user@jabberserver:password1234" -e "EJABBERD_MOD_MUC_ADMIN=true" rroemhild/ejabberd
 # and create a room to join
-docker exec -it ejabberd ejabberdctl create_room test_room conference.localhost localhost
+docker exec -it jabberserver ejabberdctl create_room test_room conference.jabberserver jabberserver
 
 # run a redis instance for sweetiebot to connect to
 docker run --detach --network=sbnet --name sbredis --volume "$(pwd)/data:/data" redis
