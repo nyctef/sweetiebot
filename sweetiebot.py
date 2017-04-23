@@ -5,7 +5,6 @@ import redis
 import sys
 import logging
 from utils import randomstr
-#from time import sleep
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
     RestartException, PBLogHandler, SweetieDe, SweetiePings, \
