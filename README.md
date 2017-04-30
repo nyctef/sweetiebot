@@ -29,7 +29,7 @@ docker exec -it jabberserver ejabberdctl create_room test_room conference.jabber
 docker run --detach --network=sbnet --name sbredis --volume "$(pwd)/data:/data" redis
 
 # run sweetiebot
-docker run --detach --network=sbnet --name sweetiewatch sweetiebot python /bin/bash run-bot-and-watch.sh
+docker run --detach --network=sbnet --name sweetiebot sweetiebot
 
 # watch sweetiebot output
 docker logs --follow sweetiebot
