@@ -8,3 +8,4 @@ get_crest_refresh_token.py
 *.md
 *tests.sh
 *.log
+.git
