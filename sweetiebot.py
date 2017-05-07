@@ -58,8 +58,9 @@ def build_sweetiebot(config=None):
     nick = config.nickname
     room = config.chatroom
     password = config.password
+    address = getattr(config, 'address', ())
 
-    bot = MUCJabberBot(jid, password, room, nick)
+    bot = MUCJabberBot(jid, password, room, nick, address)
     crest = SweetieCrest(config.crest_base_url, config.crest_client_id, config.crest_client_secret, config.crest_refresh_token)
     lookup = SweetieLookup(bot, crest)
     admin = SweetieAdmin(bot, config.chatroom)

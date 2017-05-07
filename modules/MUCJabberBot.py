@@ -17,7 +17,7 @@ class RestartException(Exception):
 
 class MUCJabberBot():
 
-    def __init__(self, jid, password, room, nick):
+    def __init__(self, jid, password, room, nick, address=()):
         print('creating bot with {} {} {} {} '.format(jid, password, room, nick))
         self.nick = nick
         self.room = room
@@ -51,7 +51,7 @@ class MUCJabberBot():
         self.message_processor = MessageProcessor(on_unknown_callback)
 
         log.info('sb connect')
-        if bot.connect():
+        if bot.connect(address=address):
             log.info('sb process')
             bot.process()
         else:
