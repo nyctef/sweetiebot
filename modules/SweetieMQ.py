@@ -10,15 +10,17 @@ class SweetieMQ(object):
 
     def __init__(self, config):
         account_key = getattr(config, 'sb_account_key', None)
-        issuer = getattr(config, 'sb_issuer', None)
-        if issuer is None:
-            issuer = 'owner'
         if account_key is None:
+            log.warn('sb_account_key is not set, skipping mq setup')
             return
 
-        self.bus_service = ServiceBusService(service_namespace='jabber-fimsquad',\
+        issuer = getattr(config, 'sb_issuer', 'owner')
+        service_namespace = getattr(config, 'sb_namespace', 'jabber-messages')
+        topic = getattr(config, 'sb_topic', 'test-topic')
+
+        self.bus_service = ServiceBusService(service_namespace=service_namespace,\
                 account_key=account_key, issuer=issuer)
-        self.topic = 'chat-general'
+        self.topic = topic
 
     def send(self, message):
         if self.bus_service is None:

@@ -6,12 +6,18 @@ chatroom = 'general@conference.friendshipismagicsquad.com'
 password = 'correct pony battery staple'
 # Nickname to use in chatroom
 nickname = 'Sweetiebot'
+
 # Optional: An account key for Azure Service bus to chuck events at
 sb_account_key = None
 # sb_account_key = '66666666666666666666666666666666666666666666'
 # Optional: Issuer for service bus
 sb_issuer = None
 # sb_issuer = 'owner'
+# Optional: Service namespace for azure service bus
+sb_namespace = 'jabber-messages'
+# Optional: Service topic for azure service bus
+sb_topic = 'test-topic'
+
 # Optional: API key for pushbullet notifications
 pushbullet_api = None
 # pushbullet_api = '000000000000000000000000000000000000000000000'
