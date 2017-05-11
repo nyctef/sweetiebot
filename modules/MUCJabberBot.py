@@ -9,6 +9,7 @@ from sleekxmpp import ClientXMPP
 from sleekxmpp.xmlstream.jid import JID
 import html
 from time import sleep
+import os
 
 log = logging.getLogger(__name__)
 
@@ -33,15 +34,20 @@ class MUCJabberBot():
 	# Fix certain Jabber clients not showing messages by giving them an ID
         bot.use_message_ids = True
 
+        # Don't try to auto reconnect after disconnections (we'll restart the
+        # process and retry that way)
+        bot.auto_reconnect = False
+
         bot.add_event_handler('session_start', self.on_start)
         bot.add_event_handler('message', self.on_message)
         bot.add_event_handler('groupchat_presence', self.on_presence)
         bot.add_event_handler('groupchat_subject', self.on_room_joined)
+        bot.add_event_handler('disconnected', self.on_disconnect)
 
         bot.register_plugin('xep_0045')
         self._muc = bot.plugin['xep_0045']
         bot.register_plugin('xep_0199')
-        bot.plugin['xep_0199'].enable_keepalive(30, 30)
+        bot.plugin['xep_0199'].enable_keepalive(5, 10)
 
         self.unknown_command_callback = None
 
@@ -51,7 +57,7 @@ class MUCJabberBot():
         self.message_processor = MessageProcessor(on_unknown_callback)
 
         log.info('sb connect')
-        if bot.connect():
+        if bot.connect(address=address, reattempt=False):
             log.info('sb process')
             bot.process()
         else:
@@ -60,9 +66,6 @@ class MUCJabberBot():
         self.add_presence_handler(self.rejoin_if_kicked)
 
         self._bot = bot
-
-    def disconnect(self):
-        self._bot.disconnect()
 
     def on_start(self, event):
         log.info('sb on_start')
@@ -80,6 +83,12 @@ class MUCJabberBot():
         needs to be idempotent'''
         log.debug('on_room_joined with {}'.format(room_join_message))
         self._rejoining = False
+
+    def on_disconnect(self, event):
+        log.error('disconnected event raised, quitting so we can restart from scratch')
+        # os._exit() actually nukes the process (instead of raising SystemExit
+        # like sys.exit() does)
+        os._exit(0)
 
     @logerrors
     def on_message(self, message_stanza):

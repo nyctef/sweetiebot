@@ -41,9 +41,6 @@ class Sweetiebot(object):
     def unknown_command(self, message):
         return self.chat.random_chat(message)
 
-    def disconnect(self):
-        self.bot.disconnect()
-
 def build_sweetiebot(config=None):
     if config is None: import config
     resource = config.nickname + randomstr()
@@ -109,23 +106,15 @@ def setup_logging(config):
 if __name__ == '__main__':
     import config
     setup_logging(config)
-    if '--test' in sys.argv:
-        config.fake_redis = True
-    else:
-        config.fake_redis = False
 
-    while True:
-        try:
-            sweet = build_sweetiebot(config)
-            while True: time.sleep(1)
-        except RestartException:
-            continue
-        except KeyboardInterrupt:
-            sys.exit(0)
-        except Exception:
-            traceback.print_exc()
-            sys.exit(1)
-        finally:
-            if sweet is not None: sweet.disconnect()
-        break
+    config.fake_redis = ('--test' in sys.argv)
+
+    try:
+        sweet = build_sweetiebot(config)
+        while True: time.sleep(1)
+    except KeyboardInterrupt:
+        sys.exit(0)
+    except Exception:
+        traceback.print_exc()
+        sys.exit(1)
 
