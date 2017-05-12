@@ -94,7 +94,7 @@ class SweetieLookup(object):
 
     def id_lookup(self, name):
         if name.lower() == 'plex' or name.lower() == '30 day':
-            return 'https://crest-tq.eveonline.com/inventory/types/29668/', name
+            return 'https://crest-tq.eveonline.com/inventory/types/44992/', name
         test = name
         test = test.upper()
         reply = None
