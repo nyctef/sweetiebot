@@ -7,9 +7,8 @@ chatroom = getenv('SB_CHATROOM', 'test_room@conference.jabberserver')
 password = getenv('SB_PASSWORD', 'password1234')
 # Nickname to use in chatroom
 nickname = getenv('SB_NICKNAME', 'Sweetiebot')
-# Optional: hostname to connect to (if different from the one specified in the JID)
+# Optional: hostname and port to connect to (if different from the one specified in the JID)
 hostname = getenv('SB_HOSTNAME', None)
-# Optional: port to connect to (if different from 5222)
 port = getenv('SB_PORT', 5222)
 # Optional: turn on some debug features
 debug = getenv('SB_DEBUG', False)
