@@ -15,11 +15,9 @@ echo "Starting sweetiebot..."
 echo '********************************************************************************' >> data/sweetiebot.log
 echo "Starting log at" `date '+%Y-%m-%d %H:%M:%S'` >> data/sweetiebot.log
 echo '********************************************************************************' >> data/sweetiebot.log
-python sweetiebot.py 2>&1 | tee -a data/sweetiebot.log &
-echo "... done. Waiting for sweetiebot to quit..."
+python sweetiebot.py 2>&1 | tee -a data/sweetiebot.log
 # wait for bot to exit before exiting script
-wait %1
-echo "Sweetiebot ended, cleaning up remaining jobs..."
+echo "...Sweetiebot ended, cleaning up remaining jobs..."
 # kill sweetiewatch instead of leaving it lying around
 kill $(jobs -p)
 echo "... done. Exiting"

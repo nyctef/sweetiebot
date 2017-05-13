@@ -19,7 +19,8 @@ class RestartException(Exception):
 class MUCJabberBot():
     
     def __init__(self, jid, password, room, nick, address=()):
-        print('creating bot with {} {} {} {} '.format(jid, password, room, nick))
+        print('creating bot with {} {} {} {} {}'
+                .format(jid, password, room, nick, address))
         self.nick = nick
         self.room = room
         self.jid = JID(jid)
@@ -61,7 +62,8 @@ class MUCJabberBot():
             log.info('sb process')
             bot.process()
         else:
-            raise Exception('could not connect')
+            log.error('failed to connect at first attempt')
+            self.on_disconnect(None)
 
         self.add_presence_handler(self.rejoin_if_kicked)
 
