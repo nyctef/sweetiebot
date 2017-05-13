@@ -30,7 +30,7 @@ class FakeXMPPUser():
     def __init__(self, timeout, username, password, nick):
         print("creating bot..")
         self.nick = nick
-        self.chatroom =  'sweetiebot_playground@conference.friendshipismagicsquad.com'
+        self.chatroom =  'test_room@conference.jabberserver'
         bot = sleekxmpp.ClientXMPP(username, password)
         bot.add_event_handler('session_start', self.on_start)
         bot.add_event_handler('message', self.on_message_received)
@@ -41,7 +41,7 @@ class FakeXMPPUser():
         self.messages = queue.Queue()
         self.has_joined_chat = Event()
         print('fake user connecting ..')
-        if self.bot.connect():
+        if self.bot.connect(address=('localhost',5222)):
             print('.. connected')
             self.bot.process()
         else:
@@ -85,16 +85,12 @@ class FakeXMPPUser():
         self.bot.disconnect()
 
 
-chatroom = 'sweetiebot_playground@conference.friendshipismagicsquad.com'
-
 def stay_awhile_and_listen():
     import time
     #TODO: replace any usage of this function with something that spins on a condition or actually waits for a specific message id
     time.sleep(1)
 
 def bot_connects_to_chat():
-    #username = 'sweetiebutt@friendshipismagicsquad.com/sweetiebutt'
-    #password = open('password.txt', 'r').read().strip()
     import config
     config.fake_redis = True
     sweet = build_sweetiebot()
@@ -104,16 +100,16 @@ def bot_connects_to_chat():
 def admin_connects_to_chat():
     import config
     print("connecting admin...")
-    username = 'nyctef@friendshipismagicsquad.com/sweetieadmin'
-    password = config.admin_password
+    username = 'admin_user@jabberserver/sweetieadmin'
+    password = 'password1234'
     admin = FakeXMPPUser(10, username, password, 'admin')
     print("joining admin... ")
     assert admin.has_joined_chat.wait(10)
     return admin
 
 def test_user_connects_to_chat():
-    username = 'sweetietest@friendshipismagicsquad.com/asdftest'
-    password = 'asdf'
+    username = 'normal_user@jabberserver/asdftest'
+    password = 'password1234'
     test_user = FakeXMPPUser(10, username, password, 'test_user')
     assert test_user.has_joined_chat.wait(10)
     return test_user
@@ -147,7 +143,7 @@ def test_admin(admin):
     send_and_wait('Sweetiebot: banlist')
     send_and_wait('Sweetiebot: ban test_user for science')
     send_and_wait('Sweetiebot: listbans')
-    send_and_wait('Sweetiebot: unban sweetietest@friendshipismagicsquad.com')
+    send_and_wait('Sweetiebot: unban sweetietest@jabberserver')
     send_and_wait('Sweetiebot: listbans')
 
 def test_lookup(admin):
@@ -181,10 +177,10 @@ def bot_kicks_missing_user():
     send_and_wait('Sweetiebot: kick nobody')
 
 def bot_kicks_missing_jid():
-    send_and_wait('Sweetiebot: kickjid nobody@friendshipismagicsquad.com')
+    send_and_wait('Sweetiebot: kickjid nobody@jabberserver')
 
 def bot_kicks_test_user_by_jid():
-    admin.send_message('Sweetiebot: kickjid sweetietest@friendshipismagicsquad.com')
+    admin.send_message('Sweetiebot: kickjid sweetietest@jabberserver')
     stay_awhile_and_listen()
     stay_awhile_and_listen()
 
@@ -236,7 +232,7 @@ if __name__ == '__main__':
         #logging.getLogger('modules.Message').setLevel(logging.DEBUG)
         #logging.getLogger('modules.MUCJabberBot').setLevel(logging.DEBUG)
         #logging.getLogger('sleekxmpp').setLevel(logging.DEBUG)
-        logging.getLogger('sleekxmpp.xmlstream.xmlstream').setLevel(logging.FATAL)
+        #logging.getLogger('sleekxmpp.xmlstream.xmlstream').setLevel(logging.FATAL)
         logging.getLogger('modules.SweetieAdmin').setLevel(logging.DEBUG)
         #logging.getLogger('modules.SweetieLookup').setLevel(logging.DEBUG)
         #logging.getLogger('modules.SweetieSeen').setLevel(logging.DEBUG)

@@ -45,6 +45,12 @@ class SweetieLookup(object):
             'http://tumblraas.azurewebsites.net/rant', timeout=10)
         return res.text.strip()
 
+    def format_isk(self, value):
+        if value == 0 or value == float("inf"):
+            return 'unavailable'
+
+        return '{0:,} isk'.format(float(value))
+
     def get_prices(self, href, region, station):
         endpoint = '/market/{}/orders/?type={}'.format(region, href)
 
@@ -60,9 +66,7 @@ class SweetieLookup(object):
                 if is_buy_order and price > buy: buy = price
                 if not is_buy_order and price < sell: sell = price
 
-            buy = '{0:,}'.format(float(buy))
-            sell = '{0:,}'.format(float(sell))
-            return 'buy: ' + buy + ' isk, sell: ' + sell + ' isk'
+            return 'buy: ' + self.format_isk(buy) + ', sell: ' + self.format_isk(sell)
         except Exception as e:
             log.exception(e, 'error parsing CREST data')
             if 'apiresult' in locals():
@@ -94,7 +98,7 @@ class SweetieLookup(object):
 
     def id_lookup(self, name):
         if name.lower() == 'plex' or name.lower() == '30 day':
-            return 'https://crest-tq.eveonline.com/inventory/types/29668/', name
+            return 'https://crest-tq.eveonline.com/inventory/types/44992/', name
         test = name
         test = test.upper()
         reply = None

@@ -17,9 +17,9 @@ class RestartException(Exception):
     pass
 
 class MUCJabberBot():
-
-    def __init__(self, jid, password, room, nick):
-        log.info('creating bot with {} {} {} {} '.format(jid, password, room, nick))
+    
+    def __init__(self, jid, password, room, nick, address=()):
+        print('creating bot with {} {} {} {} '.format(jid, password, room, nick))
         self.nick = nick
         self.room = room
         self.jid = JID(jid)
