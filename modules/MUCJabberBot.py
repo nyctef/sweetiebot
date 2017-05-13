@@ -61,7 +61,7 @@ class MUCJabberBot():
             log.info('sb process')
             bot.process()
         else:
-            raise 'could not connect'
+            raise Exception('could not connect')
 
         self.add_presence_handler(self.rejoin_if_kicked)
 
