@@ -54,7 +54,7 @@ def build_sweetiebot(config=None):
     nick = config.nickname
     room = config.chatroom
     password = config.password
-    address = getattr(config, 'address', ())
+    address = (config.hostname, config.port)
 
     bot = MUCJabberBot(jid, password, room, nick, address)
     crest = SweetieCrest(config.crest_base_url, config.crest_client_id, config.crest_client_secret, config.crest_refresh_token)
@@ -70,7 +70,7 @@ def build_sweetiebot(config=None):
     chat = SweetieChat(bot, actions, sass, config.chatroom, cadmusic, tell, dictionary)
     roulette = SweetieRoulette(bot, admin)
     pings = SweetiePings(bot, redis_conn)
-    if hasattr(config, 'twitter_key'):
+    if config.twitter_key is not None:
         twitter = TwitterClient.get_client(config.twitter_key, config.twitter_secret)
         watchers = list(map(twitter.get_timeline_watcher, ['EVE_Status', 'EVEOnline']))
     else:
