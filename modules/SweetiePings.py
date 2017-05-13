@@ -1,7 +1,7 @@
 from modules import MUCJabberBot
 from utils import logerrors, botcmd
 from datetime import datetime
-from sleekxmpp.xmlstream.jid import JID
+from sleekxmpp.jid import JID
 
 class SweetiePings:
     def __init__(self, bot, store):

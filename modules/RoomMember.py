@@ -1,5 +1,5 @@
 import logging
-from sleekxmpp.xmlstream.jid import JID
+from sleekxmpp.jid import JID
 
 log = logging.getLogger(__name__)
 

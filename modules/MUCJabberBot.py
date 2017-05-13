@@ -6,7 +6,7 @@ from modules.RoomMember import RoomMember, RoomMemberList
 import logging
 from utils import logerrors
 from sleekxmpp import ClientXMPP
-from sleekxmpp.xmlstream.jid import JID
+from sleekxmpp.jid import JID
 import html
 from time import sleep
 import os
