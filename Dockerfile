@@ -10,4 +10,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # now copy everything else
 COPY . /usr/src/app/
 
+VOLUME /usr/src/app/data
+
 ENTRYPOINT ["/bin/bash", "/usr/src/app/run-bot-and-watch.sh"]
