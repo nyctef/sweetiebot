@@ -68,10 +68,10 @@ class SweetieLookup(object):
 
             return 'buy: ' + self.format_isk(buy) + ', sell: ' + self.format_isk(sell)
         except Exception as e:
-            log.exception(e, 'error parsing CREST data')
+            log.exception('error parsing CREST data')
             if 'apiresult' in locals():
                 return "CREST is unhappy: "+apiresult[:200]
-            raise
+            return "Error getting market data: "+str(e)
 
     def read_ids(self):
         self.chat('Downloading latest typeid list from CREST (this might take a minute)')

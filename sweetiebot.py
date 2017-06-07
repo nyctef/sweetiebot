@@ -5,7 +5,6 @@ import redis
 import sys
 import logging
 from utils import randomstr
-#from time import sleep
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
     RestartException, PBLogHandler, SweetieDe, SweetiePings, \
@@ -42,9 +41,6 @@ class Sweetiebot(object):
     def unknown_command(self, message):
         return self.chat.random_chat(message)
 
-    def disconnect(self):
-        self.bot.disconnect()
-
 def build_sweetiebot(config=None):
     if config is None: import config
     resource = config.nickname + randomstr()
@@ -52,13 +48,16 @@ def build_sweetiebot(config=None):
         log.debug('faking out redis')
         redis_conn = FakeRedis()
     else:
-        redis_conn = redis.Redis('localhost')
+        redis_conn = redis.from_url(config.redis_url)
 
     jid = config.username + '/' + resource
     nick = config.nickname
     room = config.chatroom
     password = config.password
-    address = getattr(config, 'address', ())
+    if config.hostname is not None:
+        address = (config.hostname, config.port)
+    else:
+        address = ()
 
     bot = MUCJabberBot(jid, password, room, nick, address)
     crest = SweetieCrest(config.crest_base_url, config.crest_client_id, config.crest_client_secret, config.crest_refresh_token)
@@ -74,7 +73,7 @@ def build_sweetiebot(config=None):
     chat = SweetieChat(bot, actions, sass, config.chatroom, cadmusic, tell, dictionary)
     roulette = SweetieRoulette(bot, admin)
     pings = SweetiePings(bot, redis_conn)
-    if hasattr(config, 'twitter_key'):
+    if config.twitter_key is not None:
         twitter = TwitterClient.get_client(config.twitter_key, config.twitter_secret)
         watchers = list(map(twitter.get_timeline_watcher, ['EVE_Status', 'EVEOnline']))
     else:
@@ -111,24 +110,15 @@ def setup_logging(config):
 if __name__ == '__main__':
     import config
     setup_logging(config)
-    if '--test' in sys.argv:
-        config.fake_redis = True
-        config.chatroom = config.test_chatroom
-    else:
-        config.fake_redis = False
 
-    while True:
-        try:
-            sweet = build_sweetiebot(config)
-            while True: time.sleep(1)
-        except RestartException:
-            continue
-        except KeyboardInterrupt:
-            sys.exit(0)
-        except Exception:
-            traceback.print_exc()
-            sys.exit(1)
-        finally:
-            if sweet is not None: sweet.disconnect()
-        break
+    config.fake_redis = ('--test' in sys.argv)
+
+    try:
+        sweet = build_sweetiebot(config)
+        while True: time.sleep(1)
+    except KeyboardInterrupt:
+        sys.exit(0)
+    except Exception:
+        traceback.print_exc()
+        sys.exit(1)
 

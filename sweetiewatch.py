@@ -5,7 +5,7 @@ import random
 import logging
 from time import sleep
 from sleekxmpp.clientxmpp import ClientXMPP
-from sleekxmpp.xmlstream.jid import JID
+from sleekxmpp.jid import JID
 import traceback
 import sys
 

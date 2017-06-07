@@ -6,6 +6,5 @@ env/
 .ropeproject
 *.pyc
 *log.txt
-config.py
 tests/output.txt
 *.rdb
