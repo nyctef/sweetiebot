@@ -268,6 +268,7 @@ class SweetieChat(object):
                 "You can always stop procrastinating tomorrow.",
                 "Yeah ... I guess.",
                 "Hehe, *neigh*borhood :sweetieread: Oh, did you have a question?",
+                "You can keep adjusting, but it will not make you well-adjusted.",
                 ]
         return choices[int(chance) % len(choices)]
 
