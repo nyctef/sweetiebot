@@ -9,7 +9,7 @@ from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
     RestartException, PBLogHandler, SweetieDe, SweetiePings, \
     TwitterClient, SweetieSeen, AtomWatcher, SweetieTell, SweetieCrest, \
-    SweetieDictionary
+    SweetieDictionary, SweetieMoon
 import time
 import os
 import traceback
@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 class Sweetiebot(object):
     def __init__(self, nickname, bot, lookup, mq, admin, chat, roulette,
-                 sweetiede, pings, watchers):
+                 sweetiede, pings, watchers, moon):
         self.nickname = nickname
         self.bot = bot
         self.bot.unknown_command_callback = self.unknown_command
@@ -30,6 +30,7 @@ class Sweetiebot(object):
         self.sweetiede = SweetieDe
         self.pings = pings
         self.watchers = watchers
+        self.moon = moon
         self.bot.add_recurring_task(self.check_watchers, 5*60)
 
     def check_watchers(self):
@@ -73,6 +74,7 @@ def build_sweetiebot(config=None):
     chat = SweetieChat(bot, actions, sass, config.chatroom, cadmusic, tell, dictionary)
     roulette = SweetieRoulette(bot, admin)
     pings = SweetiePings(bot, redis_conn)
+    moon = SweetieMoon(bot)
     if config.twitter_key is not None:
         twitter = TwitterClient.get_client(config.twitter_key, config.twitter_secret)
         watchers = list(map(twitter.get_timeline_watcher, ['EVE_Status', 'EVEOnline']))
@@ -82,7 +84,7 @@ def build_sweetiebot(config=None):
     seen = SweetieSeen(bot, redis_conn)
 
     sweet = Sweetiebot(config.nickname, bot, lookup, mq, admin, chat, roulette,
-                       de, pings, watchers)
+                       de, pings, watchers, moon)
     return sweet
 
 def setup_logging(config):

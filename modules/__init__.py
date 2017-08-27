@@ -18,3 +18,4 @@ from .SweetieSeen import SweetieSeen
 from .SweetieTell import SweetieTell
 from .SweetieCrest import SweetieCrest
 from .SweetieDictionary import SweetieDictionary
+from .SweetieMoon import SweetieMoon
