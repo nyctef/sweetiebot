@@ -320,3 +320,8 @@ class SweetieChat(object):
         '''[choices] Choose one of a (comma-separated) list of options'''
         return random.choice(list(map(lambda e: e.strip(), message.args.split(","))))
 
+    @botcmd
+    def version(self, message):
+        with open('version.txt', 'r') as versiontxt:
+            return ' '.join(map(str.strip, versiontxt.readlines()))
+
