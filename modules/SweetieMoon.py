@@ -12,7 +12,7 @@ class SweetieMoon(object):
 
     def phase_description(self, phase):
         descriptions = {
-                'new moon': "hiding. Spoopiness levels are at a minimum and most incantations are safe to perform. Spoopiness levels are at a minimum and most incantations are safe to perform.",
+                'new moon': "hiding. Spoopiness levels are at a minimum and most incantations are safe to perform.",
                 'waxing crescent': "growing.",
                 'first quarter': "half full. Preparations are not necessary yet.",
                 'waxing gibbous': "almost full. It is still safe to go out after dark, but be careful.",
