@@ -70,11 +70,12 @@ class Message(object):
         if not args: return None
 
         known_nicks = self.room_member_list.get_nick_list()
+        re_options = re.IGNORECASE | re.DOTALL
         for known_nick in known_nicks:
             # re.match only matches the start of the string
-            match = re.match("\s*'" + known_nick + "'(.*)", args, re.I) or\
-                    re.match('\s*"' + known_nick + '"(.*)', args, re.I) or\
-                     re.match("\s*" + known_nick + "(.*)", args, re.I)
+            match = re.match("\s*'" + known_nick + "'(.*)", args, re_options) or\
+                    re.match('\s*"' + known_nick + '"(.*)', args, re_options) or\
+                     re.match("\s*" + known_nick + "(.*)", args, re_options)
             if match:
                 nick = known_nick
                 reason = match.group(1).strip()
@@ -82,9 +83,9 @@ class Message(object):
 
         nick = None
         reason = None
-        match = re.match("\s*'([^']*)'(.*)", args) or\
-            re.match("\s*\"([^\"]*)\"(.*)", args) or\
-            re.match("\s*(\S*)(.*)", args)
+        match = re.match("\s*'([^']*)'(.*)", args, re_options) or\
+            re.match("\s*\"([^\"]*)\"(.*)", args, re_options) or\
+            re.match("\s*(\S*)(.*)", args, re_options)
         if match:
             nick = match.group(1)
             reason = match.group(2).strip()

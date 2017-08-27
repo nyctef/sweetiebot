@@ -100,3 +100,7 @@ class MessageParsingTests(unittest.TestCase):
         # as above, but case-insensitive
         message = create_message("!kick 'NAME WITH SPACES' for reasons")
         self.assertEqual(message.nick_reason, ('name with spaces', 'for reasons'))
+
+    def test_nickreason_parses_multiple_lines(self):
+        message = create_message("!tell someone this is\na message")
+        self.assertEqual(message.nick_reason, ('someone', 'this is\na message'))
