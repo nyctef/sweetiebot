@@ -16,7 +16,7 @@ class SweetieMoon(object):
                 'waxing crescent': "growing.",
                 'first quarter': "half full. Preparations are not necessary yet, but be prepared.",
                 'waxing gibbous': "growing, and almost full.",
-                'full moon': "full. Please be careful when leaving your designated shelter after dark.",
+                'full moon': "fully operational. Please be careful when leaving your designated shelter after dark.",
                 'waning gibbous': "waning.",
                 'last quarter': "half empty. Normalcy levels are within tolerances.",
                 'waning crescent': "continuing to wane.",
