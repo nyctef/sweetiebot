@@ -14,12 +14,12 @@ class SweetieMoon(object):
         descriptions = {
                 'new moon': "hiding. Spoopiness levels are at a minimum and most incantations are safe to perform.",
                 'waxing crescent': "growing.",
-                'first quarter': "half full. Preparations are not necessary yet.",
-                'waxing gibbous': "almost full. It is still safe to go out after dark, but be careful.",
-                'full moon': "full. If you have not yet made it to a shelter, please do so imminently",
-                'waning gibbous': "waning, thankfully. Normalcy will resume shortly.",
-                'last quarter': "half empty.",
-                'waning crescent': "almost gone. Sun festival preparations will begin presently.",
+                'first quarter': "half full. Preparations are not necessary yet, but be prepared.",
+                'waxing gibbous': "growing, and almost full.",
+                'full moon': "full. Please be careful when leaving your designated shelter after dark.",
+                'waning gibbous': "waning.",
+                'last quarter': "half empty. Normalcy levels are within tolerances.",
+                'waning crescent': "continuing to wane.",
                 }
         return descriptions.get(phase.lower(), 'unknown. This is worrying.')
 
