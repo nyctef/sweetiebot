@@ -14,11 +14,11 @@ class SweetieMoon(object):
         descriptions = {
                 'new moon': "hiding. Spoopiness levels are at a minimum and most incantations are safe to perform.",
                 'waxing crescent': "growing.",
-                'first quarter': "half full. Preparations are not necessary yet, but be prepared.",
+                'first quarter': "growing. Preparations are not necessary yet, but be prepared.",
                 'waxing gibbous': "growing, and almost full.",
                 'full moon': "fully operational. Please be careful when leaving your designated shelter after dark.",
                 'waning gibbous': "waning.",
-                'last quarter': "half empty. Normalcy levels are within tolerances.",
+                'last quarter': "waning. Normalcy levels are within tolerances.",
                 'waning crescent': "continuing to wane.",
                 }
         return descriptions.get(phase.lower(), 'unknown. This is worrying.')
@@ -53,7 +53,7 @@ class SweetieMoon(object):
         description = self.phase_description(phase)
         percentage = result.get('fracillum', None)
         if not percentage:
-            percentage = phase_percentage(phase)
+            percentage = self.phase_percentage(phase)
 
         return 'Currently, the moon is {} full and {}'.format(percentage, description)
 
