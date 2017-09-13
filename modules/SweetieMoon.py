@@ -12,14 +12,14 @@ class SweetieMoon(object):
 
     def phase_description(self, phase, percentage):
         descriptions = {
-                'new moon': "Currently, the moon is hiding. Spoopiness levels are at a minimum and most incantations are safe to perform.",
-                'waxing crescent': "Currently, the moon is {percentage} full and growing.",
-                'first quarter': "Currently, the moon is half full and growing. Preparations are not necessary yet, but be prepared.",
-                'waxing gibbous': "Currently, the moon is {percentage} full and growing. It's almost full!",
-                'full moon': "The moon is full and fully operational. Please be careful when leaving your designated shelter after dark.",
-                'waning gibbous': "The moon is currently {percentage} full and waning.",
-                'last quarter': "Currently the moon is {percentage} full and waning. Normalcy levels are now within acceptable tolerances.",
-                'waning crescent': "The moon is {percentage} full and continuing to wane.",
+                'new moon': "It is the New Moon. Just like the old moon, but this one has Bluetooth.",
+                'waxing crescent': "The moon is {percentage} full and waxing. Beware fleeting shadows in the corners of your vision",
+                'first quarter': "The moon is half full, in the first quarter. You may hear a haunting wail outside tonight. Do not investigate.",
+                'waxing gibbous': "The moon is {percentage} full and waxing. Test your doors and window locks now. Soon it will be too late ",
+                'full moon': "The moon is full. Avoid windows. Do not look outside. Do not look into mirrors. It watches. It thirsts.",
+                'waning gibbous': "The moon is {percentage} full and waning. Somehow you have survived. Next time you may not be so lucky.",
+                'last quarter': "The moon is {percentage} full, in the third quarter. The woon can now be observed safely for short intervals with proper safety equipment.",
+                'waning crescent': "The moon is {percentage} full and waning. Soon the moon shall hide, but do not lose vigilance.",
                 }
         return descriptions.get(phase.lower(), 'The moon phase is unknown. This is worrying.').format(percentage=percentage)
 
