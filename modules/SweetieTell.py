@@ -14,6 +14,9 @@ class SweetieTell(object):
         self.bot.load_commands_from(self)
         self.nicktojid = NickToJidTracker(self.bot, self.store)
 
+    def enc(self, str):
+        return str.encode('utf-8')
+
     def dec(self, bytes):
         return bytes.decode('utf-8')
 
@@ -28,20 +31,23 @@ class SweetieTell(object):
         sendee_jid = self.bot.get_jid_from_nick(sendee_nick)
         sendee_jid = sendee_jid or self.nicktojid.get_jid_from_nick(sendee_nick)
         sender_jid = message.user_jid
-        existing_messages = self.get(sendee_jid)
         log.debug('sender_nick {} sendee_nick {} mess {} sendee_jid {} sender_jid {}'.format(
             sender_nick, sendee_nick, mess, sendee_jid, sender_jid))
-        #pprint(existing_messages)
+
         if sendee_nick == message.nickname:
             return 'I\'m right here, you know'
         if sendee_jid is None:
             return 'Sorry, I don\'t know who \'{}\' is'.format(sendee_nick)
         if sender_jid is None:
             return 'I can\'t figure out who you are: is this channel hiding JIDs?'
-        if str(sender_jid) in map(self.dec, existing_messages.keys()):
-            return 'Sorry, you\'ve already left a message for {}'.format(sendee_nick)
         if sender_jid == sendee_jid:
             return 'Talking to yourself is more efficient in real life than on jabber'
+
+        existing_messages = self.get(sendee_jid)
+        existing_message = existing_messages.get(self.enc(str(sender_jid)), None)
+        if existing_message is not None:
+            self.set(sendee_jid, sender_jid, self.dec(existing_message) + '\n' + mess)
+            return 'Message received for {} (appended to previous message)'.format(sendee_jid)
         if sendee_nick and mess:
             self.set(sendee_jid, sender_jid, '{} left you a message: {}'.format(sender_nick, mess))
             return 'Message received for {}'.format(sendee_jid)

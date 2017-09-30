@@ -52,10 +52,15 @@ class TellTests(unittest.TestCase):
         # zhuli shouldn't get pinged a second time
         self.assertIsNone(response)
 
-    def test_denies_telling_someone_two_things(self):
+    def test_can_tell_someone_two_things(self):
         r1 = self.tell.tell(create_message('!tell ZhuLi Do the thing!'))
-        r2 = self.tell.tell(create_message('!tell ZhuLi Do the thing!'))
-        self.assertEqual('Sorry, you\'ve already left a message for ZhuLi', r2)
+        self.assertEqual('Message received for zhuli@jabber.org', r1)
+
+        r2 = self.tell.tell(create_message('!tell ZhuLi Do another thing!'))
+        self.assertEqual('Message received for zhuli@jabber.org (appended to previous message)', r2)
+
+        r3 = self.tell.get_messages_for(create_message_zhuli('hello~~'))
+        self.assertEqual('ZhuLi, sender left you a message: Do the thing!\nDo another thing!', r3)
 
     def test_denies_tell_in_pm(self):
         response = self.tell.tell(create_message('!tell ZhuLi Do another thing!', is_pm=True))
