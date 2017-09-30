@@ -91,4 +91,15 @@ class TellTests(unittest.TestCase):
         response = self.tell.tell(create_message('!tell AfkPerson to do a thing'))
         self.assertEqual('Message received for afkperson@jabber.org', response)
 
+    def test_message_length_cannot_exceed_limit(self):
+        response = self.tell.tell(create_message('!tell ZhuLi ' + ('do a thing' * 1000)))
+        self.assertEqual('Sorry, that message is too long (1000 char maximum)', response)
+
+    def test_combined_message_length_cannot_exceed_limit(self):
+        r1 = self.tell.tell(create_message('!tell ZhuLi ' + ('do a thing' * 90)))
+        r2 = self.tell.tell(create_message('!tell ZhuLi ' + ('do a thing' * 11)))
+        # the count here is technically inaccurate because the message text contains 'sender left you a message:'
+        self.assertEqual('Sorry, that message is too long (1000 char maximum; you\'ve already used ~927)', r2)
+
+
         
