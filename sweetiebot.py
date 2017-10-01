@@ -77,7 +77,7 @@ def build_sweetiebot(config=None):
     moon = SweetieMoon(bot)
     if config.twitter_key is not None:
         twitter = TwitterClient.get_client(config.twitter_key, config.twitter_secret)
-        watchers = list(map(twitter.get_timeline_watcher, ['EVE_Status', 'EVEOnline']))
+        watchers = list(map(twitter.get_timeline_watcher, ['EVE_Status']))
     else:
         watchers = []
     watchers.append(AtomWatcher.get_watcher('http://eveion.blogspot.com/feeds/posts/default'))
