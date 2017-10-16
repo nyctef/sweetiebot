@@ -98,6 +98,7 @@ class MUCJabberBot():
         if message_stanza['type'] == 'error':
             print('\n\nerror!\n\n')
             log.error(message_stanza)
+            return
 
         body = message_stanza['body']
         if not body:
