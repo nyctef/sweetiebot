@@ -237,11 +237,11 @@ class SweetieChat(object):
                 term = match.group(1)
                 return self.dictionary.get_definition(term)
 
-        if re.match(r'^\s*hey\s+now\s*$', message):
+        if re.match(r'^\s*hey\s+now\s*$', message, re.IGNORECASE):
             return "you're an all star"
 
-        if re.match(r'.+is gay\s*$', message) or \
-            re.match(r'^gay$', message):
+        if re.match(r'.+is gay\s*$', message, re.IGNORECASE) or \
+            re.match(r'^gay$', message, re.IGNORECASE):
                 return sender + ': mlyp'
 
     def hashpercent(self, input):
