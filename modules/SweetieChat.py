@@ -237,6 +237,9 @@ class SweetieChat(object):
                 term = match.group(1)
                 return self.dictionary.get_definition(term)
 
+        if re.match(r'^\s*hey\s+now\s*$', message):
+            return "you're an all star"
+
         if re.match(r'.+is gay\s*$', message) or \
             re.match(r'^gay$', message):
                 return sender + ': mlyp'
