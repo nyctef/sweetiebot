@@ -30,20 +30,38 @@ class SweetieLookup(object):
     def chat(self, message):
         self.bot.send_groupchat_message(message)
 
+    def ross(self):
+        return random.choice([
+            "In painting, you have unlimited power. You have the ability to move mountains. You can bend rivers. But when I get home, the only thing I have power over is the garbage",
+            "You need the dark in order to show the light.",
+            "Look around. Look at what we have. Beauty is everywhere—you only have to look to see it.",
+            "Just go out and talk to a tree. Make friends with it.",
+            "There's nothing wrong with having a tree as a friend.",
+            "Trees cover up a multitude of sins.",
+            "They say everything looks better with odd numbers of things. But sometimes I put even numbers—just to upset the critics.",
+            "I remember when my Dad told me as a kid, ‘If you want to catch a rabbit, stand behind a tree and make a noise like a carrot. Then when the rabbit comes by you grab him.’ Works pretty good until you try to figure out what kind of noise a carrot makes…",
+            "The secret to doing anything is believing that you can do it. Anything that you believe you can do strong enough, you can do. Anything. As long as you believe.",
+            "Water's like me. It's laaazy ... Boy, it always looks for the easiest way to do things",
+            "We artists are a different breed of people. We're a happy bunch.",
+            "We don't make mistakes. We just have happy accidents.",
+            "Talent is a pursued interest. Anything that you're willing to practice, you can do.",
+            "I guess I’m a little weird. I like to talk to trees and animals. That’s okay though; I have more fun than most people.",
+            "I can't think of anything more rewarding than being able to express yourself to others through painting. Exercising the imagination, experimenting with talents, being creative; these things, to me, are truly the windows to your soul.",
+            "Lets build a happy little cloud. Lets build some happy little trees.",
+            "Believe that you can do it, 'cause you can do it."
+            ])
+
     @botcmd
     @logerrors
     def argue(self, message):
-        '''Start a tumblr argument courtesy of lokaltog.github.io/tumblr-argument-generator'''
-        res = requests.get('http://tumblraas.azurewebsites.net/', timeout=10)
-        return res.text.strip()
+        '''Get angry'''
+        return self.ross()
 
     @botcmd
     @logerrors
     def rant(self, message):
-        '''Rant for a while, courtesy of lokaltog.github.io/tumblr-argument-generator'''
-        res = requests.get(
-            'http://tumblraas.azurewebsites.net/rant', timeout=10)
-        return res.text.strip()
+        '''Rage at the dying of the light'''
+        return self.ross()
 
     def format_isk(self, value):
         if value == 0 or value == float("inf"):
