@@ -49,6 +49,11 @@ class ResponsesFile(object):
         self._remove_dup()
 
     def get_next(self):
+        if self.next_response:
+            response = self.next_response
+            self.next_response = None
+            return response
+            
         if not self.responses:
             log.debug("reading sass file..")
             with self._read() as f:
@@ -66,3 +71,15 @@ class ResponsesFile(object):
         response = self.responses[self.sass_index]
         log.debug("returning response {}: {}".format(self.sass_index, response))
         return response
+    
+    def pick_line(self, line_number, sender):
+        log.debug("{} forced next sass line {}.".format(sender, line_number))
+        with self._read() as f:
+            responses_list = [line.strip() for line in f.readlines()]
+            log.debug(".. read {} responses".format(len(responses_list)))
+
+        if not line_number > len(responses_list) and not line_number < 1:
+            self.next_response = responses_list[line_number - 1]
+            return True
+        else:
+            return False
