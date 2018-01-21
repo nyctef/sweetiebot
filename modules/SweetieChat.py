@@ -240,6 +240,16 @@ class SweetieChat(object):
         if re.match(r'.+is gay\s*$', message) or \
             re.match(r'^gay$', message):
                 return sender + ': mlyp'
+            
+        if mess.is_pm and mess.sender_can_do_admin_things() and mess.command == 'picksass':
+            try:
+                int(mess.args)
+                if self.sass.pick_line(int(mess.args), sender):
+                    return ":sweetiebeh: Alright, I'll say that. But you owe me."
+                else:
+                    return ":sweetielod: You have fucked up now."
+            except ValueError:
+                return 'Excuse me wtf r u doin. :sweetiestare:'
 
     def hashpercent(self, input):
         return int(hashlib.md5(input.encode()).hexdigest(), 16) % 10001 / 100
