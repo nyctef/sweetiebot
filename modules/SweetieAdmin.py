@@ -90,7 +90,11 @@ class SweetieAdmin(object):
         log.debug('banlist items: '+str(items))
         for item in items:
             if item.get('jid') is not None:
-                res += "\n" + item.get('jid') + ": "+str(item[0].text)
+                try:
+                    reason = str(item[0].text)
+                except:
+                    reason = "[reason unavailable]"
+                res += "\n" + item.get('jid') + ": "+reason
         if not res: return 'Bans list is empty'
         return res
 
