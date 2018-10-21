@@ -113,6 +113,8 @@ class SweetieChat(object):
             return False
         if (result.strip() == 'Imgur: The most awesome images on the Internet'):
             return False
+        if (result.strip() == 'Imgur: The magic of the Internet'):
+            return False
         if ('jiffier gifs through HTML5 Video Conversion' in result.strip()):
             return False
         return True
