@@ -34,6 +34,7 @@ class SweetiePings:
         return "ping sent to {} users".format(len(targets))
 
     @botcmd
+    @botcmd(name='sub', hidden=True)
     @logerrors
     def subscribe(self, message):
         '''[group] Add yourself to a pingable group'''
@@ -48,6 +49,7 @@ class SweetiePings:
             return "User {} was already in group '{}'".format(jid, group)
 
     @botcmd
+    @botcmd(name='unsub', hidden=True)
     @logerrors
     def unsubscribe(self, message):
         '''[group] Remove yourself from a pingable group'''
@@ -55,6 +57,8 @@ class SweetiePings:
         if not group or group.isspace():
             return 'Usage: unsubscribe group_name'
         jid = message.user_jid
+        if not jid:
+            return "Sorry, I don't know what your JID is"
         num_removed = self.store.srem(self.key(group), str(jid))
         if num_removed:
             return "User {} removed from group '{}'".format(jid, group)
@@ -71,9 +75,11 @@ class SweetiePings:
             if num_in_group:
                 group_name = group[len('ping:'):].decode('utf-8')
                 result.append(group_name + ' ({})'.format(num_in_group))
-        return 'Available groups: {}'.format(', '.join(result))
+        return ('Available groups: {}'.format(', '.join(result)) +
+            '. See also !users and !mygroups')
 
     @botcmd
+    @botcmd(name='group', hidden=True)
     @logerrors
     def users(self, message):
         '''[group] Lists users currently in a pingable group'''
@@ -84,4 +90,29 @@ class SweetiePings:
         if not len(targets):
             return "no users found in group '{}'".format(group)
         usernames = map(lambda x: JID(x.decode('utf-8')).user, targets)
-        return 'Users in {}: {}'.format(group, ', '.join(usernames))
+        return ('Users in {}: {}'.format(group, ', '.join(usernames)) +
+            '. See also !groups and !mygroups')
+
+    @botcmd
+    @botcmd(name='subs', hidden=True)
+    @botcmd(name='mysubs', hidden=True)
+    @botcmd(name='subscriptions', hidden=True)
+    def mygroups(self, message):
+        '''List pingable groups that you are currently subscribed to'''
+        jid = message.user_jid
+        if not jid:
+            return "Sorry, I don't know what your JID is"
+        result = []
+        for group in self.store.keys('ping:*'):
+            group_members = self.store.smembers(group)
+            group_usernames = list(map(lambda x: x.decode('utf-8'), group_members))
+            if jid in group_usernames:
+                group_name = group[len('ping:'):].decode('utf-8')
+                result.append(group_name)
+
+        if not len(result):
+            return 'User {} is not currently subscribed to any pingable groups'.format(
+                    jid)
+        return ('Your groups: {}'.format(', '.join(result)) +
+            '. See also !users and !groups')
+
