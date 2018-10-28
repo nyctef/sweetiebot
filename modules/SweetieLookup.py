@@ -167,35 +167,53 @@ class SweetieLookup(object):
     def dice_error(self, message, *args):
         return SweetieLookup.Bunch(error=message.format(*args))
 
-    def parse_dice(self, dice):
-        split = dice.split('d', 1)
-        if len(split) < 2:
-            return self.dice_error("Dice need to be specified in the form 2d20")
+    def parse_dice(self, dice_spec):
+        # scrap whitespace
+        dice_spec = re.sub(r'\s+', '', dice_spec, re.UNICODE)
+
+        # search for the d
+        split = dice_spec.split('d', 1)
+        if len(split) != 2:
+            return self.dice_error("Dice need to be specified in the form 2d20 [>x] [<x] [!] [=] [+n]")
         dice_count = split[0]
         dice_type = split[1]
+
         try:
-            dice = int(dice_count)
+            # assume we only want one die if dice count is missing
+            dice = 1 if dice_count == '' else int(dice_count)
         except:
             return self.dice_error("Sorry, don't know how to roll '{}' dice", dice_count)
+
         try:
-            split_modifiers = re.split(r'(\d+|=|>|!)', dice_type)
+            split_modifiers = re.split(r'(\d+|=|>|<|!|%|\+)', dice_type)
             split_modifiers = list(filter(len, split_modifiers))
-            sides = int(split_modifiers[0])
+
             current_modifier = None
             threshold = None
+            lt_threshold = None
             show_sum = False
             explode = False
+            bonus = 0
             # iterate over dice spec, remembering what the last modifier was 
             # in order to interpret the different numbers
             for modifier in split_modifiers:
                 if modifier.isdigit():
+                    modifier_value = int(modifier)
+
                     if current_modifier == '>':
-                        threshold = int(modifier)
-                        current_modifier = None
+                        threshold = modifier_value
+                    elif current_modifier == '<':
+                        lt_threshold = modifier_value
+                    elif current_modifier == '+':
+                        bonus = modifier_value
                     else: 
                         assert(current_modifier is None)
                         sides = int(modifier)
-                elif modifier == '>':
+                    current_modifier = None
+
+                elif modifier == '%':
+                    sides = 100
+                elif modifier == '>' or modifier == '<' or modifier == '+':
                     current_modifier = modifier
                 elif modifier == '=':
                     show_sum = True
@@ -204,8 +222,13 @@ class SweetieLookup(object):
                 else:
                     raise "unknown modifier"
 
-            return SweetieLookup.Bunch(dice=dice, sides=sides,
-                    threshold=threshold, show_sum=show_sum,
+            return SweetieLookup.Bunch(
+                    dice=dice,
+                    sides=sides,
+                    bonus=bonus,
+                    threshold=threshold,
+                    lt_threshold=lt_threshold,
+                    show_sum=show_sum,
                     explode=explode)
         except:
             return self.dice_error("Sorry, don't know how to roll '{}'", dice_type)
@@ -214,34 +237,49 @@ class SweetieLookup(object):
     @botcmd
     def roll(self, message):
         '''[eg 5d20] Roll some dice'''
-        brup = message.args.split(' ')
-        for args in brup:
-            try:
-                dice_spec = self.parse_dice(args)
-                if dice_spec.error:
-                    return dice_spec.error
-                dice = dice_spec.dice
-                sides = dice_spec.sides
-            except Exception as e:
-                log.error('bad dice '+str(e))
-                return "Error parsing input"
-            if dice > 25:
-                return "Too many variables in possibilty space, abort!"
-            if sides > 20000000:
-                return "Sides of dice too small, can't see what face is upright!"
-            if sides == 1:
-                return "Oh look, they all came up ones. Are you suprised? I'm suprised."
-            if sides < 1:
-                return "How do you make a dice with less than two sides?"
-            if dice < 1:
-                return "You want me to roll...less than one dice?"
-            rolls = self.get_rolls(dice, sides)
-            if dice_spec.explode:
-                rolls = self.explode_dice(rolls, sides)
+        try:
+            dice_spec = self.parse_dice(message.args)
+            if dice_spec.error:
+                return dice_spec.error
+            dice = dice_spec.dice
+            sides = dice_spec.sides
+        except Exception as e:
+            log.exception('bad dice')
+            return "Error parsing input"
+        if dice > 25:
+            return "Too many variables in possibility space, abort!"
+        if sides > 20000000:
+            return "Sides of dice too small, can't see what face is upright!"
+        if sides == 1:
+            return "Oh look, they all came up ones. Are you suprised? I'm suprised."
+        if sides < 1:
+            return "How do you make a dice with less than two sides?"
+        if dice < 1:
+            return "You want me to roll...less than one dice?"
+
+        if (dice_spec.threshold and dice_spec.lt_threshold and
+                dice_spec.threshold > dice_spec.lt_threshold):
+            return "Requirements unsatisfactory: thresholds conflict. Try again."
+
+        rolls = self.get_rolls(dice, sides)
+        rolls = list(map(lambda x: x + dice_spec.bonus, rolls))
+
+        if dice_spec.explode:
+            rolls = self.explode_dice(rolls, sides)
+
         log.debug("roll result: {}".format(rolls))
         roll_list = ', '.join(map(str, rolls))
-        if dice_spec.threshold:
-            success_count = len(list(filter(lambda x: x >= dice_spec.threshold, rolls)))
+        if dice_spec.threshold or dice_spec.lt_threshold:
+            gt = dice_spec.threshold
+            lt = dice_spec.lt_threshold
+
+            if not lt:
+                success_count = len(list(filter(lambda x: x >= gt, rolls)))
+            elif not gt:
+                success_count = len(list(filter(lambda x: x <= lt, rolls)))
+            else:
+                success_count = len(list(filter(lambda x: (x <= lt and x >= gt), rolls)))
+
             roll_list += " ({} successes)".format(success_count)
         if dice_spec.show_sum:
             dice_sum = sum(rolls)

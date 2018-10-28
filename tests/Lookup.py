@@ -27,7 +27,7 @@ class LookupTests(unittest.TestCase):
 
     def test_wants_the_d(self):
         response = self.lookup.roll(create_message('!roll butts'))
-        self.assertEqual("Dice need to be specified in the form 2d20", response)
+        self.assertEqual("Dice need to be specified in the form 2d20 [>x] [<x] [!] [=] [+n]", response)
 
     def test_fails_nicely_with_unrecognised_dice(self):
         response = self.lookup.roll(create_message('!roll 1dbutts'))
@@ -60,6 +60,32 @@ class LookupTests(unittest.TestCase):
         self.assertTrue(dice_spec.show_sum)
         self.assertEqual(5, dice_spec.threshold)
 
+    def test_can_parse_empty_die_count(self):
+        dice_spec = self.lookup.parse_dice('d20')
+        self.assertEqual(1, dice_spec.dice)
+        self.assertEqual(20, dice_spec.sides)
+
+    def test_can_handle_spaces_in_dice_spec(self):
+        response = self.lookup.roll(create_message('!roll 1d6 > 5'))
+        self.assertIn(" successes)", response)
+
+    def test_can_parse_percent_die(self):
+        dice_spec = self.lookup.parse_dice('1d%')
+        self.assertEqual(100, dice_spec.sides)
+
+    def test_can_parse_lt_threshold(self):
+        dice_spec = self.lookup.parse_dice('2d20<5')
+        self.assertEqual(5, dice_spec.lt_threshold)
+
+    def test_can_parse_two_thresholds(self):
+        dice_spec = self.lookup.parse_dice('2d20<15>10')
+        self.assertEqual(15, dice_spec.lt_threshold)
+        self.assertEqual(10, dice_spec.threshold)
+
+    def test_complains_about_non_overlapping_thresholds(self):
+        response = self.lookup.roll(create_message('!roll 2d10>10<5'))
+        self.assertEqual('Requirements unsatisfactory: thresholds conflict. Try again.', response)
+
     def rolls(self, *rolls):
         rolls = list(rolls)
         def mock_function(self, dice=1, sides=6):
@@ -75,6 +101,18 @@ class LookupTests(unittest.TestCase):
             self.assertEqual("1, 2, 3", response)
             response = self.lookup.roll(create_message('!roll 3d3'))
             self.assertEqual("2, 4, 6", response)
+
+    def test_can_add_bonus(self):
+        with patch.object(SweetieLookup, 'get_rolls', 
+                self.rolls([1,2,3])):
+            response = self.lookup.roll(create_message('!roll 3d3+10>12'))
+            self.assertEqual("11, 12, 13 (2 successes)", response)
+
+    def test_uses_both_thresholds_for_success_checks(self):
+        with patch.object(SweetieLookup, 'get_rolls', 
+                self.rolls([1,2,3])):
+            response = self.lookup.roll(create_message('!roll 3d3+10>12<12'))
+            self.assertEqual("11, 12, 13 (1 successes)", response)
 
     def test_can_parse_exploding_dice(self):
         dice_spec = self.lookup.parse_dice('10d6!')
