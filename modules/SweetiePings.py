@@ -33,8 +33,8 @@ class SweetiePings:
             self.bot.send_chat_message(formatted_message, target.decode('utf-8'))
         return "ping sent to {} users".format(len(targets))
 
+
     @botcmd
-    @botcmd(name='sub', hidden=True)
     @logerrors
     def subscribe(self, message):
         '''[group] Add yourself to a pingable group'''
@@ -51,7 +51,6 @@ class SweetiePings:
             return "User {} was already in group '{}'".format(jid, group)
 
     @botcmd
-    @botcmd(name='unsub', hidden=True)
     @logerrors
     def unsubscribe(self, message):
         '''[group] Remove yourself from a pingable group'''
@@ -81,7 +80,6 @@ class SweetiePings:
             '. See also !users and !mygroups')
 
     @botcmd
-    @botcmd(name='group', hidden=True)
     @logerrors
     def users(self, message):
         '''[group] Lists users currently in a pingable group'''
@@ -96,9 +94,7 @@ class SweetiePings:
             '. See also !groups and !mygroups')
 
     @botcmd
-    @botcmd(name='subs', hidden=True)
-    @botcmd(name='mysubs', hidden=True)
-    @botcmd(name='subscriptions', hidden=True)
+    @logerrors
     def mygroups(self, message):
         '''List pingable groups that you are currently subscribed to'''
         jid = message.user_jid
@@ -117,4 +113,23 @@ class SweetiePings:
                     jid)
         return ('Your groups: {}'.format(', '.join(result)) +
             '. See also !users and !groups')
+
+    # aliases:
+    @botcmd(hidden=True)
+    def group(self, message): return self.users(message)
+
+    @botcmd(hidden=True)
+    def subs(self, message): return self.mygroups(message)
+
+    @botcmd(hidden=True)
+    def mysubs(self, message): return self.mygroups(message)
+
+    @botcmd(hidden=True)
+    def subscriptions(self, message): return self.mygroups(message)
+
+    @botcmd(hidden=True)
+    def unsub(self, message): return self.unsubscribe(message)
+
+    @botcmd(hidden=True)
+    def sub(self, message): return self.subscribe(message)
 
