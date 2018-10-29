@@ -42,6 +42,8 @@ class SweetiePings:
         if not group or group.isspace():
             return 'Usage: subscribe group_name'
         jid = message.user_jid
+        if not jid:
+            return "Sorry, I don't know what your JID is"
         num_added = self.store.sadd(self.key(group), str(jid))
         if num_added:
             return "User {} added to group '{}'".format(jid, group)
