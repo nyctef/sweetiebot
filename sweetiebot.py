@@ -6,7 +6,7 @@ import sys
 import logging
 from utils import randomstr
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
-    SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
+    SweetieChat, SweetieLookup, FakeRedis, SweetieRoulette, \
     RestartException, PBLogHandler, SweetieDe, SweetiePings, \
     TwitterClient, SweetieSeen, AtomWatcher, SweetieTell, \
     SweetieDictionary, SweetieMoon
@@ -17,13 +17,12 @@ import traceback
 log = logging.getLogger(__name__)
 
 class Sweetiebot(object):
-    def __init__(self, nickname, bot, lookup, mq, admin, chat, roulette,
+    def __init__(self, nickname, bot, lookup, admin, chat, roulette,
                  sweetiede, pings, watchers, moon):
         self.nickname = nickname
         self.bot = bot
         self.bot.unknown_command_callback = self.unknown_command
         self.lookup = lookup
-        self.mq = mq
         self.admin = admin
         self.chat = chat
         self.roulette = roulette
@@ -63,8 +62,7 @@ def build_sweetiebot(config=None):
     bot = MUCJabberBot(jid, password, room, nick, address)
     lookup = SweetieLookup(bot)
     admin = SweetieAdmin(bot, config.chatroom)
-    mq = SweetieMQ(config)
-    de = SweetieDe(bot, admin, mq, ResponsesFile('data/deowl_fails.txt'))
+    de = SweetieDe(bot, admin, ResponsesFile('data/deowl_fails.txt'))
     actions = ResponsesFile('data/actions.txt')
     sass = ResponsesFile('data/sass.txt')
     cadmusic = ResponsesFile('data/cadmusic.txt')
@@ -82,7 +80,7 @@ def build_sweetiebot(config=None):
     watchers.append(AtomWatcher.get_watcher('http://eveion.blogspot.com/feeds/posts/default'))
     seen = SweetieSeen(bot, redis_conn)
 
-    sweet = Sweetiebot(config.nickname, bot, lookup, mq, admin, chat, roulette,
+    sweet = Sweetiebot(config.nickname, bot, lookup, admin, chat, roulette,
                        de, pings, watchers, moon)
     return sweet
 

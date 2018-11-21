@@ -11,10 +11,9 @@ class SweetieDe(object):
     kick_owl_delay = 7200
     last_owl_kick = 0
 
-    def __init__(self, bot, admin, mq, failure_messages):
+    def __init__(self, bot, admin, failure_messages):
         bot.load_commands_from(self)
         self.admin = admin
-        self.mq = mq
         
         self.failures = failure_messages
 
@@ -39,29 +38,12 @@ class SweetieDe(object):
             log.debug('deowl success')
             self.last_owl_kick = datetime.now()
             self.kick_owl_delay = random.gauss(2*60*60, 20*60)
-            self.log_deowl(speaker, True)
         return handler
 
     def deowl_failure_handler(self, speaker):
         def handler():
             log.debug('deowl failure')
-            self.log_deowl(speaker, False)
         return handler
-
-    @logerrors
-    def log_deowl(self, speaker, success):
-        speaker = JID(speaker)
-        timestamp = datetime.utcnow()
-        mq_message = {
-            'deowl':True,
-            'room':speaker.user,
-            'server':speaker.domain,
-            'speaker': speaker.resource,
-            'timestamp': timestamp.isoformat(' '),
-            'success': success,
-            }
-
-        self.mq.send(json.dumps(mq_message).encode('utf-8'))
 
     @botcmd(hidden=True)
     def deoctavia(self, message):
