@@ -19,10 +19,9 @@ class SweetieLookup(object):
 
     id_dic = {"": ""}
 
-    def __init__(self, bot, crest):
+    def __init__(self, bot):
         self.bot = bot
         self.bot.load_commands_from(self)
-        self.crest = crest
 
     def get_sender_username(self, mess):
         return self.bot.get_sender_username(mess)
@@ -62,103 +61,6 @@ class SweetieLookup(object):
     def rant(self, message):
         '''Rage at the dying of the light'''
         return self.ross()
-
-    def format_isk(self, value):
-        if value == 0 or value == float("inf"):
-            return 'unavailable'
-
-        return '{0:,} isk'.format(float(value))
-
-    def get_prices(self, href, region, station):
-        endpoint = '/market/{}/orders/?type={}'.format(region, href)
-
-        log.debug('asking for prices at '+endpoint)
-        try:
-            apiresult = self.crest.get(endpoint).json()
-            buy = 0
-            sell = float("inf")
-            for item in apiresult['items']:
-                if item['location']['id'] != station: continue
-                price = item['price']
-                is_buy_order = item['buy']
-                if is_buy_order and price > buy: buy = price
-                if not is_buy_order and price < sell: sell = price
-
-            return 'buy: ' + self.format_isk(buy) + ', sell: ' + self.format_isk(sell)
-        except Exception as e:
-            log.exception('error parsing CREST data')
-            if 'apiresult' in locals():
-                return "CREST is unhappy: "+apiresult[:200]
-            return "Error getting market data: "+str(e)
-
-    def read_ids(self):
-        self.chat('Downloading latest typeid list from CREST (this might take a minute)')
-        result = {}
-        types_url = 'https://crest-tq.eveonline.com/market/types/'
-        while types_url:
-            try:
-                types_res = requests.get(types_url, timeout=10)
-                types = json.loads(types_res.text)
-                for type in types['items']:
-                    href = type['type']['href']
-                    name = type['type']['name'].upper()
-                    result[name] = href
-                if 'next' in types:
-                    types_url = types['next']['href']
-                else:
-                    types_url = None
-            except Timeout as t:
-                raise
-            except Exception as e:
-                log.exception(e)
-        log.info('found {} typeid results'.format(len(result)))
-        return result
-
-    def id_lookup(self, name):
-        if name.lower() == 'plex' or name.lower() == '30 day':
-            return 'https://crest-tq.eveonline.com/inventory/types/44992/', name
-        test = name
-        test = test.upper()
-        reply = None
-        i_id = None
-        i_name = None
-        if len(self.id_dic) <= 1:
-            self.id_dic = self.read_ids()
-
-        log.debug('looking for '+test+' in id_dic')
-        if test in list(self.id_dic.keys()):
-            log.debug('.. found')
-            reply = self.id_dic[test]
-            log.debug(' .. sending '+test+', '+str(reply))
-            return reply, test
-        else:
-            maybe = difflib.get_close_matches(
-                test, list(self.id_dic.keys()), 1)
-            if len(maybe) > 0:
-                log.debug("maybe meant " + str(maybe))
-                if maybe[0] in list(self.id_dic.keys()):
-                    i_id = self.id_dic[maybe[0]]
-                    i_name = maybe[0]
-        return i_id, i_name
-
-    @botcmd
-    @logerrors
-    def jita(self, message):
-        return self.get_prices_response(message, 10000002, 60003760)
-
-    @botcmd
-    @logerrors
-    def amarr(self, message):
-        return self.get_prices_response(message, 10000043, 60008494)
-
-    def get_prices_response(self, message, regionid, systemid):
-        '''[item name] Look up prices in jita'''
-        href, name = self.id_lookup(message.args)
-        if href is None:
-            return 'Couldn\'t find any matches'
-        reply = self.get_prices(href, regionid, systemid)
-        reply = message.sender_nick + ': '+name.title() + ' - ' + reply
-        return reply
 
     class Bunch:
         __init__ = lambda self, **kw: setattr(self, '__dict__', kw)

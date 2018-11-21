@@ -8,7 +8,7 @@ from utils import randomstr
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, SweetieMQ, FakeRedis, SweetieRoulette, \
     RestartException, PBLogHandler, SweetieDe, SweetiePings, \
-    TwitterClient, SweetieSeen, AtomWatcher, SweetieTell, SweetieCrest, \
+    TwitterClient, SweetieSeen, AtomWatcher, SweetieTell, \
     SweetieDictionary, SweetieMoon
 import time
 import os
@@ -61,8 +61,7 @@ def build_sweetiebot(config=None):
         address = ()
 
     bot = MUCJabberBot(jid, password, room, nick, address)
-    crest = SweetieCrest(config.crest_base_url, config.crest_client_id, config.crest_client_secret, config.crest_refresh_token)
-    lookup = SweetieLookup(bot, crest)
+    lookup = SweetieLookup(bot)
     admin = SweetieAdmin(bot, config.chatroom)
     mq = SweetieMQ(config)
     de = SweetieDe(bot, admin, mq, ResponsesFile('data/deowl_fails.txt'))

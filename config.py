@@ -31,11 +31,5 @@ pushbullet_device = getenv('PB_DEVICE_ID', None)
 twitter_key = getenv('TWITTER_API_KEY', None)
 twitter_secret = getenv('TWITTER_API_SECRET', None)
 
-# details for connecting to the EVE Online CREST api
-crest_base_url = getenv('CREST_BASE', 'https://crest-tq.eveonline.com')
-crest_client_id = getenv('CREST_ID', None);
-crest_client_secret = getenv('CREST_CLIENT_SECRET', None)
-crest_refresh_token = getenv('CREST_REFRESH_TOKEN', None)
-
 # A url for the redis instance to connect to in the form redis://[:password]@host:port/dbnum
 redis_url = getenv('REDIS_DB_URL', 'redis://sbredis:6379/0')
