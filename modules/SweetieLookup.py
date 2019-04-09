@@ -155,7 +155,7 @@ class SweetieLookup(object):
         if sides > 20000000:
             return "Sides of dice too small, can't see what face is upright!"
         if sides == 1:
-            return "Oh look, they all came up ones. Are you suprised? I'm suprised."
+            return "Oh look, they all came up ones. Are you surprised? I'm surprised."
         if sides < 1:
             return "How do you make a dice with less than two sides?"
         if dice < 1:
