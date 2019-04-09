@@ -87,7 +87,7 @@ class SweetieLookup(object):
             return self.dice_error("Sorry, don't know how to roll '{}' dice", dice_count)
 
         try:
-            split_modifiers = re.split(r'(\d+|=|>|<|!|%|\+)', dice_type)
+            split_modifiers = re.split(r'(\d+|=|>|<|!|%|\+|\-)', dice_type)
             split_modifiers = list(filter(len, split_modifiers))
 
             current_modifier = None
@@ -107,7 +107,9 @@ class SweetieLookup(object):
                     elif current_modifier == '<':
                         lt_threshold = modifier_value
                     elif current_modifier == '+':
-                        bonus = modifier_value
+                        bonus += modifier_value
+                    elif current_modifier == '-':
+                        bonus -= modifier_value
                     else: 
                         assert(current_modifier is None)
                         sides = int(modifier)
@@ -115,7 +117,7 @@ class SweetieLookup(object):
 
                 elif modifier == '%':
                     sides = 100
-                elif modifier == '>' or modifier == '<' or modifier == '+':
+                elif modifier in ['>', '<', '+', '-'] :
                     current_modifier = modifier
                 elif modifier == '=':
                     show_sum = True

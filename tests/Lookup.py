@@ -80,6 +80,11 @@ class LookupTests(unittest.TestCase):
         dice_spec = self.lookup.parse_dice('2d20<15>10')
         self.assertEqual(15, dice_spec.lt_threshold)
         self.assertEqual(10, dice_spec.threshold)
+    
+    def test_can_parse_bonuses(self):
+        self.assertEqual(+5, self.lookup.parse_dice("2d20+5").bonus)
+        self.assertEqual(-5, self.lookup.parse_dice("2d20-5").bonus)
+        self.assertEqual(+2, self.lookup.parse_dice("2d20-5+7").bonus)
 
     def test_complains_about_non_overlapping_thresholds(self):
         response = self.lookup.roll(create_message('!roll 2d10>10<5'))
