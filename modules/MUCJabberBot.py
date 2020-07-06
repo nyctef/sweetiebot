@@ -159,7 +159,8 @@ class MUCJabberBot():
     def _get_room_member_list(self):
         room_details = self._muc.rooms[self.room]
         member_list = [self._get_room_member(nick, props) \
-                for (nick, props) in room_details.items()]
+                for (nick, props) in room_details.items() \
+                if nick] # workaround for empty member showing in list
         return RoomMemberList(member_list)
 
     def _get_room_member(self, nick, props):
