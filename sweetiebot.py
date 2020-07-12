@@ -105,6 +105,7 @@ def setup_logging(config):
     logging.getLogger().addHandler(errorhandler)
 
     logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARNING)
+    logging.getLogger('sleekxmpp.plugins.xep_0199.ping').setLevel(logging.WARNING)
 
 if __name__ == '__main__':
     import config
