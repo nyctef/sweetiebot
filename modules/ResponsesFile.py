@@ -32,15 +32,6 @@ class ResponsesFile(object):
             out_f.writelines(sorted(lines_seen))
         return
 
-    def random_line(self):
-        try:
-            with self._read() as f:
-                lines = [_f for _f in (line.strip() for line in f) if _f]
-                return random.choice(lines)
-        except Exception as e:
-            log.error("failed to read file "+self.filename+": "+str(e))
-            return "/me slaps <target> with a large trout."
-
     def add_to_file(self, args):
         with self._append() as f:
             args = args.replace('\n', ' ') + '\n'
