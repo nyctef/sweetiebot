@@ -2,15 +2,15 @@ from os import getenv
 import unittest
 from pprint import pprint
 import psycopg2
+from modules.TableList import TableList
 
 pg_conn_str = getenv('SB_PG_DB', None)
 if not pg_conn_str:
     raise Exception("SB_PG_DB needs to be set")
+conn = psycopg2.connect(pg_conn_str)
 
-class TableList(unittest.TestCase):
+class TableListTests(unittest.TestCase):
     def test_something(self):
-        conn = psycopg2.connect(pg_conn_str)
-        cur = conn.cursor()
-        cur.execute("SELECT text FROM deowl_fails;")
-        pprint(cur.fetchone()[0])
-        pprint(cur.fetchone()[0])
+        l = TableList(conn, "deowl_fails")
+        print(l.get_next())
+        print(l.get_next())
