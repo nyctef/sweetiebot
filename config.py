@@ -24,3 +24,5 @@ twitter_secret = getenv('TWITTER_API_SECRET', None)
 
 # A url for the redis instance to connect to in the form redis://[:password]@host:port/dbnum
 redis_url = getenv('REDIS_DB_URL', 'redis://sbredis:6379/0')
+
+pg_conn_str = getenv('SB_PG_DB', None)
