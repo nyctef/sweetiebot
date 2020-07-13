@@ -28,6 +28,7 @@ class TableListTests(unittest.TestCase):
             cur.execute("DROP TABLE IF EXISTS deowl_fails;"
                         "CREATE TABLE deowl_fails(id serial PRIMARY KEY, text TEXT);"
                         "ALTER TABLE deowl_fails ADD UNIQUE (text);")
+            self.conn.commit()
 
     def test_loops_through_list_when_reaches_end(self):
         l = TableList(self.conn, "deowl_fails")
@@ -46,3 +47,15 @@ class TableListTests(unittest.TestCase):
 
         with self.assertRaises(Exception):
             l.get_next()
+    
+    def test_remembers_new_lines_added(self):
+        l = TableList(self.conn, "deowl_fails")
+
+        l.add_to_file("this is a new line")
+
+        # make sure any changes were committed to the db
+        self.conn.rollback()
+
+        value1 = l.get_next()
+
+        self.assertEqual("this is a new line", value1)

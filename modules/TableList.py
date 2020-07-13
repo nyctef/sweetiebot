@@ -13,6 +13,7 @@ class TableList(object):
     def add_to_file(self, args):
         sql = f"INSERT INTO {self.table_name}(text) VALUES (%s) ON CONFLICT (text) DO NOTHING"
         self.cur.execute(sql, (args.replace('\n', ' ').strip(),))
+        self.cur.connection.commit()
 
     def get_next(self):
         if not self.responses:
