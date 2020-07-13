@@ -24,6 +24,42 @@ class TellStorageTests(object):
         self.impl.set_jid_for_nick("nick1", "jid1")
         self.impl.set_jid_for_nick("nick1", "jid2")
         self.assertEqual("jid2", self.impl.get_jid_from_nick("nick1"))
+    
+    def test_setting_single_message(self):
+        self.impl.set_or_update_message("jid1", "sender1", "message1")
+        self.impl.set_or_update_message("other_target", "sender1", "should be ignored")
+
+        msgs = self.impl.get_existing_messages_by_sender("jid1")
+        self.assertEqual(msgs.get("sender1"), "message1")
+        self.assertListEqual(list(msgs.values()), ["message1"])
+    
+    def test_messages_should_be_replaced_instead_of_appended(self):
+        # This is a bit of a strange behavior for the store, but it matches
+        # what the code currently expects
+        self.impl.set_or_update_message("jid1", "sender1", "message2")
+        self.impl.set_or_update_message("jid1", "sender1", "message3")
+
+        msgs = self.impl.get_existing_messages_by_sender("jid1")
+        self.assertEqual(msgs.get("sender1"), "message3")
+        self.assertListEqual(list(msgs.values()), ["message3"])
+    
+    def test_messages_for_different_receivers(self):
+        self.impl.set_or_update_message("receiver1", "sender1", "message4")
+        self.impl.set_or_update_message("receiver2", "sender1", "message5")
+
+        msgs = self.impl.get_existing_messages_by_sender("receiver1")
+        self.assertListEqual(list(msgs.values()), ["message4"])
+        
+        msgs = self.impl.get_existing_messages_by_sender("receiver2")
+        self.assertListEqual(list(msgs.values()), ["message5"])
+    
+    def test_clear_messages(self):
+        self.impl.set_or_update_message("jid1", "sender1", "message2")
+        self.impl.clear_messages_for("jid1")
+
+        msgs = self.impl.get_existing_messages_by_sender("jid1")
+        self.assertEqual(msgs.get("sender1"), None)
+        self.assertListEqual(list(msgs.values()), [])
 
 
 class TellStoragePgTests(TellStorageTests, unittest.TestCase):

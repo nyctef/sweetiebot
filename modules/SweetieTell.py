@@ -46,13 +46,20 @@ class TellStoragePg(object):
         self.cur.connection.commit()
 
     def set_or_update_message(self, jid, senderjid, message):
-        pass
+        self.cur.execute("INSERT INTO tell_messages_by_sender (sender_jid, receiver_jid, messages) VALUES (%s, %s, %s) "
+                         "ON CONFLICT (sender_jid, receiver_jid) DO UPDATE SET "
+                         "messages = EXCLUDED.messages", (senderjid, jid, [message]))
+        self.cur.connection.commit()
 
     def get_existing_messages_by_sender(self, jid):
-        pass
+        self.cur.execute("SELECT sender_jid, messages from tell_messages_by_sender "
+                         "WHERE receiver_jid = %s", (jid,))
+        results = self.cur.fetchall()
+        return {s:"\n".join(m) for (s,m) in results}
         
     def clear_messages_for(self, jid):
-        pass
+        self.cur.execute("DELETE FROM tell_messages_by_sender WHERE receiver_jid = %s", (jid,))
+        self.cur.connection.commit()
 
 class SweetieTell(object):
     def __init__(self, bot, storage):
@@ -87,7 +94,7 @@ class SweetieTell(object):
             return 'Sorry, that message is too long (1000 char maximum)'
 
         existing_messages = self.storage.get_existing_messages_by_sender(sendee_jid)
-        existing_message = existing_messages.get(str(sender_jid), None)
+        existing_message = existing_messages.get(sender_jid, None)
         if existing_message is not None:
             combined_message = existing_message + '\n' + mess
             if len(combined_message) > 1000:
