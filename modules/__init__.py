@@ -14,7 +14,7 @@ from .MessageProcessor import MessageProcessor
 from .TwitterClient import get_client
 from .Presence import Presence
 from .SweetieSeen import SweetieSeen
-from .SweetieTell import SweetieTell
+from .SweetieTell import SweetieTell, TellStorageRedis
 from .SweetieDictionary import SweetieDictionary
 from .SweetieMoon import SweetieMoon
 from .TableList import TableList

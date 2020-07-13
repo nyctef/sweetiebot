@@ -1,4 +1,4 @@
-from modules import Message, SweetieTell, FakeRedis, Presence
+from modules import Message, SweetieTell, TellStorageRedis, FakeRedis, Presence
 from modules.RoomMember import RoomMember, RoomMemberList
 import unittest
 from unittest.mock import MagicMock, patch
@@ -36,7 +36,8 @@ class TellTests(unittest.TestCase):
         self.bot.get_jid_from_nick.side_effect = self.get_jid
         self.store = FakeRedis()
 
-        self.tell = SweetieTell(self.bot, self.store)
+        self.tell_storage = TellStorageRedis(self.store)
+        self.tell = SweetieTell(self.bot, self.tell_storage)
 
     def test_can_tell_someone_a_thing(self):
         response = self.tell.tell(create_message('!tell ZhuLi Do the thing!'))

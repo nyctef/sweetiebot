@@ -35,9 +35,8 @@ class TellStorageRedis(object):
         self.store.delete(f'tell:{jid}')
 
 class SweetieTell(object):
-    def __init__(self, bot, store):
-        self.store = store
-        self.storage = TellStorageRedis(store)
+    def __init__(self, bot, storage):
+        self.storage = storage
         self.bot = bot
         self.bot.load_commands_from(self)
         self.nicktojid = NickToJidTracker(self.bot, self.storage)

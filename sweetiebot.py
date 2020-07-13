@@ -10,7 +10,7 @@ from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, FakeRedis, SweetieRoulette, \
     RestartException, PBLogHandler, SweetieDe, SweetiePings, \
     TwitterClient, SweetieSeen, AtomWatcher, SweetieTell, \
-    SweetieDictionary, SweetieMoon, TableList
+    SweetieDictionary, SweetieMoon, TableList, TellStorageRedis
 import time
 import os
 import traceback
@@ -72,7 +72,8 @@ def build_sweetiebot(config=None):
     actions = TableList(pg_conn, 'actions')
     sass = TableList(pg_conn, 'sass')
     cadmusic = TableList(pg_conn, 'cadmusic')
-    tell = SweetieTell(bot, redis_conn)
+    tell_storage = TellStorageRedis(redis_conn)
+    tell = SweetieTell(bot, tell_storage)
     dictionary = SweetieDictionary(bot)
     chat = SweetieChat(bot, actions, sass, config.chatroom, cadmusic, tell, dictionary)
     roulette = SweetieRoulette(bot, admin)
