@@ -11,15 +11,12 @@ class TellStorageRedis(object):
     def __init__(self, store):
         self.store = store
 
-    def enc(self, str):
-        return str.encode('utf-8')
-
-    def dec(self, bytes):
+    def _dec(self, bytes):
         return bytes.decode('utf-8')
 
     def get_jid_from_nick(self, nick):
         result = self.store.get(f'jidfornick:{nick}')
-        if result: return self.dec(result)
+        if result: return self._dec(result)
 
     def set_jid_for_nick(self, nick, jid):
         self.store.set(f'jidfornick:{nick}', jid)
@@ -29,7 +26,7 @@ class TellStorageRedis(object):
 
     def get_existing_messages_by_sender(self, jid):
         messages = self.store.hgetall(f'tell:{jid}')
-        return {self.dec(k):self.dec(v) for (k,v) in messages.items()}
+        return {self._dec(k):self._dec(v) for (k,v) in messages.items()}
         
     def clear_messages_for(self, jid):
         self.store.delete(f'tell:{jid}')
