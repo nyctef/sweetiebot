@@ -57,16 +57,16 @@ class SweetieTell(object):
         if len(mess) > 1000:
             return 'Sorry, that message is too long (1000 char maximum)'
 
-        existing_messages = self._get(sendee_jid)
+        existing_messages = self._get_existing_messages_by_sender(sendee_jid)
         existing_message = existing_messages.get(self.enc(str(sender_jid)), None)
         if existing_message is not None:
             combined_message = self.dec(existing_message) + '\n' + mess
             if len(combined_message) > 1000:
                 return 'Sorry, that message is too long (1000 char maximum; you\'ve already used ~{})'.format(len(existing_message))
-            self._set(sendee_jid, sender_jid, combined_message)
+            self._set_or_update_message(sendee_jid, sender_jid, combined_message)
             return 'Message received for {} (appended to previous message)'.format(sendee_jid)
         if sendee_nick and mess:
-            self._set(sendee_jid, sender_jid, '{} left you a message: {}'.format(sender_nick, mess))
+            self._set_or_update_message(sendee_jid, sender_jid, '{} left you a message: {}'.format(sender_nick, mess))
             return 'Message received for {}'.format(sendee_jid)
 
     def _key(self, jid):
@@ -80,10 +80,10 @@ class SweetieTell(object):
             self.store.delete(key)
             return message.sender_nick + ", " + "\n".join(messages)
 
-    def _set(self, jid, senderjid, message):
+    def _set_or_update_message(self, jid, senderjid, message):
         self.store.hset(self._key(jid), str(senderjid), message)
 
-    def _get(self, jid):
+    def _get_existing_messages_by_sender(self, jid):
         return self.store.hgetall(self._key(jid))
 
 class NickToJidTracker(object):
