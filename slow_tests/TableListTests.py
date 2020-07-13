@@ -29,9 +29,20 @@ class TableListTests(unittest.TestCase):
                         "CREATE TABLE deowl_fails(id serial PRIMARY KEY, text TEXT);"
                         "ALTER TABLE deowl_fails ADD UNIQUE (text);")
 
-    def test_something(self):
+    def test_loops_through_list_when_reaches_end(self):
         l = TableList(self.conn, "deowl_fails")
         with self.conn.cursor() as cur:
             cur.execute("INSERT INTO deowl_fails(text) VALUES ('test1')")
-        print(l.get_next())
-        print(l.get_next())
+
+        value1 = l.get_next()
+        value2 = l.get_next()
+
+        self.assertEqual(value1, value2)
+        self.assertIsNotNone(value2)
+    
+    def test_throws_error_if_no_results_found(self):
+        '''TODO: should this just return None instead?'''
+        l = TableList(self.conn, "deowl_fails")
+
+        with self.assertRaises(Exception):
+            l.get_next()
