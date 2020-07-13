@@ -13,7 +13,18 @@ class TellStorageTests(object):
     def test_impl_is_not_none(self):
         self.assertIsNotNone(self.impl)
     
+    def test_jid_from_nick_returns_none_if_not_found(self):
+        self.assertEqual(None, self.impl.get_jid_from_nick("not_found"))
     
+    def test_jid_from_nick_returns_result_if_found(self):
+        self.impl.set_jid_for_nick("nick1", "jid1")
+        self.assertEqual("jid1", self.impl.get_jid_from_nick("nick1"))
+    
+    def test_jid_from_nick_returns_latest_result(self):
+        self.impl.set_jid_for_nick("nick1", "jid1")
+        self.impl.set_jid_for_nick("nick1", "jid2")
+        self.assertEqual("jid2", self.impl.get_jid_from_nick("nick1"))
+
 
 class TellStoragePgTests(TellStorageTests, unittest.TestCase):
     @classmethod

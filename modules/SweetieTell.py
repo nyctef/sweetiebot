@@ -36,10 +36,14 @@ class TellStoragePg(object):
         self.cur = conn.cursor()
 
     def get_jid_from_nick(self, nick):
-        pass
+        self.cur.execute("SELECT jid from tell_jid_to_nick_mapping WHERE nick = %s", (nick,))
+        result = self.cur.fetchone()
+        return result[0] if result is not None else None
 
     def set_jid_for_nick(self, nick, jid):
-        pass
+        self.cur.execute("INSERT INTO tell_jid_to_nick_mapping (nick, jid) VALUES (%s, %s) "
+                         "ON CONFLICT (nick) DO UPDATE SET jid = EXCLUDED.jid", (nick,jid))
+        self.cur.connection.commit()
 
     def set_or_update_message(self, jid, senderjid, message):
         pass
