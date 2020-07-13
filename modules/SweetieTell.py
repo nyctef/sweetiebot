@@ -7,12 +7,24 @@ from pprint import pprint
 
 log = logging.getLogger(__name__)
 
+class TellStorageRedis(object):
+    def __init__(self, store):
+        self.store = store
+
+    def get_jid_from_nick(self, nick):
+        result = self.store.get(f'jidfornick:{nick}')
+        if result: return result.decode('utf-8')
+
+    def set_jid_for_nick(self, nick, jid):
+        self.store.set(f'jidfornick:{nick}', jid)
+
 class SweetieTell(object):
     def __init__(self, bot, store):
         self.store = store
+        self.storage = TellStorageRedis(store)
         self.bot = bot
         self.bot.load_commands_from(self)
-        self.nicktojid = NickToJidTracker(self.bot, self.store)
+        self.nicktojid = NickToJidTracker(self.bot, self.storage)
 
     def enc(self, str):
         return str.encode('utf-8')
@@ -45,16 +57,16 @@ class SweetieTell(object):
         if len(mess) > 1000:
             return 'Sorry, that message is too long (1000 char maximum)'
 
-        existing_messages = self.get(sendee_jid)
+        existing_messages = self._get(sendee_jid)
         existing_message = existing_messages.get(self.enc(str(sender_jid)), None)
         if existing_message is not None:
             combined_message = self.dec(existing_message) + '\n' + mess
             if len(combined_message) > 1000:
                 return 'Sorry, that message is too long (1000 char maximum; you\'ve already used ~{})'.format(len(existing_message))
-            self.set(sendee_jid, sender_jid, combined_message)
+            self._set(sendee_jid, sender_jid, combined_message)
             return 'Message received for {} (appended to previous message)'.format(sendee_jid)
         if sendee_nick and mess:
-            self.set(sendee_jid, sender_jid, '{} left you a message: {}'.format(sender_nick, mess))
+            self._set(sendee_jid, sender_jid, '{} left you a message: {}'.format(sender_nick, mess))
             return 'Message received for {}'.format(sendee_jid)
 
     def _key(self, jid):
@@ -68,15 +80,15 @@ class SweetieTell(object):
             self.store.delete(key)
             return message.sender_nick + ", " + "\n".join(messages)
 
-    def set(self, jid, senderjid, message):
+    def _set(self, jid, senderjid, message):
         self.store.hset(self._key(jid), str(senderjid), message)
 
-    def get(self, jid):
+    def _get(self, jid):
         return self.store.hgetall(self._key(jid))
 
 class NickToJidTracker(object):
-    def __init__(self, bot, store):
-        self.store = store
+    def __init__(self, bot, storage):
+        self.storage = storage
         self.bot = bot
         self.bot.add_presence_handler(self.on_presence)
 
@@ -84,15 +96,8 @@ class NickToJidTracker(object):
         nick = presence.muc_jid.resource
         jid = presence.user_jid.bare
         log.debug('setting jid for nick {} to {}'.format(nick, jid))
-        self.set_jid_for_nick(nick, jid)
-
+        self.storage.set_jid_for_nick(nick, jid)
+    
     def get_jid_from_nick(self, nick):
-        result = self.store.get(self._key(nick))
-        if result: return result.decode('utf-8')
-
-    def set_jid_for_nick(self, nick, jid):
-        self.store.set(self._key(nick), jid)
-
-    def _key(self, nick):
-        return 'jidfornick:{}'.format(nick)
+        return self.storage.get_jid_from_nick(nick)
 
