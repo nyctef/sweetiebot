@@ -31,6 +31,25 @@ class TellStorageRedis(object):
     def clear_messages_for(self, jid):
         self.store.delete(f'tell:{jid}')
 
+class TellStoragePg(object):
+    def __init__(self, conn):
+        self.cur = conn.cursor()
+
+    def get_jid_from_nick(self, nick):
+        pass
+
+    def set_jid_for_nick(self, nick, jid):
+        pass
+
+    def set_or_update_message(self, jid, senderjid, message):
+        pass
+
+    def get_existing_messages_by_sender(self, jid):
+        pass
+        
+    def clear_messages_for(self, jid):
+        pass
+
 class SweetieTell(object):
     def __init__(self, bot, storage):
         self.storage = storage
