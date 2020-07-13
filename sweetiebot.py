@@ -4,12 +4,13 @@
 import redis
 import sys
 import logging
+import psycopg2
 from utils import randomstr
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, FakeRedis, SweetieRoulette, \
     RestartException, PBLogHandler, SweetieDe, SweetiePings, \
     TwitterClient, SweetieSeen, AtomWatcher, SweetieTell, \
-    SweetieDictionary, SweetieMoon
+    SweetieDictionary, SweetieMoon, TableList
 import time
 import os
 import traceback
@@ -49,6 +50,11 @@ def build_sweetiebot(config=None):
         redis_conn = FakeRedis()
     else:
         redis_conn = redis.from_url(config.redis_url)
+    
+    if config.pg_conn_str:
+        pg_conn = psycopg2.connect(config.pg_conn_str)
+    else:
+        raise Exception("pg connection string must be set")
 
     jid = config.username + '/' + resource
     nick = config.nickname
@@ -62,10 +68,10 @@ def build_sweetiebot(config=None):
     bot = MUCJabberBot(jid, password, room, nick, address)
     lookup = SweetieLookup(bot)
     admin = SweetieAdmin(bot, config.chatroom)
-    de = SweetieDe(bot, admin, ResponsesFile('data/deowl_fails.txt'))
-    actions = ResponsesFile('data/actions.txt')
-    sass = ResponsesFile('data/sass.txt')
-    cadmusic = ResponsesFile('data/cadmusic.txt')
+    de = SweetieDe(bot, admin, TableList(pg_conn, 'deowl_fails'))
+    actions = TableList(pg_conn, 'actions')
+    sass = TableList(pg_conn, 'sass')
+    cadmusic = TableList(pg_conn, 'cadmusic')
     tell = SweetieTell(bot, redis_conn)
     dictionary = SweetieDictionary(bot)
     chat = SweetieChat(bot, actions, sass, config.chatroom, cadmusic, tell, dictionary)
