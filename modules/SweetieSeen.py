@@ -41,11 +41,21 @@ class SeenStoragePg:
         self.cur = conn.cursor()
     
     def set_last_seen_time(self, target, time):
+        if target is None or time is None:
+            # TODO: find out why we hit this branch
+            log.warning('skipping setting seen {} to {}'.format(target, time))
+            return
+
         self.cur.execute("INSERT INTO seen_records(target, seen) VALUES "
                          "(%s, %s) ON CONFLICT (target) DO UPDATE SET "
                          "seen = EXCLUDED.seen", (target, time))
 
     def set_last_spoke_time(self, target, time):
+        if target is None or time is None:
+            # TODO: find out why we hit this branch
+            log.warning('skipping setting spoke {} to {}'.format(target, time))
+            return
+
         self.cur.execute("INSERT INTO seen_records(target, spoke) VALUES "
                          "(%s, %s) ON CONFLICT (target) DO UPDATE SET "
                          "spoke = EXCLUDED.spoke", (target, time))
