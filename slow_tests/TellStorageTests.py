@@ -83,8 +83,8 @@ class TellStoragePgTests(TellStorageTests, unittest.TestCase):
             # TODO: should this be able to run the sql in create_basic_tables somehow?
             cur.execute("DROP TABLE IF EXISTS tell_jid_to_nick_mapping;"
                         "DROP TABLE IF EXISTS tell_messages_by_sender;"
-                        "CREATE TABLE tell_jid_to_nick_mapping(nick TEXT PRIMARY KEY, jid TEXT);"
-                        "CREATE TABLE tell_messages_by_sender(sender_jid TEXT, receiver_jid TEXT, messages TEXT[], PRIMARY KEY (sender_jid, receiver_jid));")
+                        "CREATE TABLE tell_jid_to_nick_mapping(nick TEXT PRIMARY KEY, jid TEXT NOT NULL);"
+                        "CREATE TABLE tell_messages_by_sender(sender_jid TEXT, receiver_jid TEXT, messages TEXT[] NOT NULL, PRIMARY KEY (sender_jid, receiver_jid));")
             self.conn.commit()
 
 class TellStorageRedisTests(TellStorageTests, unittest.TestCase):
