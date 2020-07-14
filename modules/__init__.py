@@ -7,7 +7,7 @@ from .FakeRedis import FakeRedis
 from .SweetieRoulette import SweetieRoulette
 from .PBLogHandler import PBLogHandler
 from .SweetieDe import SweetieDe
-from .SweetiePings import SweetiePings
+from .SweetiePings import SweetiePings, PingStorageRedis
 from .Message import Message
 from .MessageResponse import MessageResponse
 from .MessageProcessor import MessageProcessor

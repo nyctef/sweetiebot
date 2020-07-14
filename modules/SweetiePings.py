@@ -3,11 +3,47 @@ from utils import logerrors, botcmd
 from datetime import datetime
 from sleekxmpp.jid import JID
 
+class PingStorageRedis(object):
+    def __init__(self, store):
+        self.store = store
+    
+    def get_ping_group_members(self, group):
+        return [x.decode() for x in self.store.smembers(f'ping:{group}')]
+    
+    def add_ping_group_member(self, group, member):
+        return self.store.sadd(f'ping:{group}', str(member))
+    
+    def remove_ping_group_member(self, group, member):
+        return self.store.srem(f'ping:{group}', str(member))
+    
+    def get_ping_group_list(self):
+        group_names = [x.decode() for x in self.store.keys('ping:*')]
+        groups = [(x, self.store.scard(x)) for x in group_names]
+        groups = [(x[len('ping:'):], count) for (x, count) in groups]
+        return [(group, count) for (group, count) in groups if count > 0]
+    
+    def get_ping_groups_for_member(self, member):
+        result = []
+        for group in self.store.keys('ping:*'):
+            group_members = self.store.smembers(group)
+            group_usernames = list(map(lambda x: x.decode('utf-8'), group_members))
+            if member in group_usernames:
+                group_name = group[len('ping:'):].decode('utf-8')
+                result.append(group_name)
+        return result
+
+class PingStoragePg(object):
+    def __init__(self, conn):
+        self.cur = conn.cursor()
+    
+    def get_ping_group_members(self, group):
+        return []
+
 class SweetiePings:
     def __init__(self, bot, store):
         bot.load_commands_from(self)
         self.bot = bot
-        self.store = store
+        self.storage = PingStorageRedis(store)
 
     def key(self, group):
         return 'ping:'+group
@@ -26,11 +62,11 @@ class SweetiePings:
         formatted_message = '''{}
 
 ## sent by {} to {} at {} ##'''.format(ping_message, sender, group, time)
-        targets = self.store.smembers(self.key(group))
+        targets = self.storage.get_ping_group_members(group)
         if not len(targets):
             return "no users found in group '{}'".format(group)
         for target in targets:
-            self.bot.send_chat_message(formatted_message, target.decode('utf-8'))
+            self.bot.send_chat_message(formatted_message)
         return "ping sent to {} users".format(len(targets))
 
 
@@ -44,8 +80,8 @@ class SweetiePings:
         jid = message.user_jid
         if not jid:
             return "Sorry, I don't know what your JID is"
-        num_added = self.store.sadd(self.key(group), str(jid))
-        if num_added:
+        added = self.storage.add_ping_group_member(group, str(jid))
+        if added:
             return "User {} added to group '{}'".format(jid, group)
         else:
             return "User {} was already in group '{}'".format(jid, group)
@@ -60,8 +96,8 @@ class SweetiePings:
         jid = message.user_jid
         if not jid:
             return "Sorry, I don't know what your JID is"
-        num_removed = self.store.srem(self.key(group), str(jid))
-        if num_removed:
+        removed = self.storage.remove_ping_group_member(group, str(jid))
+        if removed:
             return "User {} removed from group '{}'".format(jid, group)
         else:
             return "User {} was not in group '{}'".format(jid, group)
@@ -71,13 +107,10 @@ class SweetiePings:
     def groups(self, message):
         '''List available groups for pings'''
         result = []
-        for group in self.store.keys('ping:*'):
-            num_in_group = self.store.scard(group)
-            if num_in_group:
-                group_name = group[len('ping:'):].decode('utf-8')
-                result.append(group_name + ' ({})'.format(num_in_group))
-        return ('Available groups: {}'.format(', '.join(result)) +
-            '. See also !users and !mygroups')
+        for (group, count) in self.storage.get_ping_group_list():
+            result.append(f'{group} ({count})')
+
+        return f'Available groups: {", ".join(result)}. See also !users and !mygroups'
 
     @botcmd
     @logerrors
@@ -86,7 +119,7 @@ class SweetiePings:
         if not message.args:
             return 'Usage: users group_name'
         group = message.args
-        targets = self.store.smembers(self.key(group))
+        targets = self.storage.get_ping_group_members(group)
         if not len(targets):
             return "no users found in group '{}'".format(group)
         usernames = map(lambda x: JID(x.decode('utf-8')).user, targets)
@@ -100,13 +133,7 @@ class SweetiePings:
         jid = message.user_jid
         if not jid:
             return "Sorry, I don't know what your JID is"
-        result = []
-        for group in self.store.keys('ping:*'):
-            group_members = self.store.smembers(group)
-            group_usernames = list(map(lambda x: x.decode('utf-8'), group_members))
-            if jid in group_usernames:
-                group_name = group[len('ping:'):].decode('utf-8')
-                result.append(group_name)
+        result = self.storage.get_ping_groups_for_member(str(jid))
 
         if not len(result):
             return 'User {} is not currently subscribed to any pingable groups'.format(

@@ -50,6 +50,7 @@ class PingTests(unittest.TestCase):
         # A user now pings the group to send a message
         response = self.pings.ping(create_message("!ping capable_assistants Do the thing!"))
         self.assertEqual("ping sent to 1 users", response)
+        # TODO: assert that a ping was actually sent to self.bot?
 
         # And a user unsubscribes from the group
         response = self.pings.unsubscribe(create_message_zhuli('!unsub capable_assistants'))
