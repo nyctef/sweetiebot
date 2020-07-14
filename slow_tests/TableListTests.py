@@ -26,8 +26,7 @@ class TableListTests(unittest.TestCase):
     def setUp(self):
         with self.conn.cursor() as cur:
             cur.execute("DROP TABLE IF EXISTS deowl_fails;"
-                        "CREATE TABLE deowl_fails(id serial PRIMARY KEY, text TEXT);"
-                        "ALTER TABLE deowl_fails ADD UNIQUE (text);")
+                        "CREATE TABLE deowl_fails(id serial PRIMARY KEY, text TEXT UNIQUE NOT NULL);")
             self.conn.commit()
 
     def test_loops_through_list_when_reaches_end(self):
