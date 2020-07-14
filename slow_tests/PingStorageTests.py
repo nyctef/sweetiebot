@@ -27,6 +27,14 @@ class TellStorageTests(object):
         result = self.impl.get_ping_group_members("group")
         self.assertListEqual(["member1"], result)
     
+    def test_removing_group_member(self):
+        self.impl.add_ping_group_member("evil_horde", "adora")
+        self.impl.add_ping_group_member("evil_horde", "catra")
+        self.impl.remove_ping_group_member("evil_horde", "adora")
+
+        result = self.impl.get_ping_group_members("evil_horde")
+        self.assertListEqual(["catra"], result)
+    
     def test_removing_group_member_from_empty_group_does_nothing(self):
         v1 = self.impl.remove_ping_group_member("group", "member1")
         self.assertFalse(v1)
@@ -58,33 +66,32 @@ class TellStorageTests(object):
         result = self.impl.get_ping_groups_for_member("みちる")
         self.assertListEqual(["人間", "獣人"], result)
 
-
-
-
-# class TellStoragePgTests(TellStorageTests, unittest.TestCase):
-#     @classmethod
-#     def setUpClass(cls):
-#         with psycopg2.connect(pg_conn_str) as conn, conn.cursor() as cur:
-#             conn.autocommit = True
-#             cur.execute("CREATE DATABASE tell_storage_tests")
-#         cls.conn = psycopg2.connect(pg_conn_str, dbname="tell_storage_tests")
-#         cls.impl = TellStoragePg(cls.conn)
+class TellStoragePgTests(TellStorageTests, unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        with psycopg2.connect(pg_conn_str) as conn, conn.cursor() as cur:
+            conn.autocommit = True
+            cur.execute("CREATE DATABASE ping_storage_tests")
+        cls.conn = psycopg2.connect(pg_conn_str, dbname="ping_storage_tests")
+        cls.impl = PingStoragePg(cls.conn)
     
-#     @classmethod
-#     def tearDownClass(cls):
-#         cls.conn.close()
-#         with psycopg2.connect(pg_conn_str) as conn, conn.cursor() as cur:
-#             conn.autocommit = True
-#             cur.execute("DROP DATABASE tell_storage_tests")
+    @classmethod
+    def tearDownClass(cls):
+        cls.conn.close()
+        with psycopg2.connect(pg_conn_str) as conn, conn.cursor() as cur:
+            conn.autocommit = True
+            cur.execute("DROP DATABASE ping_storage_tests")
     
-#     def setUp(self):
-#         with self.conn.cursor() as cur:
-#             # TODO: should this be able to run the sql in create_basic_tables somehow?
-#             cur.execute("DROP TABLE IF EXISTS tell_jid_to_nick_mapping;"
-#                         "DROP TABLE IF EXISTS tell_messages_by_sender;"
-#                         "CREATE TABLE tell_jid_to_nick_mapping(nick TEXT PRIMARY KEY, jid TEXT);"
-#                         "CREATE TABLE tell_messages_by_sender(sender_jid TEXT, receiver_jid TEXT, messages TEXT[], PRIMARY KEY (sender_jid, receiver_jid));")
-#             self.conn.commit()
+    def setUp(self):
+        with self.conn.cursor() as cur:
+            # TODO: should this be able to run the sql in create_basic_tables somehow?
+            cur.execute("DROP TABLE IF EXISTS ping_group_memberships;"
+                        "CREATE TABLE ping_group_memberships("
+                        "    member_jid TEXT, "
+                        "    group_name TEXT, "
+                        "    PRIMARY KEY (member_jid, group_name) "
+                        ");")
+            self.conn.commit()
 
 class TellStorageRedisTests(TellStorageTests, unittest.TestCase):
     def setUp(self):
