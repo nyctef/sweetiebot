@@ -19,3 +19,9 @@ CREATE TABLE ping_group_memberships(
     group_name TEXT,
     PRIMARY KEY (member_jid, group_name)
 );
+
+CREATE TABLE seen_records(
+    target TEXT PRIMARY KEY,
+    seen TIMESTAMP NULL,
+    spoke TIMESTAMP NULL
+);
