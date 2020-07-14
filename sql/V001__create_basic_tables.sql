@@ -17,3 +17,9 @@ CREATE TABLE tell_messages_by_sender(
     messages TEXT[],
     PRIMARY KEY (sender_jid, receiver_jid)
 );
+
+CREATE TABLE ping_group_memberships(
+    member_jid TEXT,
+    group_name TEXT,
+    PRIMARY KEY (member_jid, group_name)
+);
