@@ -5,7 +5,6 @@ from .SweetieLookup import SweetieLookup
 from .MUCJabberBot import MUCJabberBot, RestartException
 from .FakeRedis import FakeRedis
 from .SweetieRoulette import SweetieRoulette
-from .PBLogHandler import PBLogHandler
 from .SweetieDe import SweetieDe
 from .SweetiePings import SweetiePings, PingStorageRedis
 from .Message import Message
