@@ -88,7 +88,6 @@ class SweetieSeen:
     def on_message(self, message):
         if message.is_pm: return
 
-        response = self.timestamp()
         nickname = message.sender_nick
         user = message.user_jid.bare
         self.storage.set_last_spoke_time(nickname, datetime.now(timezone.utc))
