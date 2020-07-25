@@ -17,4 +17,4 @@ RUN echo -n ' | Image built at' `date` >> version.txt
 
 VOLUME /usr/src/app/data
 
-ENTRYPOINT ["/bin/bash", "/usr/src/app/run-bot-and-watch.sh"]
+ENTRYPOINT ["python", "/usr/src/app/sweetiebot.py"]
