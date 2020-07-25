@@ -8,7 +8,7 @@ import psycopg2
 from utils import randomstr
 from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
     SweetieChat, SweetieLookup, FakeRedis, SweetieRoulette, \
-    RestartException, PBLogHandler, SweetieDe, SweetiePings, \
+    RestartException, SweetieDe, SweetiePings, \
     TwitterClient, SweetieSeen, AtomWatcher, SweetieTell, \
     SweetieDictionary, SweetieMoon, TableList, TellStorageRedis
 import time
@@ -105,11 +105,6 @@ def setup_logging(config):
     filehandler.setLevel(logging.DEBUG)
     filehandler.setFormatter(formatter)
     logging.getLogger().addHandler(filehandler)
-
-    errorhandler = PBLogHandler(config)
-    errorhandler.setLevel(logging.ERROR)
-    errorhandler.setFormatter(formatter)
-    logging.getLogger().addHandler(errorhandler)
 
     logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARNING)
     logging.getLogger('sleekxmpp.plugins.xep_0199.ping').setLevel(logging.WARNING)
