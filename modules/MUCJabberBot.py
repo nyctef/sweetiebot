@@ -44,6 +44,7 @@ class MUCJabberBot():
         bot.add_event_handler('groupchat_presence', self.on_presence)
         bot.add_event_handler('groupchat_subject', self.on_room_joined)
         bot.add_event_handler('disconnected', self.on_disconnect)
+        bot.add_event_handler("ssl_invalid_cert", self.discard_invalid_ssl_cert)
 
         bot.register_plugin('xep_0045')
         self._muc = bot.plugin['xep_0045']
@@ -68,6 +69,10 @@ class MUCJabberBot():
         self.add_presence_handler(self.rejoin_if_kicked)
 
         self._bot = bot
+    
+    def discard_invalid_ssl_cert(self, event, cert, direct):
+        """ hack: we don't have a valid cert for local testing, so ignore for now """
+        return
 
     def on_start(self, event):
         log.info('sb on_start')
