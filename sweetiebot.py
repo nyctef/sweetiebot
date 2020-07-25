@@ -101,11 +101,6 @@ def setup_logging(config):
     streamhandler.setFormatter(formatter)
     logging.getLogger().addHandler(streamhandler)
 
-    filehandler = logging.FileHandler('sweetiebot.log')
-    filehandler.setLevel(logging.DEBUG)
-    filehandler.setFormatter(formatter)
-    logging.getLogger().addHandler(filehandler)
-
     logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARNING)
     logging.getLogger('sleekxmpp.plugins.xep_0199.ping').setLevel(logging.WARNING)
 
