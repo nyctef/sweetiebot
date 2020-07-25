@@ -14,6 +14,7 @@ from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
 import time
 import os
 import traceback
+from opencensus.ext.azure.log_exporter import AzureLogHandler
 
 log = logging.getLogger(__name__)
 
@@ -92,14 +93,23 @@ def build_sweetiebot(config=None):
     return sweet
 
 def setup_logging(config):
-    logging.getLogger().setLevel(logging.DEBUG)
-    logging.getLogger().handlers = []
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.DEBUG)
+    root_logger.handlers = []
 
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
     streamhandler = logging.StreamHandler()
     streamhandler.setLevel(logging.DEBUG if config.debug else logging.INFO)
     streamhandler.setFormatter(formatter)
-    logging.getLogger().addHandler(streamhandler)
+    root_logger.addHandler(streamhandler)
+
+    if config.app_insights_key is not None:
+        azure_handler = AzureLogHandler(
+            instrumentation_key=config.app_insights_key,
+            export_interval = 0.1
+        )
+        azure_handler.setLevel(logging.DEBUG)
+        root_logger.addHandler(azure_handler)
 
     logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARNING)
     logging.getLogger('sleekxmpp.plugins.xep_0199.ping').setLevel(logging.WARNING)
