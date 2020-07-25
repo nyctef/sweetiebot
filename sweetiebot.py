@@ -105,8 +105,7 @@ def setup_logging(config):
 
     if config.app_insights_key is not None:
         azure_handler = AzureLogHandler(
-            instrumentation_key=config.app_insights_key,
-            export_interval = 0.1
+            instrumentation_key=config.app_insights_key
         )
         azure_handler.setLevel(logging.DEBUG)
         root_logger.addHandler(azure_handler)
