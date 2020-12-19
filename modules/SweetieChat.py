@@ -94,7 +94,7 @@ class SweetieChat(object):
             if not 'html' in res.headers['content-type']:
                 log.warning("didn't get html from request, skipping")
                 return
-            soup = BeautifulSoup(res.text)
+            soup = BeautifulSoup(res.text, "html.parser")
             return soup.title.string
         except Exception as e:
             log.warning("error fetching url "+url+" : "+str(e))
