@@ -1,8 +1,8 @@
 basic running:
 
 ```
-virtualenv --python=python3 env
-. env/bin/activate
+pipenv --python 3.8
+pipenv shell
 cp config.py.example config.py
 vim config.py
 ./run-tests.sh
