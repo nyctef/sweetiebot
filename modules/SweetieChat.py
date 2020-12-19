@@ -80,15 +80,19 @@ class SweetieChat(object):
         from bs4 import BeautifulSoup
         import requests
         try:
-            headers = { 'user-agent': 'sweetiebot' }
+            # sadly some sites (ie twitter.com) block "unsupported" browsers, so we have to lie about our user-agent
+            headers = { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36' }
             res = requests.get(url, timeout=5, headers=headers)
-            if res.status_code != 200: return None
+            if res.status_code != 200:
+                log.warning("error fetching url "+url+" : "+str(res.status_code))
+                return None
             # don't try and download big things
             content = res.raw.read(100000+1, decode_content=True)
             if len(content) > 100000:
-                log.warning('skipping download of {} due to content-length > 100000')
+                log.warning('skipping download of {} due to content length > 100000')
                 return
             if not 'html' in res.headers['content-type']:
+                log.warning("didn't get html from request, skipping")
                 return
             soup = BeautifulSoup(res.text)
             return soup.title.string
