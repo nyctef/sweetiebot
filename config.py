@@ -13,15 +13,7 @@ port = getenv('SB_PORT', 5222)
 # Optional: turn on some debug features
 debug = getenv('SB_DEBUG', False)
 
-# Optional: API key for pushbullet notifications
-# TODO: remove
-pushbullet_api = getenv('PB_API_KEY', None)
-# Optional: Device ID for pushbullet notifications
-# TODO: remove
-pushbullet_device = getenv('PB_DEVICE_ID', None)
-
 # Optional: Twitter API for putting twitter feeds into chat
-# TODO: remove
 twitter_key = getenv('TWITTER_API_KEY', None)
 twitter_secret = getenv('TWITTER_API_SECRET', None)
 

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "5694c07c65958e986957b62c1cd2a297d5a0fa0ee454ba9cd6ddad85aef63d4d"
+            "sha256": "e12322037d6bc9fa8b493b8564db02310591d8da0efe168f69737e364a120085"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -216,14 +216,6 @@
             ],
             "index": "pypi",
             "version": "==2.8.5"
-        },
-        "pushbullet.py": {
-            "hashes": [
-                "sha256:104163c27565263badad9bfde693262b4c05fc949961d9de03b607229af44122",
-                "sha256:e6d58f6d062d60b15386ab028765b1fd8498ec23c87d03639996ce166bfe9898"
-            ],
-            "index": "pypi",
-            "version": "==0.9.0"
         },
         "pyasn1": {
             "hashes": [
