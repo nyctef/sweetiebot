@@ -19,6 +19,9 @@ from modules import (
     SweetiePings,
     TwitterClient,
     SweetieSeen,
+    SeenStoragePg,
+    SeenStorageRedis,
+    SeenStorageExperiment,
     SweetieTell,
     SweetieDictionary,
     SweetieMoon,
@@ -114,7 +117,11 @@ def build_sweetiebot(config=None):
     # else:
     watchers = []
 
-    seen = SweetieSeen(bot, redis_conn)
+    seen_storage = SeenStorageExperiment(
+        SeenStorageRedis(redis_conn), SeenStoragePg(pg_conn)
+    )
+
+    seen = SweetieSeen(bot, seen_storage)
 
     sweet = Sweetiebot(
         config.nickname, bot, lookup, admin, chat, roulette, de, pings, watchers, moon
