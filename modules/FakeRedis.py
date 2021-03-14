@@ -1,10 +1,13 @@
 import random
 from fnmatch import fnmatch
 
+
 def enc(string):
     # redis actually stores bytes, not strings
-    if isinstance(string, bytes): return string
-    return string.encode('utf-8')
+    if isinstance(string, bytes):
+        return string
+    return string.encode("utf-8")
+
 
 class FakeRedis(object):
     def __init__(self):
@@ -17,11 +20,14 @@ class FakeRedis(object):
 
     def get(self, key):
         key = enc(key)
-        if not key in self.data: return None
+        if not key in self.data:
+            return None
         return self.data[key]
 
     def keys(self, pattern):
-        return [x for x in list(self.data.keys()) if fnmatch(x.decode('utf-8'), pattern)]
+        return [
+            x for x in list(self.data.keys()) if fnmatch(x.decode("utf-8"), pattern)
+        ]
 
     def srandmember(self, key):
         key = enc(key)
@@ -68,7 +74,7 @@ class FakeRedis(object):
         if not field in hash:
             hash[field] = 0
         hash[field] += increment
-        #print(key, '=', field, hash[field])
+        # print(key, '=', field, hash[field])
 
     def hset(self, key, field, value):
         key = enc(key)
@@ -98,4 +104,3 @@ class FakeRedis(object):
     def delete(self, key):
         key = enc(key)
         del self.data[key]
-

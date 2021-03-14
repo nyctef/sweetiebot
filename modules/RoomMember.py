@@ -3,7 +3,8 @@ from sleekxmpp.jid import JID
 
 log = logging.getLogger(__name__)
 
-class RoomMemberList():
+
+class RoomMemberList:
     def __init__(self, members):
         self.members = members
 
@@ -19,7 +20,8 @@ class RoomMemberList():
     def get_nick_list(self):
         return [x.nickname for x in self.members]
 
-class RoomMember():
+
+class RoomMember:
     def __init__(self, nickname, jid, affiliation, role):
         self.nickname = nickname
         self.jid = jid
@@ -27,9 +29,11 @@ class RoomMember():
         self.role = role
 
     def can_do_admin_things(self):
-        if self.role == "moderator": return True
-        return self.affiliation in ('admin', 'owner')
+        if self.role == "moderator":
+            return True
+        return self.affiliation in ("admin", "owner")
 
     def __repr__(self):
-        return "RoomMember({},{},{},{})".format(self.nickname, self.jid, self.affiliation, self.role)
-
+        return "RoomMember({},{},{},{})".format(
+            self.nickname, self.jid, self.affiliation, self.role
+        )
