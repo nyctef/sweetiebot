@@ -34,7 +34,7 @@ from modules import (
 import time
 import os
 import traceback
-from opencensus.ext.azure.log_exporter import AzureLogHandler
+
 
 log = logging.getLogger(__name__)
 
@@ -156,10 +156,15 @@ def setup_logging(config):
     streamhandler.setFormatter(formatter)
     root_logger.addHandler(streamhandler)
 
-    if config.app_insights_key is not None:
-        azure_handler = AzureLogHandler(instrumentation_key=config.app_insights_key)
-        azure_handler.setLevel(logging.DEBUG)
-        root_logger.addHandler(azure_handler)
+    try:
+        if config.app_insights_key is not None:
+            from opencensus.ext.azure.log_exporter import AzureLogHandler
+
+            azure_handler = AzureLogHandler(instrumentation_key=config.app_insights_key)
+            azure_handler.setLevel(logging.DEBUG)
+            root_logger.addHandler(azure_handler)
+    except:
+        logging.exception("Failed to set up azure logging")
 
     logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(
         logging.WARNING
