@@ -8,7 +8,7 @@ ENV PIP_NO_CACHE_DIR=1
 
 # only copy pipfile first so that we can cache the pip install step
 COPY Pipfile Pipfile.lock /usr/src/app/
-RUN pip install pipenv && pipenv install --three --deploy --ignore-pipfile
+RUN pip install pipenv && pipenv install --three --deploy --system --ignore-pipfile
 
 # now copy everything else
 COPY . /usr/src/app/
@@ -17,4 +17,4 @@ RUN echo -n ' | Image built at' `date` >> version.txt
 
 VOLUME /usr/src/app/data
 
-ENTRYPOINT ["/bin/bash", "/usr/src/app/run-bot-and-watch.sh"]
+ENTRYPOINT ["python", "/usr/src/app/sweetiebot.py"]

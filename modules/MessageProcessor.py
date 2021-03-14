@@ -4,8 +4,8 @@ from inspect import getdoc
 
 log = logging.getLogger(__name__)
 
-class MessageProcessor():
 
+class MessageProcessor:
     def __init__(self, unknown_command_callback):
         self.commands = {}
         self.unknown_command_callback = unknown_command_callback
@@ -17,10 +17,10 @@ class MessageProcessor():
     def process_message(self, message):
         if message.command is not None:
             command = message.command
-            if command == 'help':
+            if command == "help":
                 return self.help(message)
             if command in self.commands:
-                log.debug('running command '+command)
+                log.debug("running command " + command)
                 return self.commands[command](message)
 
         if self.unknown_command_callback is not None:
@@ -33,22 +33,18 @@ class MessageProcessor():
 
         commands = self.commands.values()
         result = []
-        prefix = \
-'''
-'''
-        postfix = \
-'''
+        prefix = """
+"""
+        postfix = """
 ---
 see source code or report issues at https://github.com/nyctef/sweetiebot
-'''
+"""
         for command in commands:
-            if not hasattr(command, '_bot_command'):
+            if not hasattr(command, "_bot_command"):
                 continue
-            if getattr(command, '_bot_command_hidden', False):
+            if getattr(command, "_bot_command_hidden", False):
                 continue
             command_name = command._bot_command_name
-            docs = (getdoc(command) or '\n').splitlines()[0]
-            result.append(command_name + ': ' + docs)
-        return prefix+'\n'.join(sorted(result))+postfix
-
-
+            docs = (getdoc(command) or "\n").splitlines()[0]
+            result.append(command_name + ": " + docs)
+        return prefix + "\n".join(sorted(result)) + postfix

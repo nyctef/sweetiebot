@@ -4,6 +4,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
+
 class SweetieRoulette(object):
     def __init__(self, bot, admin):
         bot.load_commands_from(self)
@@ -12,23 +13,23 @@ class SweetieRoulette(object):
 
     def _spin(self):
         self.current_chamber = random.randint(0, 5)
-        log.debug("chamber on "+str(self.current_chamber))
+        log.debug("chamber on " + str(self.current_chamber))
 
     @botcmd
     @logerrors
     def spin(self, message):
         """Spin the barrel (see also: roulette)"""
         if message.is_pm:
-            return ':lyraahem: no tampering with the gun under the table now'
+            return ":lyraahem: no tampering with the gun under the table now"
         self._spin()
-        return '*WHIIIIiiiiirr...*'
+        return "*WHIIIIiiiiirr...*"
 
     @botcmd
     @logerrors
     def roulette(self, message):
         """Six bullets, one chamber (see also: spin)"""
         if message.is_pm:
-            return ':lyraahem: suicide should be a social activity'
+            return ":lyraahem: suicide should be a social activity"
         speaker = message.sender_nick
 
         self.current_chamber += 1
@@ -36,9 +37,7 @@ class SweetieRoulette(object):
         if self.current_chamber == 0:
             self._spin()
             if speaker:
-                return self.admin.kick(speaker, '*BANG*')
-            return 'BANG! You\'re dead.'
+                return self.admin.kick(speaker, "*BANG*")
+            return "BANG! You're dead."
         else:
-            return '*click*'
-
-
+            return "*click*"

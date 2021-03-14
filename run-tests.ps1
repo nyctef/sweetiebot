@@ -1,2 +1,2 @@
-python -m unittest discover --verbose -s tests/ -p '*.py'
+pipenv run python -m unittest discover --verbose -s tests/ -p '*.py'
 
