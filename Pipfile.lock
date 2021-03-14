@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "2ae088e2bebbd3b97fe9e41ca9136342fe73fa8067bde2e9aacb06ce69a37d5a"
+            "sha256": "7f234ab3f3fa383f65a0e2b0604e3c161d0205742c24e925dc784d14623dda6f"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -92,6 +92,14 @@
                 "sha256:684a38a6f903c1d71d6d5fac066b58d7768af4de2b832e426ec79c30daa94a16"
             ],
             "version": "==2.7"
+        },
+        "laboratory": {
+            "hashes": [
+                "sha256:8b92a73561c56896e926cbdca4a131d6a98f7f5b425f40fdfd4b3fec57646a63",
+                "sha256:9501afa85a4252e2269ae7ed08aeded8d80ed0de5691b06297caab1f30b41277"
+            ],
+            "index": "pypi",
+            "version": "==1.0.2"
         },
         "opencensus": {
             "hashes": [
