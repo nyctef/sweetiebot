@@ -3,14 +3,14 @@ import logging
 
 log = logging.getLogger(__name__)
 
-class ResponsesFile(object):
 
+class ResponsesFile(object):
     def __init__(self, filename):
         self.filename = filename
         self.responses = None
 
     def _open(self, mode):
-        return open(self.filename, mode, encoding="utf-8", newline='')
+        return open(self.filename, mode, encoding="utf-8", newline="")
 
     def _read(self):
         return self._open("r")
@@ -32,28 +32,14 @@ class ResponsesFile(object):
             out_f.writelines(sorted(lines_seen))
         return
 
-    def add_to_file(self, args):
+    def add_line(self, args):
         with self._append() as f:
-            args = args.replace('\n', ' ') + '\n'
-            log.info('adding %r to %s', args, self.filename)
+            args = args.replace("\n", " ") + "\n"
+            log.info("adding %r to %s", args, self.filename)
             f.write(args)
         self._remove_dup()
 
-    def get_next(self):
-        if not self.responses:
-            log.debug("reading sass file..")
-            with self._read() as f:
-                self.responses = [line.strip() for line in f.readlines()]
-                log.debug(".. read {} responses".format(len(self.responses)))
-                random.shuffle(self.responses)
-            self.sass_index = -1
-        self.sass_index += 1
-
-        if self.sass_index >= len(self.responses):
-            log.debug("reshuffling sass")
-            random.shuffle(self.responses)
-            self.sass_index = 0
-
-        response = self.responses[self.sass_index]
-        log.debug("returning response {}: {}".format(self.sass_index, response))
-        return response
+    def read_all(self):
+        log.debug("reading file")
+        with self._read() as f:
+            return [line.strip() for line in f.readlines()]

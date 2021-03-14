@@ -21,4 +21,4 @@ from .SweetieSeen import (
 from .SweetieTell import SweetieTell, TellStorageRedis
 from .SweetieDictionary import SweetieDictionary
 from .SweetieMoon import SweetieMoon
-from .TableList import TableList
+from .TableList import TableList, RandomizedList

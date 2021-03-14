@@ -91,5 +91,6 @@ class ExperimentTests(unittest.TestCase):
         candidateObj = CandidateClass()
         result = make_experiment_object(testObj, candidateObj)
 
+        # no real assertions here, just looking at the logging output when playing around with implementations
         result.api_method_1()
         result.api_method_2(24)

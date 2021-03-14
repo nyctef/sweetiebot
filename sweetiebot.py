@@ -26,6 +26,7 @@ from modules import (
     SweetieDictionary,
     SweetieMoon,
     TableList,
+    RandomizedList,
     TellStorageRedis,
 )
 import time
@@ -100,10 +101,11 @@ def build_sweetiebot(config=None):
     bot = MUCJabberBot(jid, password, room, nick, address)
     lookup = SweetieLookup(bot)
     admin = SweetieAdmin(bot, config.chatroom)
-    de = SweetieDe(bot, admin, TableList(pg_conn, "deowl_fails"))
-    actions = TableList(pg_conn, "actions")
-    sass = TableList(pg_conn, "sass")
-    cadmusic = TableList(pg_conn, "cadmusic")
+    deowl_fails = RandomizedList(TableList(pg_conn, "deowl_fails"))
+    de = SweetieDe(bot, admin, deowl_fails)
+    actions = RandomizedList(TableList(pg_conn, "actions"))
+    sass = RandomizedList(TableList(pg_conn, "sass"))
+    cadmusic = RandomizedList(TableList(pg_conn, "cadmusic"))
     tell_storage = TellStorageRedis(redis_conn)
     tell = SweetieTell(bot, tell_storage)
     dictionary = SweetieDictionary(bot)
