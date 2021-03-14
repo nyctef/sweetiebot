@@ -6,11 +6,25 @@ import sys
 import logging
 import psycopg2
 from utils import randomstr
-from modules import MUCJabberBot, ResponsesFile, SweetieAdmin, \
-    SweetieChat, SweetieLookup, FakeRedis, SweetieRoulette, \
-    RestartException, SweetieDe, SweetiePings, \
-    TwitterClient, SweetieSeen, AtomWatcher, SweetieTell, \
-    SweetieDictionary, SweetieMoon, TableList, TellStorageRedis
+from modules import (
+    MUCJabberBot,
+    ResponsesFile,
+    SweetieAdmin,
+    SweetieChat,
+    SweetieLookup,
+    FakeRedis,
+    SweetieRoulette,
+    RestartException,
+    SweetieDe,
+    SweetiePings,
+    TwitterClient,
+    SweetieSeen,
+    SweetieTell,
+    SweetieDictionary,
+    SweetieMoon,
+    TableList,
+    TellStorageRedis,
+)
 import time
 import os
 import traceback
@@ -80,12 +94,12 @@ def build_sweetiebot(config=None):
     roulette = SweetieRoulette(bot, admin)
     pings = SweetiePings(bot, redis_conn)
     moon = SweetieMoon(bot)
-    if config.twitter_key is not None:
-        twitter = TwitterClient.get_client(config.twitter_key, config.twitter_secret)
-        watchers = list(map(twitter.get_timeline_watcher, ['EVE_Status']))
-    else:
-        watchers = []
-    watchers.append(AtomWatcher.get_watcher('http://eveion.blogspot.com/feeds/posts/default'))
+    # if config.twitter_key is not None:
+    #     twitter = TwitterClient.get_client(config.twitter_key, config.twitter_secret)
+    #     watchers = list(map(twitter.get_timeline_watcher, ['EVE_Status']))
+    # else:
+    watchers = []
+
     seen = SweetieSeen(bot, redis_conn)
 
     sweet = Sweetiebot(config.nickname, bot, lookup, admin, chat, roulette,
