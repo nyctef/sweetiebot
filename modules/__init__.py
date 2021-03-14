@@ -1,4 +1,3 @@
-from .ResponsesFile import ResponsesFile
 from .SweetieAdmin import SweetieAdmin
 from .SweetieChat import SweetieChat
 from .SweetieLookup import SweetieLookup

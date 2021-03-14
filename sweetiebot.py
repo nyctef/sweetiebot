@@ -8,7 +8,6 @@ import psycopg2
 from utils import randomstr
 from modules import (
     MUCJabberBot,
-    ResponsesFile,
     SweetieAdmin,
     SweetieChat,
     SweetieLookup,
