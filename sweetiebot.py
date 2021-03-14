@@ -17,17 +17,20 @@ from modules import (
     RestartException,
     SweetieDe,
     SweetiePings,
+    PingStorageRedis,
+    PingStoragePg,
     TwitterClient,
     SweetieSeen,
     SeenStoragePg,
     SeenStorageRedis,
-    SeenStorageExperiment,
     SweetieTell,
+    TellStorageRedis,
+    TellStoragePg,
     SweetieDictionary,
     SweetieMoon,
     TableList,
     RandomizedList,
-    TellStorageRedis,
+    make_experiment_object,
 )
 import time
 import os
@@ -110,14 +113,19 @@ def build_sweetiebot(config=None):
     sass = RandomizedList(TableList(pg_conn, "sass"))
     cadmusic = RandomizedList(TableList(pg_conn, "cadmusic"))
 
-    tell_storage = TellStorageRedis(redis_conn)
+    tell_storage = make_experiment_object(
+        TellStorageRedis(redis_conn), TellStoragePg(pg_conn)
+    )
     tell = SweetieTell(bot, tell_storage)
 
     dictionary = SweetieDictionary(bot)
     chat = SweetieChat(bot, actions, sass, config.chatroom, cadmusic, tell, dictionary)
 
     roulette = SweetieRoulette(bot, admin)
-    pings = SweetiePings(bot, redis_conn)
+    ping_storage = make_experiment_object(
+        PingStorageRedis(redis_conn), PingStoragePg(pg_conn)
+    )
+    pings = SweetiePings(bot, ping_storage)
     moon = SweetieMoon(bot)
     # if config.twitter_key is not None:
     #     twitter = TwitterClient.get_client(config.twitter_key, config.twitter_secret)
@@ -125,7 +133,7 @@ def build_sweetiebot(config=None):
     # else:
     watchers = []
 
-    seen_storage = SeenStorageExperiment(
+    seen_storage = make_experiment_object(
         SeenStorageRedis(redis_conn), SeenStoragePg(pg_conn)
     )
     seen = SweetieSeen(bot, seen_storage)

@@ -98,24 +98,6 @@ class SeenStoragePg:
         return SeenResult(seen, spoke)
 
 
-class SeenStorageExperiment:
-    def __init__(self, control, candidate):
-        self.control = control
-        self.candidate = candidate
-
-        self.set_last_spoke_time = LoggingExperiment.decorator(
-            candidate=self.candidate.set_last_spoke_time
-        )(self.control.set_last_spoke_time)
-
-        self.set_last_seen_time = LoggingExperiment.decorator(
-            candidate=self.candidate.set_last_seen_time
-        )(self.control.set_last_seen_time)
-
-        self.get_seen = LoggingExperiment.decorator(candidate=self.candidate.get_seen)(
-            self.control.get_seen
-        )
-
-
 class SweetieSeen:
     def __init__(self, bot, storage):
         self.bot = bot
