@@ -99,17 +99,23 @@ def build_sweetiebot(config=None):
         address = ()
 
     bot = MUCJabberBot(jid, password, room, nick, address)
+
     lookup = SweetieLookup(bot)
+
     admin = SweetieAdmin(bot, config.chatroom)
     deowl_fails = RandomizedList(TableList(pg_conn, "deowl_fails"))
     de = SweetieDe(bot, admin, deowl_fails)
+
     actions = RandomizedList(TableList(pg_conn, "actions"))
     sass = RandomizedList(TableList(pg_conn, "sass"))
     cadmusic = RandomizedList(TableList(pg_conn, "cadmusic"))
+
     tell_storage = TellStorageRedis(redis_conn)
     tell = SweetieTell(bot, tell_storage)
+
     dictionary = SweetieDictionary(bot)
     chat = SweetieChat(bot, actions, sass, config.chatroom, cadmusic, tell, dictionary)
+
     roulette = SweetieRoulette(bot, admin)
     pings = SweetiePings(bot, redis_conn)
     moon = SweetieMoon(bot)
@@ -122,7 +128,6 @@ def build_sweetiebot(config=None):
     seen_storage = SeenStorageExperiment(
         SeenStorageRedis(redis_conn), SeenStoragePg(pg_conn)
     )
-
     seen = SweetieSeen(bot, seen_storage)
 
     sweet = Sweetiebot(
