@@ -16,7 +16,6 @@ class Message(object):
         sender_jid,
         user_jid,
         message_text,
-        message_html,
         is_pm,
         room_member_list,
     ):
@@ -25,7 +24,6 @@ class Message(object):
         self.sender_jid = JID(sender_jid)
         self.user_jid = JID(user_jid)
         self.message_text = message_text
-        self.message_html = message_html
         self.is_pm = is_pm
         self.room_member_list = room_member_list
 
@@ -40,7 +38,6 @@ class Message(object):
         self: {}
         sender: {} jid {} user {}
         message: {}
-        message_html: {}
         parsed: {}|{}
         is_ping: {}""".format(
                 self.nickname,
@@ -48,7 +45,6 @@ class Message(object):
                 self.sender_jid,
                 self.user_jid,
                 self.message_text,
-                self.message_html,
                 self.command,
                 self.args,
                 self.is_ping,

@@ -8,6 +8,7 @@ from utils import logerrors
 from slixmpp import ClientXMPP
 from slixmpp.jid import JID
 import os
+from pprint import pformat
 
 log = logging.getLogger(__name__)
 
@@ -30,6 +31,7 @@ class MUCJabberBot:
         self._message_callbacks = []
 
         bot = ClientXMPP(jid, password)
+        self._bot = bot
 
         # disable ipv6 for now since we're getting errors using it
         bot.use_ipv6 = False
@@ -52,26 +54,21 @@ class MUCJabberBot:
         self._muc = bot.plugin["xep_0045"]
         bot.register_plugin("xep_0199")
         bot.plugin["xep_0199"].enable_keepalive(5, 10)
+        bot.register_plugin("xep_0071")
 
         self.unknown_command_callback = None
 
         def on_unknown_callback(message):
+            log.debug("MUCJabberBot on_unknown_callback...")
             if self.unknown_command_callback is not None:
+                log.debug("...delegating to attribute")
                 return self.unknown_command_callback(message)
 
         self.message_processor = MessageProcessor(on_unknown_callback)
-
-        log.info("sb connect")
-        if bot.connect(address=address, reattempt=False):
-            log.info("sb process")
-            bot.process()
-        else:
-            log.error("failed to connect at first attempt")
-            self.on_disconnect(None)
-
         self.add_presence_handler(self.rejoin_if_kicked)
 
-        self._bot = bot
+        log.info("sb connect")
+        bot.connect(address=address)
 
     def discard_invalid_ssl_cert(self, event, cert, direct):
         """ hack: we don't have a valid cert for local testing, so ignore for now """
@@ -85,7 +82,7 @@ class MUCJabberBot:
         self.join_room()
 
     def join_room(self):
-        self._muc.joinMUC(self.room, self.nick)
+        self._muc.join_muc(self.room, self.nick)
 
     def on_room_joined(self, room_join_message):
         """Note that this event might actually be called multiple
@@ -102,7 +99,6 @@ class MUCJabberBot:
 
     @logerrors
     def on_message(self, message_stanza):
-
         if message_stanza["type"] == "error":
             print("\n\nerror!\n\n")
             log.error(message_stanza)
@@ -150,7 +146,6 @@ class MUCJabberBot:
         room_member_list = self._get_room_member_list()
 
         is_pm = message_stanza["type"] == "chat"
-        message_html = str(message_stanza["html"]["body"])
         message = message_stanza["body"]
         parsed_message = Message(
             self.nick,
@@ -158,12 +153,12 @@ class MUCJabberBot:
             jid,
             user_jid,
             message,
-            message_html,
             is_pm,
             room_member_list,
         )
 
         reply = self.message_processor.process_message(parsed_message)
+        log.debug("reply from processor: " + str(reply))
         if reply:
             if is_pm:
                 self.send_chat_message(reply, jid)
@@ -218,10 +213,10 @@ class MUCJabberBot:
         )
 
     def get_jid_from_nick(self, nick):
-        jid = self._muc.getJidProperty(self.room, nick, "jid")
+        jid = self._muc.get_jid_property(self.room, nick, "jid")
         if jid is None:
             return None
-        return jid.bare
+        return JID(jid).bare
 
     def get_nick_from_jid(self, jid):
         # slixmpp has a method for this but it uses full jids
@@ -288,3 +283,6 @@ class MUCJabberBot:
         )
         self.join_room()
         self.add_recurring_task(self.rejoin, 5, repeat=False)
+
+    def process(self):
+        self._bot.process()

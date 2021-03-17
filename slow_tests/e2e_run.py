@@ -45,18 +45,16 @@ class FakeXMPPUser:
         self.messages = queue.Queue()
         self.has_joined_chat = Event()
         print("fake user connecting ..")
-        if self.bot.connect(address=("localhost", 5222)):
-            print(".. connected")
-            self.bot.process()
-        else:
-            raise "unable to connect"
+        self.bot.connect(address=("localhost", 5222))
+        print(".. connected")
+        self.bot.process()
 
     def on_start(self, event):
         print("fake user on_start")
         self.bot.get_roster()
         self.bot.send_presence()
         print("fake user joining {} as {}".format(self.chatroom, self.nick))
-        self.muc.joinMUC(self.chatroom, self.nick, wait=True)
+        self.muc.join_muc(self.chatroom, self.nick, wait=True)
         self.has_joined_chat.set()
 
     def send_message(self, message, html=None):

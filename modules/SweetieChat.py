@@ -210,6 +210,7 @@ class SweetieChat(object):
     @logerrors
     def random_chat(self, mess):
         """Does things"""
+        log.debug("SweetieChat random chat")
         message = mess.message_text
         is_ping = mess.is_ping
 
