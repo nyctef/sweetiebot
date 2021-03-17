@@ -90,6 +90,7 @@ class MUCJabberBot:
         needs to be idempotent"""
         log.debug("on_room_joined with {}".format(room_join_message))
         self._rejoining = False
+        self._bot.cancel_schedule("custom task: rejoin")
 
     def on_disconnect(self, event):
         log.error("disconnected event raised, quitting so we can restart from scratch")
@@ -247,11 +248,6 @@ class MUCJabberBot:
         iq.set_payload(xml)
         return iq
 
-    def add_recurring_task(self, callback, secs, repeat=True):
-        task_name = "custom task " + callback.__name__
-        self._bot.scheduler.remove(task_name)
-        self._bot.scheduler.add(task_name, secs, callback, repeat=repeat)
-
     def add_presence_handler(self, callback):
         self._presence_callbacks.append(callback)
 
@@ -269,20 +265,17 @@ class MUCJabberBot:
             return
         user = presence.user_jid.bare
         if user == self.jid.bare:
-            log.debug("looks like we were kicked, rejoining...")
+            log.warning("looks like we were kicked, rejoining...")
             self._rejoining = True
-            self.rejoin()
+            self._bot.schedule("custom task: rejoin", 5, self.rejoin, repeat=True)
         else:
             log.debug("{} was kicked".format(user))
 
     def rejoin(self):
+        log.warning(f"attempting a room rejoin... (self._rejoining={self._rejoining})")
         if not self._rejoining:
             return
-        log.debug(
-            "attempting a room rejoin... (self._rejoining={})".format(self._rejoining)
-        )
         self.join_room()
-        self.add_recurring_task(self.rejoin, 5, repeat=False)
 
     def process(self):
         self._bot.process()

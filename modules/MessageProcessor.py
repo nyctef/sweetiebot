@@ -15,7 +15,7 @@ class MessageProcessor:
 
     @logerrors
     def process_message(self, message):
-        log.debug("processing message with command: " + message.command)
+        log.debug("processing message with command: " + str(message.command))
         if message.command is not None:
             command = message.command
             if command == "help":
