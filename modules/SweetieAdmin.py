@@ -1,7 +1,7 @@
 import logging
 from utils import logerrors, randomstr, botcmd
 from datetime import datetime
-from sleekxmpp.exceptions import IqError, IqTimeout
+from slixmpp.exceptions import IqError, IqTimeout
 import xml.etree.ElementTree as ET
 
 log = logging.getLogger(__name__)

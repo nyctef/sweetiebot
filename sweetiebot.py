@@ -162,7 +162,7 @@ def setup_logging(config):
     logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(
         logging.WARNING
     )
-    logging.getLogger("sleekxmpp.plugins.xep_0199.ping").setLevel(logging.WARNING)
+    logging.getLogger("slixmpp.plugins.xep_0199.ping").setLevel(logging.WARNING)
 
 
 if __name__ == "__main__":

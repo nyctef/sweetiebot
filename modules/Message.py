@@ -1,6 +1,6 @@
 import logging
 import re
-from sleekxmpp import JID
+from slixmpp import JID
 
 log = logging.getLogger(__name__)
 

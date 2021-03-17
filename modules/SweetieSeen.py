@@ -1,5 +1,5 @@
 from utils import botcmd, logerrors
-from sleekxmpp import JID
+from slixmpp import JID
 from datetime import datetime, timezone
 import logging
 from collections import namedtuple
