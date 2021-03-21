@@ -16,10 +16,8 @@ psycopg2-binary = "*"
 slixmpp = "==1.7.0"
 # azure logging
 azure = "==0.8.1"
-# note these lines are disabled for now since they bring in pyasn1, which breaks sleekxmpp:
-# https://github.com/fritzy/SleekXMPP/issues/477#issuecomment-349638055
-# opencensus-ext-azure = "==1.0.4"
-# opencensus-ext-logging = "==0.1.0"
+opencensus-ext-azure = "==1.0.4"
+opencensus-ext-logging = "==0.1.0"
 # misc
 laboratory = "*"
 

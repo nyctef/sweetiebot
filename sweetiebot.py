@@ -159,6 +159,8 @@ def setup_logging(config):
     )
     logging.getLogger("slixmpp.plugins.xep_0199.ping").setLevel(logging.WARNING)
     logging.getLogger("slixmpp.xmlstream.xmlstream").setLevel(logging.WARNING)
+    logging.getLogger("opencensus.ext.azure.common.transport").setLevel(logging.WARNING)
+    logging.getLogger("urllib3.connectionpool").setLevel(logging.WARNING)
 
 
 if __name__ == "__main__":
