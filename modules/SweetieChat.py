@@ -6,6 +6,7 @@ from random import randint
 from utils import logerrors, botcmd
 from pprint import pprint
 from modules.MessageResponse import MessageResponse
+from urllib.parse import urlparse
 
 log = logging.getLogger(__name__)
 
@@ -79,6 +80,8 @@ class SweetieChat(object):
     def get_page_titles(self, message):
         matches = self.urlregex.findall(message)
         matches = [x[0] for x in matches]
+        matches = list(map(self.youtube_filter, matches))
+        matches = list(map(self.twitter_filter, matches))
         matches = list(map(self.imgur_filter, matches))
         matches = list(map(self.deviantart_filter, matches))
         results = list(map(self.get_page_title, matches))
@@ -126,7 +129,14 @@ class SweetieChat(object):
             headers = {"user-agent": "sweetiebot"}
             res = requests.get(url, timeout=5, headers=headers)
             result = json.loads(res.text)
-            return result["title"] + " by " + result["author_name"]
+            if "title" in result and "author_name" in result:
+                return result["title"] + " by " + result["author_name"]
+            elif "html" in result:
+                # because twitter's oembed api isn't as helpful
+                from bs4 import BeautifulSoup
+                return BeautifulSoup(result["html"], "html.parser").get_text(" ")
+            else:
+                raise Exception("Couldn't find appropriate oembed properties in "+url)
         except Exception as e:
             log.warning("error fetching url " + url + " : " + str(e))
 
@@ -148,6 +158,18 @@ class SweetieChat(object):
         result = result.replace("\r", "")
         result = re.sub("\s+", " ", result)
         return result
+
+    def youtube_filter(self, link):
+        parsed = urlparse(link)
+        if "youtube" in parsed.netloc.replace(".", ""):
+            return "https://www.youtube.com/oembed?format=json&url=" + link
+        return link
+
+    def twitter_filter(self, link):
+        parsed = urlparse(link)
+        if "twitter" in parsed.netloc:
+            return "https://publish.twitter.com/oembed?format=json&url=" + link
+        return link
 
     def imgur_filter(self, link):
         imgurregex = re.compile(r"^http(s)?://i.imgur.com/([a-zA-Z0-9]*)\..*$")
@@ -172,7 +194,7 @@ class SweetieChat(object):
 
     def get_youtube_links(self, text):
         youtuberegex = re.compile(
-            r"(?:https?://)?(?:www\.)?(?:youtube|youtu|youtube-nocookie)\.(?:com|be)/(?:watch\?v=|embed/|v/|[^ ]+\?v=)?(?:[^&=%\?]{11})"
+            r"(?:https?://)?(?:www\.)?(?:youtube|youtu)\.(?:com|be)/(?:watch\?v=|embed/|v/|[^ ]+\?v=)?(?:[^&=%\?]{11})"
         )
         links = youtuberegex.findall(text)
         if links:
