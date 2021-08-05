@@ -1,4 +1,4 @@
-from modules import Message, SweetiePings, FakeRedis, Presence
+from modules import Message, SweetiePings, PingStorageRedis, FakeRedis, Presence
 from modules.RoomMember import RoomMember, RoomMemberList
 import unittest
 from unittest.mock import MagicMock, patch
@@ -41,7 +41,7 @@ def create_message_zhuli(input, is_pm=False):
 class PingTests(unittest.TestCase):
     def setUp(self):
         self.bot = MagicMock()
-        self.store = FakeRedis()
+        self.store = PingStorageRedis(FakeRedis())
 
         self.pings = SweetiePings(self.bot, self.store)
 
