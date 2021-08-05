@@ -18,6 +18,7 @@ from modules import (
     SweetiePings,
     PingStorageRedis,
     PingStoragePg,
+    PgWrapper,
     TwitterClient,
     SweetieSeen,
     SeenStoragePg,
@@ -87,7 +88,7 @@ def build_sweetiebot(config=None):
         redis_conn = redis.from_url(config.redis_url)
 
     if config.pg_conn_str:
-        pg_conn = psycopg2.connect(config.pg_conn_str)
+        dbwrapper = PgWrapper(config.pg_conn_str)
     else:
         raise Exception("pg connection string must be set")
 
@@ -105,15 +106,15 @@ def build_sweetiebot(config=None):
     lookup = SweetieLookup(bot)
 
     admin = SweetieAdmin(bot, config.chatroom)
-    deowl_fails = RandomizedList(TableList(pg_conn, "deowl_fails"))
+    deowl_fails = RandomizedList(TableList(dbwrapper, "deowl_fails"))
     de = SweetieDe(bot, admin, deowl_fails)
 
-    actions = RandomizedList(TableList(pg_conn, "actions"))
-    sass = RandomizedList(TableList(pg_conn, "sass"))
-    cadmusic = RandomizedList(TableList(pg_conn, "cadmusic"))
+    actions = RandomizedList(TableList(dbwrapper, "actions"))
+    sass = RandomizedList(TableList(dbwrapper, "sass"))
+    cadmusic = RandomizedList(TableList(dbwrapper, "cadmusic"))
 
     tell_storage = make_experiment_object(
-        TellStorageRedis(redis_conn), TellStoragePg(pg_conn)
+        TellStorageRedis(redis_conn), TellStoragePg(dbwrapper)
     )
     tell = SweetieTell(bot, tell_storage)
 
@@ -122,7 +123,7 @@ def build_sweetiebot(config=None):
 
     roulette = SweetieRoulette(bot, admin)
     ping_storage = make_experiment_object(
-        PingStorageRedis(redis_conn), PingStoragePg(pg_conn)
+        PingStorageRedis(redis_conn), PingStoragePg(dbwrapper)
     )
     pings = SweetiePings(bot, ping_storage)
     moon = SweetieMoon(bot)
@@ -133,7 +134,7 @@ def build_sweetiebot(config=None):
     watchers = []
 
     seen_storage = make_experiment_object(
-        SeenStorageRedis(redis_conn), SeenStoragePg(pg_conn)
+        SeenStorageRedis(redis_conn), SeenStoragePg(dbwrapper)
     )
     seen = SweetieSeen(bot, seen_storage)
 

@@ -17,3 +17,4 @@ from .SweetieDictionary import SweetieDictionary
 from .SweetieMoon import SweetieMoon
 from .TableList import TableList, RandomizedList
 from .Experiments import make_experiment_object
+from .PgWrapper import PgWrapper

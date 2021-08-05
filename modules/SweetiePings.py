@@ -35,48 +35,45 @@ class PingStorageRedis(object):
 
 
 class PingStoragePg(object):
-    def __init__(self, conn):
-        self.cur = conn.cursor()
+    def __init__(self, dbwrapper):
+        self.dbwrapper = dbwrapper
 
     def get_ping_group_members(self, group):
-        self.cur.execute(
+        results = self.dbwrapper.query_all(
             "SELECT member_jid FROM ping_group_memberships WHERE group_name = %s",
             (group,),
         )
-        return [x[0] for x in self.cur.fetchall()]
+        return [x[0] for x in results]
 
     def add_ping_group_member(self, group, member):
-        self.cur.execute(
+        affected_rows = self.dbwrapper.write(
             "INSERT INTO ping_group_memberships (group_name, member_jid) "
             "VALUES (%s, %s) ON CONFLICT DO NOTHING;",
             (group, member),
         )
-        self.cur.connection.commit()
-        return self.cur.rowcount > 0
+        return affected_rows > 0
 
     def remove_ping_group_member(self, group, member):
-        self.cur.execute(
+        affected_rows = self.dbwrapper.write(
             "DELETE FROM ping_group_memberships "
             "WHERE group_name = %s AND member_jid = %s",
             (group, member),
         )
-        self.cur.connection.commit()
-        return self.cur.rowcount > 0
+        return affected_rows > 0
 
     def get_ping_group_list(self):
-        self.cur.execute(
+        return self.dbwrapper.query_all(
             "SELECT group_name, COUNT(member_jid) FROM ping_group_memberships "
             "GROUP BY group_name ORDER BY group_name"
         )
-        return self.cur.fetchall()
 
     def get_ping_groups_for_member(self, member):
-        self.cur.execute(
+        results = self.dbwrapper.query_all(
             "SELECT DISTINCT group_name FROM ping_group_memberships "
             "WHERE member_jid = %s",
             (member,),
         )
-        return [x[0] for x in self.cur.fetchall()]
+        return [x[0] for x in results]
 
 
 class SweetiePings:

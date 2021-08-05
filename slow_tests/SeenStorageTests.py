@@ -4,6 +4,7 @@ from pprint import pprint
 import psycopg2
 from modules.SweetieSeen import SeenStoragePg, SeenStorageRedis
 from modules.FakeRedis import FakeRedis
+from modules import PgWrapper
 from datetime import datetime
 
 pg_conn_str = getenv("SB_PG_DB", None)
@@ -60,12 +61,12 @@ class SeenStoragePgTests(SeenStorageTests, unittest.TestCase):
         cur = conn.cursor()
         cur.execute("CREATE DATABASE seen_storage_tests")
 
-        cls.conn = psycopg2.connect(pg_conn_str, dbname="seen_storage_tests")
-        cls.impl = SeenStoragePg(cls.conn)
+        cls.dbwrapper = PgWrapper(pg_conn_str + " dbname=seen_storage_tests")
+        cls.impl = SeenStoragePg(cls.dbwrapper)
 
     @classmethod
     def tearDownClass(cls):
-        cls.conn.close()
+        cls.dbwrapper._conn.close()
 
         conn = psycopg2.connect(pg_conn_str)
         conn.autocommit = True
@@ -73,13 +74,11 @@ class SeenStoragePgTests(SeenStorageTests, unittest.TestCase):
         cur.execute("DROP DATABASE seen_storage_tests")
 
     def setUp(self):
-        with self.conn.cursor() as cur:
+        self.dbwrapper.write(
             # TODO: should this be able to run the sql in create_basic_tables somehow?
-            cur.execute(
-                "DROP TABLE IF EXISTS seen_records;"
-                "CREATE TABLE seen_records(target TEXT PRIMARY KEY, seen TIMESTAMP NULL, spoke TIMESTAMP NULL);"
-            )
-            self.conn.commit()
+            "DROP TABLE IF EXISTS seen_records;"
+            "CREATE TABLE seen_records(target TEXT PRIMARY KEY, seen TIMESTAMP NULL, spoke TIMESTAMP NULL);"
+        )
 
 
 class SeenStorageRedisTests(SeenStorageTests, unittest.TestCase):

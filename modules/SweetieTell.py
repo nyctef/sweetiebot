@@ -35,47 +35,41 @@ class TellStorageRedis(object):
 
 
 class TellStoragePg(object):
-    def __init__(self, conn):
-        self.cur = conn.cursor()
+    def __init__(self, dbwrapper):
+        self.dbwrapper = dbwrapper
 
     def get_jid_from_nick(self, nick):
-        self.cur.execute(
+        return self.dbwrapper.query_one(
             "SELECT jid from tell_jid_to_nick_mapping WHERE nick = %s", (nick,)
         )
-        result = self.cur.fetchone()
-        return result[0] if result is not None else None
 
     def set_jid_for_nick(self, nick, jid):
-        self.cur.execute(
+        self.dbwrapper.write(
             "INSERT INTO tell_jid_to_nick_mapping (nick, jid) VALUES (%s, %s) "
             "ON CONFLICT (nick) DO UPDATE SET jid = EXCLUDED.jid",
             (nick, str(jid)),
         )
-        self.cur.connection.commit()
 
     def set_or_update_message(self, jid, senderjid, message):
-        self.cur.execute(
+        self.dbwrapper.write(
             "INSERT INTO tell_messages_by_sender (sender_jid, receiver_jid, messages) VALUES (%s, %s, %s) "
             "ON CONFLICT (sender_jid, receiver_jid) DO UPDATE SET "
             "messages = EXCLUDED.messages",
             (str(senderjid), str(jid), [message]),
         )
-        self.cur.connection.commit()
 
     def get_existing_messages_by_sender(self, jid):
-        self.cur.execute(
+        results = self.dbwrapper.query_all(
             "SELECT sender_jid, messages from tell_messages_by_sender "
             "WHERE receiver_jid = %s",
             (str(jid),),
         )
-        results = self.cur.fetchall()
         return {s: "\n".join(m) for (s, m) in results}
 
     def clear_messages_for(self, jid):
-        self.cur.execute(
+        self.dbwrapper.write(
             "DELETE FROM tell_messages_by_sender WHERE receiver_jid = %s", (str(jid),)
         )
-        self.cur.connection.commit()
 
 
 class SweetieTell(object):

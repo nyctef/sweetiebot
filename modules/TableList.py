@@ -5,19 +5,17 @@ log = logging.getLogger(__name__)
 
 
 class TableList(object):
-    def __init__(self, conn, table_name):
-        self.cur = conn.cursor()
+    def __init__(self, dbwrapper, table_name):
+        self.dbwrapper = dbwrapper
         self.table_name = table_name
         self.responses = None
 
     def add_line(self, line):
         sql = f"INSERT INTO {self.table_name}(text) VALUES (%s) ON CONFLICT (text) DO NOTHING"
-        self.cur.execute(sql, (line,))
-        self.cur.connection.commit()
+        self.dbwrapper.write(sql, (line,))
 
     def read_all(self):
-        self.cur.execute(f"SELECT text from {self.table_name}")
-        results = self.cur.fetchall()
+        results = self.dbwrapper.query_all(f"SELECT text from {self.table_name}")
         return [x[0].strip() for x in results]
 
 

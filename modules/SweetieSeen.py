@@ -49,8 +49,8 @@ class SeenStorageRedis:
 
 
 class SeenStoragePg:
-    def __init__(self, conn):
-        self.cur = conn.cursor()
+    def __init__(self, dbwrapper):
+        self.dbwrapper = dbwrapper
 
     def set_last_seen_time(self, target, time):
         if target is None or time is None:
@@ -58,13 +58,12 @@ class SeenStoragePg:
             log.warning("skipping setting seen {} to {}".format(target, time))
             return
 
-        self.cur.execute(
+        self.dbwrapper.write(
             "INSERT INTO seen_records(target, seen) VALUES "
             "(%s, %s) ON CONFLICT (target) DO UPDATE SET "
             "seen = EXCLUDED.seen",
             (target, time),
         )
-        self.cur.connection.commit()
 
     def set_last_spoke_time(self, target, time):
         if target is None or time is None:
@@ -72,23 +71,21 @@ class SeenStoragePg:
             log.warning("skipping setting spoke {} to {}".format(target, time))
             return
 
-        self.cur.execute(
+        self.dbwrapper.write(
             "INSERT INTO seen_records(target, spoke) VALUES "
             "(%s, %s) ON CONFLICT (target) DO UPDATE SET "
             "spoke = EXCLUDED.spoke",
             (target, time),
         )
-        self.cur.connection.commit()
 
     def get_seen(self, target):
-        self.cur.execute(
+        result = self.dbwrapper.query_all(
             "SELECT seen, spoke from seen_records " "WHERE target = %s", (target,)
         )
-        result = self.cur.fetchone()
-        if result is None:
+        if not result:
             return SeenResult(None, None)
 
-        (seen, spoke) = result
+        (seen, spoke) = result[0]
 
         # round to nearest minute
         if seen is not None:

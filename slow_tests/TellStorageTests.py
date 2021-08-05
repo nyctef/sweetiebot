@@ -4,6 +4,7 @@ from pprint import pprint
 import psycopg2
 from modules.SweetieTell import TellStoragePg, TellStorageRedis
 from modules.FakeRedis import FakeRedis
+from modules import PgWrapper
 from sleekxmpp import JID
 
 pg_conn_str = getenv("SB_PG_DB", None)
@@ -76,29 +77,29 @@ class TellStoragePgTests(TellStorageTests, unittest.TestCase):
         conn = psycopg2.connect(pg_conn_str)
         conn.autocommit = True
         cur = conn.cursor()
+        cur.execute("DROP DATABASE IF EXISTS tell_storage_tests")
         cur.execute("CREATE DATABASE tell_storage_tests")
 
-        cls.conn = psycopg2.connect(pg_conn_str, dbname="tell_storage_tests")
-        cls.impl = TellStoragePg(cls.conn)
+        cls.dbwrapper = PgWrapper(pg_conn_str + " dbname=tell_storage_tests")
+        cls.impl = TellStoragePg(cls.dbwrapper)
 
     @classmethod
     def tearDownClass(cls):
-        cls.conn.close()
+        cls.dbwrapper._conn.close()
+
         conn = psycopg2.connect(pg_conn_str)
         conn.autocommit = True
         cur = conn.cursor()
         cur.execute("DROP DATABASE tell_storage_tests")
 
     def setUp(self):
-        with self.conn.cursor() as cur:
+        self.dbwrapper.write(
             # TODO: should this be able to run the sql in create_basic_tables somehow?
-            cur.execute(
-                "DROP TABLE IF EXISTS tell_jid_to_nick_mapping;"
-                "DROP TABLE IF EXISTS tell_messages_by_sender;"
-                "CREATE TABLE tell_jid_to_nick_mapping(nick TEXT PRIMARY KEY, jid TEXT NOT NULL);"
-                "CREATE TABLE tell_messages_by_sender(sender_jid TEXT, receiver_jid TEXT, messages TEXT[] NOT NULL, PRIMARY KEY (sender_jid, receiver_jid));"
-            )
-            self.conn.commit()
+            "DROP TABLE IF EXISTS tell_jid_to_nick_mapping;"
+            "DROP TABLE IF EXISTS tell_messages_by_sender;"
+            "CREATE TABLE tell_jid_to_nick_mapping(nick TEXT PRIMARY KEY, jid TEXT NOT NULL);"
+            "CREATE TABLE tell_messages_by_sender(sender_jid TEXT, receiver_jid TEXT, messages TEXT[] NOT NULL, PRIMARY KEY (sender_jid, receiver_jid));"
+        )
 
 
 class TellStorageRedisTests(TellStorageTests, unittest.TestCase):

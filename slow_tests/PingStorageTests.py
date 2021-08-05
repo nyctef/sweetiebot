@@ -4,6 +4,7 @@ from pprint import pprint
 import psycopg2
 from modules.SweetiePings import PingStoragePg, PingStorageRedis
 from modules.FakeRedis import FakeRedis
+from modules import PgWrapper
 
 pg_conn_str = getenv("SB_PG_DB", None)
 if not pg_conn_str:
@@ -68,20 +69,21 @@ class PingStorageTests(object):
         self.assertListEqual(["人間", "獣人"], result)
 
 
-class PingStoragePgTests(TellStorageTests, unittest.TestCase):
+class PingStoragePgTests(PingStorageTests, unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         conn = psycopg2.connect(pg_conn_str)
         conn.autocommit = True
         cur = conn.cursor()
+        cur.execute("DROP DATABASE IF EXISTS ping_storage_tests")
         cur.execute("CREATE DATABASE ping_storage_tests")
         
-        cls.conn = psycopg2.connect(pg_conn_str, dbname="ping_storage_tests")
-        cls.impl = PingStoragePg(cls.conn)
+        cls.dbwrapper = PgWrapper(pg_conn_str + " dbname=ping_storage_tests")
+        cls.impl = PingStoragePg(cls.dbwrapper)
 
     @classmethod
     def tearDownClass(cls):
-        cls.conn.close()
+        cls.dbwrapper._conn.close()
 
         conn = psycopg2.connect(pg_conn_str)
         conn.autocommit = True
@@ -89,19 +91,17 @@ class PingStoragePgTests(TellStorageTests, unittest.TestCase):
         cur.execute("DROP DATABASE ping_storage_tests")
 
     def setUp(self):
-        with self.conn.cursor() as cur:
+        self.dbwrapper.write(
             # TODO: should this be able to run the sql in create_basic_tables somehow?
-            cur.execute(
-                "DROP TABLE IF EXISTS ping_group_memberships;"
-                "CREATE TABLE ping_group_memberships("
-                "    member_jid TEXT, "
-                "    group_name TEXT, "
-                "    PRIMARY KEY (member_jid, group_name) "
-                ");"
-            )
-            self.conn.commit()
+            "DROP TABLE IF EXISTS ping_group_memberships;"
+            "CREATE TABLE ping_group_memberships("
+            "    member_jid TEXT, "
+            "    group_name TEXT, "
+            "    PRIMARY KEY (member_jid, group_name) "
+            ");"
+        )
 
 
-class PingStorageRedisTests(TellStorageTests, unittest.TestCase):
+class PingStorageRedisTests(PingStorageTests, unittest.TestCase):
     def setUp(self):
         self.impl = PingStorageRedis(FakeRedis())
