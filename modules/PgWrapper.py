@@ -13,15 +13,15 @@ class PgWrapper(object):
     
     def query_one(self, query, vars=None):
         """returns a single value or None"""
-        return self.__retry_on_connection_fail(lambda: self.__query_one_inner(query, vars))
+        return self.__retry_on_fail(lambda: self.__query_one_inner(query, vars))
     
     def query_all(self, query, vars=None):
         """returns an array of values, possibly empty"""
-        return self.__retry_on_connection_fail(lambda: self.__query_all_inner(query, vars))
+        return self.__retry_on_fail(lambda: self.__query_all_inner(query, vars))
     
     def write(self, query, vars=None):
         """Executes query, then commits the transaction. Returns the count of affected rows"""
-        return self.__retry_on_connection_fail(lambda: self.__write_inner(query, vars))
+        return self.__retry_on_fail(lambda: self.__write_inner(query, vars))
         
     def __query_one_inner(self, query, vars=None):
         with self._conn.cursor() as cur:
@@ -40,8 +40,14 @@ class PgWrapper(object):
             cur.connection.commit()
             return cur.rowcount
     
-    def __retry_on_connection_fail(self, action):
+    def __retry_on_fail(self, action):
         try:
+            return action()
+        except psycopg2.InFailedSqlTransaction as ifst:
+            # if a previous action has failed then we need to roll back
+            log.error("In failed transaction, rolling back")
+            self._conn.rollback()
+            # if this action fails then we'll raise the failure, and the next action will have to roll back
             return action()
         except psycopg2.InterfaceError as ie:
             log.warning("Connection to pg failed: attempting to reconnect")
