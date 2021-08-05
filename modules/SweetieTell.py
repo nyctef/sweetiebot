@@ -1,9 +1,5 @@
-from utils import botcmd, logerrors
-from sleekxmpp import JID
-from datetime import datetime
+from utils import botcmd
 import logging
-import re
-from pprint import pprint
 
 log = logging.getLogger(__name__)
 

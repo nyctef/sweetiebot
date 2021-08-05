@@ -7,8 +7,6 @@ import logging
 from utils import logerrors
 from sleekxmpp import ClientXMPP
 from sleekxmpp.jid import JID
-import html
-from time import sleep
 import os
 
 log = logging.getLogger(__name__)
@@ -200,8 +198,6 @@ class MUCJabberBot:
             )
         )
 
-        nick = presence_stanza["muc"]["nick"]
-
         presence = Presence(muc_jid, user, ptype, status_text)
         for callback in self._presence_callbacks:
             callback(presence)
@@ -285,7 +281,7 @@ class MUCJabberBot:
             log.debug("{} was kicked".format(user))
 
     def rejoin(self):
-        if self._rejoining == False:
+        if not self._rejoining:
             return
         log.debug(
             "attempting a room rejoin... (self._rejoining={})".format(self._rejoining)

@@ -1,6 +1,5 @@
 import logging
 from utils import logerrors, randomstr, botcmd
-import re
 from datetime import datetime
 from sleekxmpp.exceptions import IqError, IqTimeout
 import xml.etree.ElementTree as ET
@@ -109,7 +108,7 @@ class SweetieAdmin(object):
             if item.get("jid") is not None:
                 try:
                     reason = str(item[0].text)
-                except:
+                except Exception:
                     reason = "[reason unavailable]"
                 res += "\n" + item.get("jid") + ": " + reason
         if not res:

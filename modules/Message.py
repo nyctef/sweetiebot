@@ -81,7 +81,7 @@ class Message(object):
     def _fix_ping(self, message):
         message = message.strip()
         if message.lower().startswith(self.nickname.lower()):
-            message = message[len(self.nickname) :]
+            message = message[len(self.nickname):]
         message = message.strip()
         if message.startswith(":") or message.startswith(","):
             message = message[1:]
@@ -96,9 +96,9 @@ class Message(object):
         for known_nick in known_nicks:
             # re.match only matches the start of the string
             match = (
-                re.match("\s*'" + known_nick + "'(.*)", args, re_options)
-                or re.match('\s*"' + known_nick + '"(.*)', args, re_options)
-                or re.match("\s*" + known_nick + "(.*)", args, re_options)
+                re.match(r"\s*'" + known_nick + "'(.*)", args, re_options)
+                or re.match(r'\s*"' + known_nick + '"(.*)', args, re_options)
+                or re.match(r"\s*" + known_nick + "(.*)", args, re_options)
             )
             if match:
                 nick = known_nick
@@ -108,9 +108,9 @@ class Message(object):
         nick = None
         reason = None
         match = (
-            re.match("\s*'([^']*)'(.*)", args, re_options)
-            or re.match('\s*"([^"]*)"(.*)', args, re_options)
-            or re.match("\s*(\S*)(.*)", args, re_options)
+            re.match(r"\s*'([^']*)'(.*)", args, re_options)
+            or re.match(r'\s*"([^"]*)"(.*)', args, re_options)
+            or re.match(r"\s*(\S*)(.*)", args, re_options)
         )
         if match:
             nick = match.group(1)
@@ -119,4 +119,4 @@ class Message(object):
 
     def sender_can_do_admin_things(self):
         member = self.room_member_list.get_member_from_nickname(self.sender_nick)
-        return member != None and member.can_do_admin_things()
+        return member is not None and member.can_do_admin_things()

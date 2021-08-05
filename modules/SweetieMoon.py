@@ -1,7 +1,5 @@
 import logging
-import json
-import requests
-from utils import logerrors, botcmd
+from utils import botcmd
 from datetime import datetime
 from astral import Astral
 

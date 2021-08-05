@@ -1,14 +1,10 @@
 from datetime import datetime
 import pytz
-import urllib.request, urllib.parse, urllib.error
 import requests
-from requests.exceptions import Timeout
 import logging
-import difflib
 import json
 import random
 import re
-from xml.etree import ElementTree as ET
 from utils import logerrors, botcmd
 from random import randint
 from modules.MessageResponse import MessageResponse
@@ -66,8 +62,8 @@ class SweetieLookup(object):
         return self.ross()
 
     class Bunch:
-        __init__ = lambda self, **kw: setattr(self, "__dict__", kw)
-        __getattr__ = lambda self, name: None
+        def __init__(self, **kw): setattr(self, "__dict__", kw)
+        def __getattr__(self, name): return None
 
     def dice_error(self, message, *args):
         return SweetieLookup.Bunch(error=message.format(*args))
@@ -88,7 +84,7 @@ class SweetieLookup(object):
         try:
             # assume we only want one die if dice count is missing
             dice = 1 if dice_count == "" else int(dice_count)
-        except:
+        except Exception:
             return self.dice_error(
                 "Sorry, don't know how to roll '{}' dice", dice_count
             )
@@ -142,7 +138,7 @@ class SweetieLookup(object):
                 show_sum=show_sum,
                 explode=explode,
             )
-        except:
+        except Exception:
             return self.dice_error("Sorry, don't know how to roll '{}'", dice_type)
         return SweetieLookup.Bunch(dice=dice, sides=sides)
 
@@ -155,7 +151,7 @@ class SweetieLookup(object):
                 return dice_spec.error
             dice = dice_spec.dice
             sides = dice_spec.sides
-        except Exception as e:
+        except Exception:
             log.exception("bad dice")
             return "Error parsing input"
         if dice > 25:
@@ -220,8 +216,8 @@ class SweetieLookup(object):
     def explode_dice(self, rolls, sides):
         sides = int(sides)
         rolls = list(map(SweetieLookup.ExplodingDice, rolls))
-        should_explode = lambda r: r.last_roll() == sides
-        add_roll = lambda r, n: r.add_roll(n)
+        def should_explode(r): return r.last_roll() == sides
+        def add_roll(r, n): return r.add_roll(n)
         unexploded_rolls = list(rolls)
         while any(unexploded_rolls):
             unexploded_rolls = list(filter(should_explode, unexploded_rolls))
@@ -233,7 +229,7 @@ class SweetieLookup(object):
     def get_rolls(self, dice=1, sides=6):
         try:
             return [randint(1, sides) for i in range(dice)]
-        except:
+        except Exception:
             return []
 
     @botcmd
@@ -296,7 +292,7 @@ class SweetieLookup(object):
         log.info("choosing one of {} comments".format(len(link_title_data)))
         link = random.choice(link_data)["data"]["url"]
         text = random.choice(link_title_data)["data"]["body"]
-        text = re.split("\.|!|\?", text)[0]
+        text = re.split(r"\.|!|\?", text)[0]
         html = '<a href="{}">{}</a>'.format(link, text)
         plain = "{} [ {} ]".format(text, link)
         return MessageResponse(plain, None, html=html)

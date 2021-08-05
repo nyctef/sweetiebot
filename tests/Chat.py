@@ -1,8 +1,7 @@
 from modules import Message, SweetieChat
 from modules.RoomMember import RoomMember, RoomMemberList
 import unittest
-from unittest.mock import MagicMock, patch
-from pprint import pprint
+from unittest.mock import MagicMock
 
 
 def create_message(input, is_pm=False):

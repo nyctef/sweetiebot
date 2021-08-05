@@ -1,8 +1,7 @@
-from modules import Message, SweetiePings, PingStorageRedis, FakeRedis, Presence
+from modules import Message, SweetiePings, PingStorageRedis, FakeRedis
 from modules.RoomMember import RoomMember, RoomMemberList
 import unittest
-from unittest.mock import MagicMock, patch
-from pprint import pprint
+from unittest.mock import MagicMock
 
 room_members = [
     RoomMember("Sweetiebot", "sweetiebot@jabber.org/asdf", "owner", "moderator"),

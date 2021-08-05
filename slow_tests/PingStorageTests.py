@@ -1,6 +1,5 @@
 from os import getenv
 import unittest
-from pprint import pprint
 import psycopg2
 from modules.SweetiePings import PingStoragePg, PingStorageRedis
 from modules.FakeRedis import FakeRedis
@@ -77,7 +76,7 @@ class PingStoragePgTests(PingStorageTests, unittest.TestCase):
         cur = conn.cursor()
         cur.execute("DROP DATABASE IF EXISTS ping_storage_tests")
         cur.execute("CREATE DATABASE ping_storage_tests")
-        
+
         cls.dbwrapper = PgWrapper(pg_conn_str + " dbname=ping_storage_tests")
         cls.impl = PingStoragePg(cls.dbwrapper)
 

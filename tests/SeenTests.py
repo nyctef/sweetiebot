@@ -1,10 +1,8 @@
 from modules import Message, SweetieSeen, SeenStorageRedis, FakeRedis
 from modules.RoomMember import RoomMember, RoomMemberList
 import unittest
-from unittest.mock import MagicMock, patch
-from pprint import pprint
+from unittest.mock import MagicMock
 from datetime import datetime
-import logging
 
 
 def create_message(input, is_pm=False):
@@ -62,7 +60,7 @@ class SweetieSeenTests(unittest.TestCase):
 
         self.assertRegex(response, "sender last seen speaking at ")
 
-    def test_returns_last_spoke_if_spoke_set(self):
+    def test_returns_last_seen_if_seen_set(self):
         # "seen" is a bit easier to satisfy, since the target doesn't need to be in the room
         presence = MagicMock()
         presence.presence_type = "unavailable"

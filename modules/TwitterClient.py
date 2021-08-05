@@ -2,7 +2,6 @@ import requests
 import time
 from base64 import b64encode
 import logging
-from utils import logerrors
 import html
 
 log = logging.getLogger(__name__)
@@ -17,7 +16,6 @@ def get_client(key, secret):
     }
     data = {"grant_type": "client_credentials"}
     response = requests.post(url, headers=headers, data=data).json()
-    token_type = response["token_type"]
     token = response["access_token"]
     return TwitterClient(token)
 
@@ -46,8 +44,6 @@ class TimelineWatcher:
         url = "https://api.twitter.com/1.1/statuses/user_timeline.json"
         data = {
             "screen_name": self.username,
-            #'exclude_replies': 'true',
-            #'include_rts': 'false',
         }
         if since_id is not None:
             data["since_id"] = since_id
@@ -75,7 +71,7 @@ class TimelineWatcher:
                     raise Exception(tweets)
                 try:
                     tweet = tweets[0]
-                except KeyError as ke:
+                except KeyError:
                     log.exception(
                         "Error parsing timeline result from tweets of type %s : %r",
                         type(tweets),
@@ -86,7 +82,7 @@ class TimelineWatcher:
                 # print('setting latest tweet to '+str(self.latest_tweet))
                 if should_return:
                     return self.format_tweet(tweet)
-        except Exception as e:
+        except Exception:
             log.exception("Error pulling tweets from twitter")
 
     def format_tweet(self, tweet):

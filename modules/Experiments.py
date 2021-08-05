@@ -1,4 +1,4 @@
-from pprint import pprint, pformat
+from pprint import pformat
 import logging
 import laboratory
 import types

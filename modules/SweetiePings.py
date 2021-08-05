@@ -1,4 +1,3 @@
-from modules import MUCJabberBot
 from utils import logerrors, botcmd
 from datetime import datetime
 from sleekxmpp.jid import JID
@@ -20,7 +19,7 @@ class PingStorageRedis(object):
     def get_ping_group_list(self):
         group_names = [x.decode() for x in self.store.keys("ping:*")]
         groups = [(x, self.store.scard(x)) for x in group_names]
-        groups = [(x[len("ping:") :], count) for (x, count) in groups]
+        groups = [(x[len("ping:"):], count) for (x, count) in groups]
         return [(group, count) for (group, count) in groups if count > 0]
 
     def get_ping_groups_for_member(self, member):
@@ -29,7 +28,7 @@ class PingStorageRedis(object):
             group_members = self.store.smembers(group)
             group_usernames = list(map(lambda x: x.decode("utf-8"), group_members))
             if member in group_usernames:
-                group_name = group[len("ping:") :].decode("utf-8")
+                group_name = group[len("ping:"):].decode("utf-8")
                 result.append(group_name)
         return result
 

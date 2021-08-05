@@ -1,12 +1,7 @@
 import logging
 import re
-import random
-import hashlib
 import requests
-from random import randint
 from utils import logerrors, botcmd
-from pprint import pprint
-from modules.MessageResponse import MessageResponse
 
 log = logging.getLogger(__name__)
 

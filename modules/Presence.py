@@ -1,4 +1,3 @@
-from utils import logerrors
 from sleekxmpp import JID
 
 

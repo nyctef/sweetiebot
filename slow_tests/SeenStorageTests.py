@@ -1,6 +1,5 @@
 from os import getenv
 import unittest
-from pprint import pprint
 import psycopg2
 from modules.SweetieSeen import SeenStoragePg, SeenStorageRedis
 from modules.FakeRedis import FakeRedis

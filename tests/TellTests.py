@@ -1,8 +1,7 @@
 from modules import Message, SweetieTell, TellStorageRedis, FakeRedis, Presence
 from modules.RoomMember import RoomMember, RoomMemberList
 import unittest
-from unittest.mock import MagicMock, patch
-from pprint import pprint
+from unittest.mock import MagicMock
 
 room_members = [
     RoomMember("Sweetiebot", "sweetiebot@jabber.org/asdf", "owner", "moderator"),
@@ -147,7 +146,7 @@ class TellTests(unittest.TestCase):
         )
 
     def test_combined_message_length_cannot_exceed_limit(self):
-        r1 = self.tell.tell(create_message("!tell ZhuLi " + ("do a thing" * 90)))
+        self.tell.tell(create_message("!tell ZhuLi " + ("do a thing" * 90)))
         r2 = self.tell.tell(create_message("!tell ZhuLi " + ("do a thing" * 11)))
         # the count here is technically inaccurate because the message text contains 'sender left you a message:'
         self.assertEqual(

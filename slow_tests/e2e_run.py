@@ -1,4 +1,4 @@
-# coding:utf8
+# flake8: noqa
 
 # add parent dir to path since we're not using any fancy frameworks for
 # these tests

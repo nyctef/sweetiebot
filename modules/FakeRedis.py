@@ -20,7 +20,7 @@ class FakeRedis(object):
 
     def get(self, key):
         key = enc(key)
-        if not key in self.data:
+        if key not in self.data:
             return None
         return self.data[key]
 
@@ -68,10 +68,10 @@ class FakeRedis(object):
     def hincrby(self, key, field, increment):
         key = enc(key)
         field = enc(field)
-        if not key in self.data:
+        if key not in self.data:
             self.data[key] = {}
         hash = self.data[key]
-        if not field in hash:
+        if field not in hash:
             hash[field] = 0
         hash[field] += increment
         # print(key, '=', field, hash[field])
@@ -80,20 +80,20 @@ class FakeRedis(object):
         key = enc(key)
         field = enc(field)
         value = enc(value)
-        if not key in self.data:
+        if key not in self.data:
             self.data[key] = {}
         hash = self.data[key]
         hash[field] = value
 
     def hgetall(self, key):
         key = enc(key)
-        if not key in self.data:
+        if key not in self.data:
             self.data[key] = {}
         return self.data[key]
 
     def hvals(self, key):
         key = enc(key)
-        if not key in self.data:
+        if key not in self.data:
             self.data[key] = {}
         return self.data[key].values()
 

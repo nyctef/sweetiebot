@@ -2,8 +2,6 @@ from utils import logerrors, botcmd
 from datetime import datetime
 import logging
 import random
-import json
-from sleekxmpp.jid import JID
 
 log = logging.getLogger(__name__)
 
@@ -27,8 +25,6 @@ class SweetieDe(object):
         """Your friendly neigh-bourhood pest control. Has a cooldown"""
         if message.is_pm:
             return "But owl isn't here ... :sweetieskeptical:"
-
-        speaker = message.sender_jid
 
         if self.chance(0.7):
             return self.failures.get_next()

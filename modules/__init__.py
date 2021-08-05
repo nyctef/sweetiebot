@@ -1,3 +1,4 @@
+# flake8: noqa
 from .SweetieAdmin import SweetieAdmin
 from .SweetieChat import SweetieChat
 from .SweetieLookup import SweetieLookup

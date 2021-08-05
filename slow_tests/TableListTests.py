@@ -1,6 +1,5 @@
 from os import getenv
 import unittest
-from pprint import pprint
 import psycopg2
 from modules.TableList import TableList, RandomizedList
 from modules import PgWrapper
@@ -37,30 +36,30 @@ class TableListTests(unittest.TestCase):
         )
 
     def test_loops_through_list_when_reaches_end(self):
-        l = RandomizedList(TableList(self.dbwrapper, "deowl_fails"))
+        tablelist = RandomizedList(TableList(self.dbwrapper, "deowl_fails"))
         self.dbwrapper.write("INSERT INTO deowl_fails(text) VALUES ('test1')")
 
-        value1 = l.get_next()
-        value2 = l.get_next()
+        value1 = tablelist.get_next()
+        value2 = tablelist.get_next()
 
         self.assertEqual(value1, value2)
         self.assertIsNotNone(value2)
 
     def test_throws_error_if_no_results_found(self):
         """TODO: should this just return None instead?"""
-        l = RandomizedList(TableList(self.dbwrapper, "deowl_fails"))
+        tablelist = RandomizedList(TableList(self.dbwrapper, "deowl_fails"))
 
         with self.assertRaises(Exception):
-            l.get_next()
+            tablelist.get_next()
 
     def test_remembers_new_lines_added(self):
-        l = RandomizedList(TableList(self.dbwrapper, "deowl_fails"))
+        tablelist = RandomizedList(TableList(self.dbwrapper, "deowl_fails"))
 
-        l.add_line("this is a new line")
+        tablelist.add_line("this is a new line")
 
         # make sure any changes were committed to the db
         self.dbwrapper._conn.rollback()
 
-        value1 = l.get_next()
+        value1 = tablelist.get_next()
 
         self.assertEqual("this is a new line", value1)

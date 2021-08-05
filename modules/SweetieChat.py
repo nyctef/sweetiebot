@@ -4,7 +4,6 @@ import random
 import hashlib
 from random import randint
 from utils import logerrors, botcmd
-from pprint import pprint
 from modules.MessageResponse import MessageResponse
 from urllib.parse import urlparse
 
@@ -14,9 +13,9 @@ log = logging.getLogger(__name__)
 class SweetieChat(object):
     urlregex = re.compile(
         r"((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@"
-        + ")?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za"
-        + "-z0-9.-]+)((?:\/[\+~%\/.\w_-]*)?\??(?:[-\+=&:\/"
-        + ";%@.\w_]*)#?(?:[\w]*))?)"
+        + r")?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za"
+        + r"-z0-9.-]+)((?:\/[\+~%\/.\w_-]*)?\??(?:[-\+=&:\/"
+        + r";%@.\w_]*)#?(?:[\w]*))?)"
     )
 
     emotes = [
@@ -102,7 +101,8 @@ class SweetieChat(object):
         try:
             # sadly some sites (ie twitter.com) block "unsupported" browsers, so we have to lie about our user-agent
             headers = {
-                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                              "(KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
             }
             res = requests.get(url, timeout=5, headers=headers)
             if res.status_code != 200:
@@ -113,7 +113,7 @@ class SweetieChat(object):
             if len(content) > 100000:
                 log.warning("skipping download of {} due to content length > 100000")
                 return
-            if not "html" in res.headers["content-type"]:
+            if "html" not in res.headers["content-type"]:
                 log.warning("didn't get html from request, skipping")
                 return
             soup = BeautifulSoup(res.text, "html.parser")
@@ -156,7 +156,7 @@ class SweetieChat(object):
     def remove_extra_whitespace(self, result):
         result = result.replace("\n", "")
         result = result.replace("\r", "")
-        result = re.sub("\s+", " ", result)
+        result = re.sub(r"\s+", " ", result)
         return result
 
     def youtube_filter(self, link):
@@ -211,7 +211,6 @@ class SweetieChat(object):
     def random_chat(self, mess):
         """Does things"""
         message = mess.message_text
-        sender = mess.sender_nick
         is_ping = mess.is_ping
 
         # logs Cadance musics

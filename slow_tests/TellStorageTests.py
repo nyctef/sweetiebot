@@ -1,6 +1,5 @@
 from os import getenv
 import unittest
-from pprint import pprint
 import psycopg2
 from modules.SweetieTell import TellStoragePg, TellStorageRedis
 from modules.FakeRedis import FakeRedis
@@ -98,7 +97,9 @@ class TellStoragePgTests(TellStorageTests, unittest.TestCase):
             "DROP TABLE IF EXISTS tell_jid_to_nick_mapping;"
             "DROP TABLE IF EXISTS tell_messages_by_sender;"
             "CREATE TABLE tell_jid_to_nick_mapping(nick TEXT PRIMARY KEY, jid TEXT NOT NULL);"
-            "CREATE TABLE tell_messages_by_sender(sender_jid TEXT, receiver_jid TEXT, messages TEXT[] NOT NULL, PRIMARY KEY (sender_jid, receiver_jid));"
+            "CREATE TABLE tell_messages_by_sender("
+            "  sender_jid TEXT, receiver_jid TEXT, messages TEXT[] NOT NULL,"
+            "  PRIMARY KEY (sender_jid, receiver_jid));"
         )
 
 

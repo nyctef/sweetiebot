@@ -4,7 +4,6 @@
 import redis
 import sys
 import logging
-import psycopg2
 from utils import randomstr
 from modules import (
     MUCJabberBot,
@@ -13,13 +12,11 @@ from modules import (
     SweetieLookup,
     FakeRedis,
     SweetieRoulette,
-    RestartException,
     SweetieDe,
     SweetiePings,
     PingStorageRedis,
     PingStoragePg,
     PgWrapper,
-    TwitterClient,
     SweetieSeen,
     SeenStoragePg,
     SeenStorageRedis,
@@ -33,7 +30,6 @@ from modules import (
     make_experiment_object,
 )
 import time
-import os
 import traceback
 
 
@@ -127,10 +123,6 @@ def build_sweetiebot(config=None):
     )
     pings = SweetiePings(bot, ping_storage)
     moon = SweetieMoon(bot)
-    # if config.twitter_key is not None:
-    #     twitter = TwitterClient.get_client(config.twitter_key, config.twitter_secret)
-    #     watchers = list(map(twitter.get_timeline_watcher, ['EVE_Status']))
-    # else:
     watchers = []
 
     seen_storage = make_experiment_object(
@@ -164,7 +156,7 @@ def setup_logging(config):
             azure_handler = AzureLogHandler(instrumentation_key=config.app_insights_key)
             azure_handler.setLevel(logging.DEBUG)
             root_logger.addHandler(azure_handler)
-    except:
+    except Exception:
         logging.exception("Failed to set up azure logging")
 
     logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(
