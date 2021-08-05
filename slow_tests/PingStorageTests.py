@@ -10,7 +10,7 @@ if not pg_conn_str:
     raise Exception("SB_PG_DB needs to be set")
 
 
-class TellStorageTests(object):
+class PingStorageTests(object):
     def test_returns_empty_members_list(self):
         result = self.impl.get_ping_group_members("empty_group")
         self.assertListEqual([], result)
@@ -68,21 +68,25 @@ class TellStorageTests(object):
         self.assertListEqual(["人間", "獣人"], result)
 
 
-class TellStoragePgTests(TellStorageTests, unittest.TestCase):
+class PingStoragePgTests(TellStorageTests, unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        with psycopg2.connect(pg_conn_str) as conn, conn.cursor() as cur:
-            conn.autocommit = True
-            cur.execute("CREATE DATABASE ping_storage_tests")
+        conn = psycopg2.connect(pg_conn_str)
+        conn.autocommit = True
+        cur = conn.cursor()
+        cur.execute("CREATE DATABASE ping_storage_tests")
+        
         cls.conn = psycopg2.connect(pg_conn_str, dbname="ping_storage_tests")
         cls.impl = PingStoragePg(cls.conn)
 
     @classmethod
     def tearDownClass(cls):
         cls.conn.close()
-        with psycopg2.connect(pg_conn_str) as conn, conn.cursor() as cur:
-            conn.autocommit = True
-            cur.execute("DROP DATABASE ping_storage_tests")
+
+        conn = psycopg2.connect(pg_conn_str)
+        conn.autocommit = True
+        cur = conn.cursor()
+        cur.execute("DROP DATABASE ping_storage_tests")
 
     def setUp(self):
         with self.conn.cursor() as cur:
@@ -98,6 +102,6 @@ class TellStoragePgTests(TellStorageTests, unittest.TestCase):
             self.conn.commit()
 
 
-class TellStorageRedisTests(TellStorageTests, unittest.TestCase):
+class PingStorageRedisTests(TellStorageTests, unittest.TestCase):
     def setUp(self):
         self.impl = PingStorageRedis(FakeRedis())

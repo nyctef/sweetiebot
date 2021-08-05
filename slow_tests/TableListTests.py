@@ -12,17 +12,21 @@ if not pg_conn_str:
 class TableListTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        with psycopg2.connect(pg_conn_str) as conn, conn.cursor() as cur:
-            conn.autocommit = True
-            cur.execute("CREATE DATABASE table_list_tests")
+        conn = psycopg2.connect(pg_conn_str)
+        conn.autocommit = True
+        cur = conn.cursor()
+        cur.execute("CREATE DATABASE table_list_tests")
+
         cls.conn = psycopg2.connect(pg_conn_str, dbname="table_list_tests")
 
     @classmethod
     def tearDownClass(cls):
         cls.conn.close()
-        with psycopg2.connect(pg_conn_str) as conn, conn.cursor() as cur:
-            conn.autocommit = True
-            cur.execute("DROP DATABASE table_list_tests")
+
+        conn = psycopg2.connect(pg_conn_str)
+        conn.autocommit = True
+        cur = conn.cursor()
+        cur.execute("DROP DATABASE table_list_tests")
 
     def setUp(self):
         with self.conn.cursor() as cur:

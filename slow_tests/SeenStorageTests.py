@@ -52,21 +52,25 @@ class SeenStorageTests(object):
         self.assertEqual(dt2, result.spoke)
 
 
-class TellStoragePgTests(SeenStorageTests, unittest.TestCase):
+class SeenStoragePgTests(SeenStorageTests, unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        with psycopg2.connect(pg_conn_str) as conn, conn.cursor() as cur:
-            conn.autocommit = True
-            cur.execute("CREATE DATABASE seen_storage_tests")
+        conn = psycopg2.connect(pg_conn_str)
+        conn.autocommit = True
+        cur = conn.cursor()
+        cur.execute("CREATE DATABASE seen_storage_tests")
+
         cls.conn = psycopg2.connect(pg_conn_str, dbname="seen_storage_tests")
         cls.impl = SeenStoragePg(cls.conn)
 
     @classmethod
     def tearDownClass(cls):
         cls.conn.close()
-        with psycopg2.connect(pg_conn_str) as conn, conn.cursor() as cur:
-            conn.autocommit = True
-            cur.execute("DROP DATABASE seen_storage_tests")
+
+        conn = psycopg2.connect(pg_conn_str)
+        conn.autocommit = True
+        cur = conn.cursor()
+        cur.execute("DROP DATABASE seen_storage_tests")
 
     def setUp(self):
         with self.conn.cursor() as cur:
@@ -78,6 +82,6 @@ class TellStoragePgTests(SeenStorageTests, unittest.TestCase):
             self.conn.commit()
 
 
-class TellStorageRedisTests(SeenStorageTests, unittest.TestCase):
+class SeenStorageRedisTests(SeenStorageTests, unittest.TestCase):
     def setUp(self):
         self.impl = SeenStorageRedis(FakeRedis())

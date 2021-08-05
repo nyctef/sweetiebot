@@ -73,18 +73,21 @@ class TellStorageTests(object):
 class TellStoragePgTests(TellStorageTests, unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        with psycopg2.connect(pg_conn_str) as conn, conn.cursor() as cur:
-            conn.autocommit = True
-            cur.execute("CREATE DATABASE tell_storage_tests")
+        conn = psycopg2.connect(pg_conn_str)
+        conn.autocommit = True
+        cur = conn.cursor()
+        cur.execute("CREATE DATABASE tell_storage_tests")
+
         cls.conn = psycopg2.connect(pg_conn_str, dbname="tell_storage_tests")
         cls.impl = TellStoragePg(cls.conn)
 
     @classmethod
     def tearDownClass(cls):
         cls.conn.close()
-        with psycopg2.connect(pg_conn_str) as conn, conn.cursor() as cur:
-            conn.autocommit = True
-            cur.execute("DROP DATABASE tell_storage_tests")
+        conn = psycopg2.connect(pg_conn_str)
+        conn.autocommit = True
+        cur = conn.cursor()
+        cur.execute("DROP DATABASE tell_storage_tests")
 
     def setUp(self):
         with self.conn.cursor() as cur:
