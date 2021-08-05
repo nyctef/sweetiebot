@@ -11,6 +11,7 @@ requests = "==2.20.0"
 pytz = "==2016.4"
 # storage
 redis = "==2.10.1"
+psycopg2-binary = "*"
 # connect to jabber
 sleekxmpp = "==1.3.1"
 # azure logging
@@ -21,7 +22,6 @@ azure = "==0.8.1"
 # opencensus-ext-logging = "==0.1.0"
 # misc
 laboratory = "*"
-psycopg2-binary = "*"
 
 [dev-packages]
 black = "*"

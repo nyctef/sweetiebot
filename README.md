@@ -1,19 +1,21 @@
-basic running:
 
-```
+```powershell
 pipenv --python 3.8
 pipenv shell
-cp config.py.example config.py
-vim config.py
-./run-tests.sh
-./run-e2e-tests.sh
+./run-tests.ps1
+
+docker run -d --name sbpostgres -e POSTGRES_PASSWORD=password1234 -p 5432:5432 postgres:11
+$env:SB_PG_DB="host=localhost user=postgres password=password1234"
+
+./run-slow-tests.ps1
+./run-e2e-tests.ps1
+
 python sweetiebot.py
-python sweetiewatch.py
 ```
 
-running with docker:
+running against a jabber server in docker:
 
-```
+```sh
 # build sweetiebot docker container
 docker build -t sweetiebot .
 
