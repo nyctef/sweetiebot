@@ -43,7 +43,7 @@ class PgWrapper(object):
     def __retry_on_fail(self, action):
         try:
             return action()
-        except psycopg2.InFailedSqlTransaction as ifst:
+        except psycopg2.errors.InFailedSqlTransaction as ifst:
             # if a previous action has failed then we need to roll back
             log.error("In failed transaction, rolling back")
             self._conn.rollback()
