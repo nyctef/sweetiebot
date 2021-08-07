@@ -7,7 +7,19 @@ import types
 class LoggingExperiment(laboratory.Experiment):
     def publish(self, result):
         if not result.match:
-            logging.error("Result mismatch!: " + pformat(result))
+            try:
+                logging.error(f"Experiment mismatch: output from {result.candidates[0].name} did not match {result.control.name}",
+                    extra={
+                        'custom_dimensions': {
+                            'expected_value': pformat(result.control.value),
+                            'actual_value': pformat(result.candidates[0].value),
+                            'actual_exception': pformat(result.candidates[0].exception),
+                        }
+                    })
+            except Exception as e:
+                # if the detailed reporting fails for some reason, make sure we fall back to something
+                # simpler that won't throw and interfere with the rest of the app
+                logging.error("Experiment mismatch!: " + pformat(result), extra={'custom_dimensions': {'exception': pformat(e)}})
 
 
 def method_missing(method_name, type_name):
