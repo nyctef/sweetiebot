@@ -71,6 +71,10 @@ class PingTests(unittest.TestCase):
         self.assertEqual(
             "Your groups: capable_assistants. See also !users and !groups", response
         )
+        response = self.pings.users(create_message_zhuli("!users capable_assistants"))
+        self.assertEqual(
+            "Users in capable_assistants: zhuli. See also !groups and !mygroups", response
+        )
 
         # ... but the other user isn't subscribed to anything yet.
         response = self.pings.mygroups(create_message("!mygroups"))

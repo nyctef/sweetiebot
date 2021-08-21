@@ -159,7 +159,7 @@ class SweetiePings:
         targets = self.storage.get_ping_group_members(group)
         if not len(targets):
             return "no users found in group '{}'".format(group)
-        usernames = map(lambda x: JID(x.decode("utf-8")).user, targets)
+        usernames = map(lambda x: JID(x).user, targets)
         return (
             "Users in {}: {}".format(group, ", ".join(usernames))
             + ". See also !groups and !mygroups"
