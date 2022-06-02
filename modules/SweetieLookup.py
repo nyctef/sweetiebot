@@ -272,7 +272,9 @@ class SweetieLookup(object):
     @logerrors
     def ferret(self, message):
         """Ferret!"""
-        return self.random_reddit_link("ferret", ("imgur.com", "i.imgur.com"))
+        return self.random_reddit_link(
+            "ferret", ("imgur.com", "i.imgur.com", "youtu.be", "i.redd.it")
+        )
 
     @botcmd
     @logerrors

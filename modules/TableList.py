@@ -28,6 +28,7 @@ class RandomizedList(object):
         self.storage.add_line(line)
 
     def get_next(self):
+        log.debug("RandomizedList get_next")
         if not self.responses:
             log.debug("reading response list..")
             self.responses = self.storage.read_all()

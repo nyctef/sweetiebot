@@ -47,11 +47,11 @@ class Sweetiebot(object):
         roulette,
         sweetiede,
         pings,
-        watchers,
         moon,
     ):
         self.nickname = nickname
         self.bot = bot
+        log.debug("setting unknown_command_callback on " + str(self.bot))
         self.bot.unknown_command_callback = self.unknown_command
         self.lookup = lookup
         self.admin = admin
@@ -59,18 +59,14 @@ class Sweetiebot(object):
         self.roulette = roulette
         self.sweetiede = SweetieDe
         self.pings = pings
-        self.watchers = watchers
         self.moon = moon
-        self.bot.add_recurring_task(self.check_watchers, 5 * 60)
-
-    def check_watchers(self):
-        for w in self.watchers:
-            next = w.get_next()
-            if next:
-                self.bot.send_groupchat_message(next)
 
     def unknown_command(self, message):
+        log.debug("Sweetiebot unknown_command")
         return self.chat.random_chat(message)
+
+    def process(self):
+        self.bot.process()
 
 
 def build_sweetiebot(config=None):
@@ -123,7 +119,6 @@ def build_sweetiebot(config=None):
     )
     pings = SweetiePings(bot, ping_storage)
     moon = SweetieMoon(bot)
-    watchers = []
 
     seen_storage = make_experiment_object(
         SeenStorageRedis(redis_conn), SeenStoragePg(dbwrapper)
@@ -131,7 +126,7 @@ def build_sweetiebot(config=None):
     seen = SweetieSeen(bot, seen_storage)
 
     sweet = Sweetiebot(
-        config.nickname, bot, lookup, admin, chat, roulette, de, pings, watchers, moon
+        config.nickname, bot, lookup, admin, chat, roulette, de, pings, moon
     )
     return sweet
 
@@ -162,7 +157,10 @@ def setup_logging(config):
     logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(
         logging.WARNING
     )
-    logging.getLogger("sleekxmpp.plugins.xep_0199.ping").setLevel(logging.WARNING)
+    logging.getLogger("slixmpp.plugins.xep_0199.ping").setLevel(logging.WARNING)
+    logging.getLogger("slixmpp.xmlstream.xmlstream").setLevel(logging.WARNING)
+    logging.getLogger("opencensus.ext.azure.common.transport").setLevel(logging.WARNING)
+    logging.getLogger("urllib3.connectionpool").setLevel(logging.WARNING)
 
 
 if __name__ == "__main__":
@@ -174,8 +172,8 @@ if __name__ == "__main__":
 
     try:
         sweet = build_sweetiebot(config)
-        while True:
-            time.sleep(1)
+        log.info("sb process")
+        sweet.process()
     except KeyboardInterrupt:
         sys.exit(0)
     except Exception:

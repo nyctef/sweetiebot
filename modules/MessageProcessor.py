@@ -15,6 +15,7 @@ class MessageProcessor:
 
     @logerrors
     def process_message(self, message):
+        log.debug("processing message with command: " + str(message.command))
         if message.command is not None:
             command = message.command
             if command == "help":
@@ -23,7 +24,9 @@ class MessageProcessor:
                 log.debug("running command " + command)
                 return self.commands[command](message)
 
+        log.debug("no matches found...")
         if self.unknown_command_callback is not None:
+            log.debug("... running unknown_command_callback")
             return self.unknown_command_callback(message)
 
     @logerrors

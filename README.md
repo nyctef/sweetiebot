@@ -1,6 +1,7 @@
 
 ```powershell
 pipenv --python 3.8
+pipenv install --dev
 pipenv shell
 ./run-tests.ps1
 

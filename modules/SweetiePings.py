@@ -1,6 +1,6 @@
 from utils import logerrors, botcmd
 from datetime import datetime
-from sleekxmpp.jid import JID
+from slixmpp.jid import JID
 
 
 class PingStorageRedis(object):

@@ -1,4 +1,4 @@
-from sleekxmpp import JID
+from slixmpp import JID
 
 
 class Presence:

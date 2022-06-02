@@ -4,7 +4,7 @@ import psycopg2
 from modules.SweetieTell import TellStoragePg, TellStorageRedis
 from modules.FakeRedis import FakeRedis
 from modules import PgWrapper
-from sleekxmpp import JID
+from slixmpp import JID
 
 pg_conn_str = getenv("SB_PG_DB", None)
 if not pg_conn_str:

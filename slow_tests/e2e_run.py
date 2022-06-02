@@ -8,7 +8,7 @@ parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.sys.path.insert(0, parentdir)
 
 from sweetiebot import build_sweetiebot
-import sleekxmpp
+import slixmpp
 import queue
 from utils import logerrors
 from threading import Event
@@ -16,7 +16,7 @@ from threading import Event
 """
 
 needed: wrap around sweetiebot but don't call serve_forever; process pending messages instead
-some way of logging and waiting for messages from a sleekxmpp bot to do tests with
+some way of logging and waiting for messages from a slixmpp bot to do tests with
 
 """
 
@@ -35,7 +35,7 @@ class FakeXMPPUser:
         print("creating bot..")
         self.nick = nick
         self.chatroom = "test_room@conference.jabberserver"
-        bot = sleekxmpp.ClientXMPP(username, password)
+        bot = slixmpp.ClientXMPP(username, password)
         bot.add_event_handler("session_start", self.on_start)
         bot.add_event_handler("message", self.on_message_received)
         bot.register_plugin("xep_0045")
@@ -45,18 +45,16 @@ class FakeXMPPUser:
         self.messages = queue.Queue()
         self.has_joined_chat = Event()
         print("fake user connecting ..")
-        if self.bot.connect(address=("localhost", 5222)):
-            print(".. connected")
-            self.bot.process()
-        else:
-            raise "unable to connect"
+        self.bot.connect(address=("localhost", 5222))
+        print(".. connected")
+        self.bot.process()
 
     def on_start(self, event):
         print("fake user on_start")
         self.bot.get_roster()
         self.bot.send_presence()
         print("fake user joining {} as {}".format(self.chatroom, self.nick))
-        self.muc.joinMUC(self.chatroom, self.nick, wait=True)
+        self.muc.join_muc(self.chatroom, self.nick, wait=True)
         self.has_joined_chat.set()
 
     def send_message(self, message, html=None):
@@ -263,8 +261,8 @@ if __name__ == "__main__":
         # logging.getLogger().setLevel(logging.DEBUG)
         # logging.getLogger('modules.Message').setLevel(logging.DEBUG)
         # logging.getLogger('modules.MUCJabberBot').setLevel(logging.DEBUG)
-        # logging.getLogger('sleekxmpp').setLevel(logging.DEBUG)
-        # logging.getLogger('sleekxmpp.xmlstream.xmlstream').setLevel(logging.FATAL)
+        # logging.getLogger('slixmpp').setLevel(logging.DEBUG)
+        # logging.getLogger('slixmpp.xmlstream.xmlstream').setLevel(logging.FATAL)
         logging.getLogger("modules.SweetieAdmin").setLevel(logging.DEBUG)
         # logging.getLogger('modules.SweetieLookup').setLevel(logging.DEBUG)
         # logging.getLogger('modules.SweetieSeen').setLevel(logging.DEBUG)
