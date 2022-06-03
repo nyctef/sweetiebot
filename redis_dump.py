@@ -2,6 +2,9 @@ import redis
 from pprint import pformat
 import re
 
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
 r = redis.Redis(decode_responses=True)
 r.ping()
 
