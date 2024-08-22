@@ -73,11 +73,6 @@ def build_sweetiebot(config=None):
     if config is None:
         import config
     resource = config.nickname + randomstr()
-    if config.fake_redis:
-        log.debug("faking out redis")
-        redis_conn = FakeRedis()
-    else:
-        redis_conn = redis.from_url(config.redis_url)
 
     if config.pg_conn_str:
         dbwrapper = PgWrapper(config.pg_conn_str)
@@ -105,24 +100,18 @@ def build_sweetiebot(config=None):
     sass = RandomizedList(TableList(dbwrapper, "sass"))
     cadmusic = RandomizedList(TableList(dbwrapper, "cadmusic"))
 
-    tell_storage = make_experiment_object(
-        TellStorageRedis(redis_conn), TellStoragePg(dbwrapper)
-    )
+    tell_storage = TellStoragePg(dbwrapper)
     tell = SweetieTell(bot, tell_storage)
 
     dictionary = SweetieDictionary(bot)
     chat = SweetieChat(bot, actions, sass, config.chatroom, cadmusic, tell, dictionary)
 
     roulette = SweetieRoulette(bot, admin)
-    ping_storage = make_experiment_object(
-        PingStorageRedis(redis_conn), PingStoragePg(dbwrapper)
-    )
+    ping_storage = PingStoragePg(dbwrapper)
     pings = SweetiePings(bot, ping_storage)
     moon = SweetieMoon(bot)
 
-    seen_storage = make_experiment_object(
-        SeenStorageRedis(redis_conn), SeenStoragePg(dbwrapper)
-    )
+    seen_storage = SeenStoragePg(dbwrapper)
     seen = SweetieSeen(bot, seen_storage)
 
     sweet = Sweetiebot(
