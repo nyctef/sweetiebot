@@ -41,7 +41,8 @@ class MUCJabberBot:
 
         # Don't try to auto reconnect after disconnections (we'll restart the
         # process and retry that way)
-        bot.auto_reconnect = False
+        # we originally disabled this for sleekxmpp, but maybe slixmpp will do better
+        # bot.auto_reconnect = False
 
         bot.add_event_handler("session_start", self.on_start)
         bot.add_event_handler("message", self.on_message)
