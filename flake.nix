@@ -1,74 +1,63 @@
 {
   description = "Sweetiebot XMPP chat bot";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    pyproject-nix = {
+      url = "github:pyproject-nix/pyproject.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    uv2nix = {
+      url = "github:pyproject-nix/uv2nix";
+      inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    pyproject-build-systems = {
+      url = "github:pyproject-nix/build-system-pkgs";
+      inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.uv2nix.follows = "uv2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
 
   outputs =
-    { self, nixpkgs }:
+    { self, nixpkgs, pyproject-nix, uv2nix, pyproject-build-systems, ... }:
     let
-      forAllSystems = nixpkgs.lib.genAttrs [
+      inherit (nixpkgs) lib;
+      forAllSystems = lib.genAttrs [
         "x86_64-linux"
         "aarch64-linux"
       ];
 
-      overlay = final: prev: {
-        pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
-          (pyFinal: pyPrev: {
-            # used by modules/Experiments.py and modules/SweetieSeen.py; not in nixpkgs
-            laboratory = pyFinal.buildPythonPackage rec {
-              pname = "laboratory";
-              version = "1.0.2";
-              format = "wheel";
-              src = final.fetchurl {
-                url = "https://files.pythonhosted.org/packages/be/c4/915d8f1d7dcf6c055c70976e1b44d12fa4691cd2493b1474aca689d459d1/laboratory-1.0.2-py2.py3-none-any.whl";
-                hash = "sha256-lQGvqFpCUuImmuftCK7e2NgO0N5WkbBil8qrHzC0Enc=";
-              };
-              dist = "py2.py3-none-any";
-              python = "py2.py3";
-            };
+      # dependencies only: our own code isn't a uv-managed package, see
+      # `tool.uv.package = false` in pyproject.toml
+      workspace = uv2nix.lib.workspace.loadWorkspace { workspaceRoot = ./.; };
+      overlay = workspace.mkPyprojectOverlay { sourcePreference = "wheel"; };
 
-            # modules/SweetieMoon.py uses the `Astral` class dropped in astral>=2;
-            # pinned to the version in Pipfile.lock instead of nixpkgs' current astral (3.x)
-            astral = pyFinal.buildPythonPackage rec {
-              pname = "astral";
-              version = "1.6";
-              format = "wheel";
-              src = final.fetchurl {
-                url = "https://files.pythonhosted.org/packages/5c/13/6f099c94ef58b154845a44830abe5eb213ce1ffba0e49c451f5620ba241a/astral-1.6-py2.py3-none-any.whl";
-                hash = "sha256-zaVYFI1V0xAY571K0bZ5ArdkJvxP0aJh4kdcU/vqRSI=";
-              };
-              dist = "py2.py3-none-any";
-              python = "py2.py3";
-              propagatedBuildInputs = [ pyFinal.pytz ];
-            };
-          })
-        ];
-      };
+      pythonSets = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          python = pkgs.python311;
+        in
+        (pkgs.callPackage pyproject-nix.build.packages { inherit python; }).overrideScope (
+          lib.composeManyExtensions [
+            pyproject-build-systems.overlays.default
+            overlay
+          ]
+        )
+      );
     in
     {
-      overlays.default = overlay;
-
       packages = forAllSystems (
         system:
         let
-          pkgs = nixpkgs.legacyPackages.${system}.extend overlay;
-
-          pythonEnv = pkgs.python3.withPackages (
-            ps: with ps; [
-              astral
-              beautifulsoup4
-              requests
-              pytz
-              redis
-              psycopg2
-              slixmpp
-              laboratory
-              # opencensus-ext-azure is currently broken in nixpkgs; Azure App
-              # Insights logging (config.app_insights_key) is a soft
-              # dependency guarded by a try/except in sweetiebot.py, so it's
-              # left out here rather than pinned to a broken package.
-            ]
-          );
+          pkgs = nixpkgs.legacyPackages.${system};
+          pythonSet = pythonSets.${system};
+          venv = pythonSet.mkVirtualEnv "sweetiebot-env" workspace.deps.default;
 
           sweetiebot = pkgs.stdenvNoCC.mkDerivation {
             pname = "sweetiebot";
@@ -85,12 +74,12 @@
               mkdir -p $out/bin
               cat > $out/bin/sweetiebot <<EOF
               #!${pkgs.runtimeShell}
-              exec ${pythonEnv}/bin/python $out/share/sweetiebot/sweetiebot.py "\$@"
+              exec ${venv}/bin/python $out/share/sweetiebot/sweetiebot.py "\$@"
               EOF
               chmod +x $out/bin/sweetiebot
             '';
 
-            passthru = { inherit pythonEnv; };
+            passthru = { inherit venv; };
           };
         in
         {
@@ -130,7 +119,8 @@
               default = { };
               description = ''
                 Non-secret environment variables (SB_CHATROOM, SB_NICKNAME,
-                SB_HOSTNAME, SB_PORT, SB_DEBUG, ...) to pass to sweetiebot.
+                SB_HOSTNAME, SB_PORT, SB_DEBUG, SB_APPINSIGHTS_KEY, ...) to pass
+                to sweetiebot.
               '';
               example = {
                 SB_CHATROOM = "some_room@conference.jabberserver";

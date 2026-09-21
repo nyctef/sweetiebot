@@ -1,0 +1,23 @@
+[project]
+name = "sweetiebot"
+version = "9.1"
+requires-python = "==3.11.*"
+dependencies = [
+  "astral==1.6",
+  "beautifulsoup4==4.6.0",
+  "requests==2.20.0",
+  "pytz>=2016.4",
+  "redis==2.10.1",
+  "psycopg2-binary>=2.9.9",
+  "slixmpp==1.7.0",
+  "opencensus-ext-azure==1.0.4",
+  "laboratory==1.0.2",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.extra-build-dependencies]
+# legacy sdists with no declared build backend; setuptools is needed to build their wheels
+redis = ["setuptools"]
+slixmpp = ["setuptools"]
