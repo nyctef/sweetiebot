@@ -1,0 +1,62 @@
+# see README.md
+
+name: sweetiebot-test
+
+services:
+  jabberserver:
+    image: rroemhild/ejabberd:18.12-1
+    hostname: jabberserver
+    ports:
+      - "5222:5222"
+      - "5269:5269"
+      - "5280:5280"
+    environment:
+      XMPP_DOMAIN: jabberserver
+      EJABBERD_ADMINS: admin_user@jabberserver
+      EJABBERD_USERS: >-
+        admin_user@jabberserver:password1234
+        normal_user@jabberserver:password1234
+        bot_user@jabberserver:password1234
+      EJABBERD_MOD_MUC_ADMIN: "true"
+      # the image is old enough that fetching contrib modules from github fails
+      EJABBERD_SKIP_MODULES_UPDATE: "true"
+    post_start:
+      # wait for ejabberd to finish starting, then create the room for the bot to join
+      - command: sh -c "ejabberdctl started && ejabberdctl create_room test_room conference.jabberserver jabberserver"
+    healthcheck:
+      test: ["CMD-SHELL", "ejabberdctl muc_online_rooms global | grep -q test_room@"]
+      interval: 5s
+      timeout: 10s
+      retries: 30
+      start_period: 10s
+
+  sbpostgres:
+    image: postgres:11
+    environment:
+      POSTGRES_PASSWORD: password1234
+      POSTGRES_DB: sweetiebot
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-U", "postgres", "-d", "sweetiebot"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  sweetiebot:
+    build: .
+    depends_on:
+      jabberserver:
+        condition: service_healthy
+      sbpostgres:
+        condition: service_healthy
+    restart: on-failure
+    environment:
+      SB_PG_DB: host=sbpostgres dbname=sweetiebot user=postgres password=password1234
+      SB_JID: bot_user@jabberserver
+      SB_PASSWORD: password1234
+      SB_CHATROOM: test_room@conference.jabberserver
+      SB_NICKNAME: Sweetiebot
+      SB_DEBUG: "1"

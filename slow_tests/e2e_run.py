@@ -99,7 +99,6 @@ def stay_awhile_and_listen():
 def bot_connects_to_chat():
     import config
 
-    config.fake_redis = True
     sweet = build_sweetiebot()
     stay_awhile_and_listen()
     return sweet

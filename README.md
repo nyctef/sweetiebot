@@ -1,4 +1,6 @@
 
+quick start:
+
 ```powershell
 pipenv --python 3.8
 pipenv install --dev
@@ -14,29 +16,41 @@ $env:SB_PG_DB="host=localhost user=postgres password=password1234"
 python sweetiebot.py
 ```
 
-running against a jabber server in docker:
+## Configuration
 
-```sh
-# build sweetiebot docker container
-docker build -t sweetiebot .
+environment variables (see `config.py`):
 
-# create a docker network
-docker network create sbnet
+| Variable       | Required | Default                        | Description                                     |
+|----------------|----------|--------------------------------|-------------------------------------------------|
+| `SB_PG_DB`     | yes      | _(none)_                       | libpq connection string for pg database         |
+| `SB_JID`       | no       | `bot_user@jabberserver`        | Jabber account                                  |
+| `SB_PASSWORD`  | no       | `password1234`                 | Jabber password                                 |
+| `SB_CHATROOM`  | no       | `test_room@conference.jabberserver`  | MUC room to join                          |
+| `SB_NICKNAME`  | no       | `Sweetiebot`                   | Nickname to use in the room                     |
+| `SB_HOSTNAME`  | no       | _(none)_                       | Server to connect to, if distinct from `SB_JID` |
+| `SB_PORT`      | no       | `5222`                         | Port to connect to (when `SB_HOSTNAME` is set)  |
+| `SB_DEBUG`     | no       | _(off)_                        | Any non-empty value turns on debug logging      |
+| `SB_APPINSIGHTS_KEY` | no | _(none)_                       | Azure Monitor / App Insights instrumentation    |
 
-# let's make a jabber server
-docker run --detach --network=sbnet --name jabberserver -p 5222:5222 -p 5269:5269 -p 5280:5280 -e "XMPP_DOMAIN=jabberserver" -e "EJABBERD_ADMINS=admin_user@jabberserver" -e "EJABBERD_USERS=admin_user@jabberserver:password1234 normal_user@jabberserver:password1234 bot_user@jabberserver:password1234" -e "EJABBERD_MOD_MUC_ADMIN=true" rroemhild/ejabberd
-# and create a room to join
-docker exec -it jabberserver ejabberdctl create_room test_room conference.jabberserver jabberserver
+## Running in docker
 
-# run a redis instance for sweetiebot to connect to
-docker run --detach --network=sbnet --name sbredis --volume "$(pwd)/data:/data" redis
+`compose.test.yaml` runs sweetiebot against a test jabber server and postgres database:
 
-# run sweetiebot
-docker run --detach --network=sbnet --name sweetiebot --volume "$(pwd)/data:/usr/src/app/data" sweetiebot
+```bash
+docker compose -f compose.test.yaml up --build -d
+docker compose -f compose.test.yaml logs --follow sweetiebot
 
-# watch sweetiebot output
-docker logs --follow sweetiebot
+docker compose -f compose.test.yaml exec sbpostgres psql -U postgres -d sweetiebot
+
+docker compose -f compose.test.yaml down -v
 ```
 
+Log in as `normal_user@jabberserver` / `password1234` on `localhost:5222` and join `test_room@conference.jabberserver` to talk to the bot.
 
+## Legacy stuff
 
+Redis is dead in production, but lives on in the tests, since the `FakeRedis` class is a handy in-memory storage layer for unit tests to depend on.
+- eg unit tests in `tests/Pings.py` depends on `PingStorageRedis(FakeRedis())`
+- then `slow_tests/PingStorageTests.py` tries to prove that `PingStorageRedis` behaves the same as `PingStoragePg`, so that the unit tests are also valid in the real code.
+
+The instructions for running with `pipenv` above should probably be replaced with `uv`

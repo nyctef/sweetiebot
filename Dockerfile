@@ -15,6 +15,4 @@ COPY . /usr/src/app/
 
 RUN echo -n ' | Image built at' `date` >> version.txt
 
-VOLUME /usr/src/app/data
-
 ENTRYPOINT ["pipenv", "run", "python", "/usr/src/app/sweetiebot.py"]

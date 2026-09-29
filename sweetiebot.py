@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import redis
 import sys
 import logging
 from utils import randomstr
@@ -10,18 +9,14 @@ from modules import (
     SweetieAdmin,
     SweetieChat,
     SweetieLookup,
-    FakeRedis,
     SweetieRoulette,
     SweetieDe,
     SweetiePings,
-    PingStorageRedis,
     PingStoragePg,
     PgWrapper,
     SweetieSeen,
     SeenStoragePg,
-    SeenStorageRedis,
     SweetieTell,
-    TellStorageRedis,
     TellStoragePg,
     SweetieDictionary,
     SweetieMoon,
@@ -156,8 +151,6 @@ if __name__ == "__main__":
     import config
 
     setup_logging(config)
-
-    config.fake_redis = "--test" in sys.argv
 
     try:
         sweet = build_sweetiebot(config)

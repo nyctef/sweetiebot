@@ -7,7 +7,6 @@ dependencies = [
   "beautifulsoup4==4.6.0",
   "requests==2.20.0",
   "pytz>=2016.4",
-  "redis==2.10.1",
   "psycopg2-binary>=2.9.9",
   "slixmpp==1.7.0",
   "opencensus-ext-azure==1.0.4",
@@ -19,5 +18,4 @@ package = false
 
 [tool.uv.extra-build-dependencies]
 # legacy sdists with no declared build backend; setuptools is needed to build their wheels
-redis = ["setuptools"]
 slixmpp = ["setuptools"]

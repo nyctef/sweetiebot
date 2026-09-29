@@ -14,13 +14,6 @@ port = getenv("SB_PORT", 5222)
 # Optional: turn on some debug features
 debug = getenv("SB_DEBUG", False)
 
-# Optional: Twitter API for putting twitter feeds into chat
-twitter_key = getenv("TWITTER_API_KEY", None)
-twitter_secret = getenv("TWITTER_API_SECRET", None)
-
-# A url for the redis instance to connect to in the form redis://[:password]@host:port/dbnum
-# TODO: remove in favour of pg
-redis_url = getenv("REDIS_DB_URL", "redis://sbredis:6379/0")
 # Connection string for backing storage
 pg_conn_str = getenv("SB_PG_DB", None)
 
