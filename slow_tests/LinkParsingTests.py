@@ -28,7 +28,7 @@ class LinkParsingTests(unittest.TestCase):
 
     def test_can_fetch_youtube_link(self):
         result = self.chat.get_page_titles('this is an interesting video: https://www.youtube.com/watch?v=dQw4w9WgXcQ')
-        self.assertEqual('Rick Astley - Never Gonna Give You Up (Official Music Video) by Rick Astley', result)
+        self.assertEqual('Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster) by Rick Astley', result)
 
     def test_can_fetch_twitter_link(self):
         result = self.chat.get_page_titles(' https://twitter.com/Graham_LRR/status/1354129384509038593 ')
