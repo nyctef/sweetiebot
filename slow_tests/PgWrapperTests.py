@@ -10,8 +10,8 @@ if not pg_conn_str:
 
 
 class PgWrapperTests(unittest.TestCase):
-    def test_handles_when_connection_is_disconnected(self):
-        dbwrapper = PgWrapper(pg_conn_str)
+    def test_handles_when_connection_is_disconnected(self) -> None:
+        dbwrapper = PgWrapper(pg_conn_str)  # type: ignore[arg-type]
 
         self.assertEqual(1, dbwrapper.query_one("SELECT 1;"))
 
@@ -21,8 +21,8 @@ class PgWrapperTests(unittest.TestCase):
         # but dbwrapper should recover
         self.assertEqual(1, dbwrapper.query_one("SELECT 1;"))
 
-    def test_handles_connection_in_failed_state(self):
-        dbwrapper = PgWrapper(pg_conn_str)
+    def test_handles_connection_in_failed_state(self) -> None:
+        dbwrapper = PgWrapper(pg_conn_str)  # type: ignore[arg-type]
 
         self.assertEqual(1, dbwrapper.query_one("SELECT 1;"))
 

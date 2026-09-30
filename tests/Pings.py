@@ -11,7 +11,7 @@ room_members = [
 room_member_list = RoomMemberList(room_members)
 
 
-def create_message(input, is_pm=False):
+def create_message(input: str, is_pm: bool = False) -> Message:
     return Message(
         "Sweetiebot",
         "sender",
@@ -23,7 +23,7 @@ def create_message(input, is_pm=False):
     )
 
 
-def create_message_zhuli(input, is_pm=False):
+def create_message_zhuli(input: str, is_pm: bool = False) -> Message:
     return Message(
         "Sweetiebot",
         "ZhuLi",
@@ -36,13 +36,13 @@ def create_message_zhuli(input, is_pm=False):
 
 
 class PingTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.bot = MagicMock()
         self.store = PingStorageRedis(FakeRedis())
 
         self.pings = SweetiePings(self.bot, self.store)
 
-    def test_basic_ping_workflow(self):
+    def test_basic_ping_workflow(self) -> None:
         # we start with no groups
         response = self.pings.groups(create_message("!groups"))
         self.assertEqual(

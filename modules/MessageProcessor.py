@@ -1,20 +1,25 @@
 from utils import logerrors
 import logging
 from inspect import getdoc
+from typing import Callable
+from modules.Message import Message
+from modules.MessageResponse import CommandResult
+
+CommandCallback = Callable[[Message], CommandResult]
 
 log = logging.getLogger(__name__)
 
 
 class MessageProcessor:
-    def __init__(self, unknown_command_callback):
-        self.commands = {}
+    def __init__(self, unknown_command_callback: CommandCallback | None) -> None:
+        self.commands: dict[str, CommandCallback] = {}
         self.unknown_command_callback = unknown_command_callback
 
-    def add_command(self, command_name, command_callback):
+    def add_command(self, command_name: str, command_callback: CommandCallback) -> None:
         self.commands[command_name] = command_callback
 
     @logerrors
-    def process_message(self, message):
+    def process_message(self, message: Message) -> CommandResult:
         log.debug("processing message with command: " + str(message.command))
         if message.command is not None:
             command = message.command
@@ -30,7 +35,7 @@ class MessageProcessor:
             return self.unknown_command_callback(message)
 
     @logerrors
-    def help(self, message):
+    def help(self, message: Message) -> str:
         if not message.is_pm:
             return "Hi! I'm Sweetiebot. Use 'help' in a PM for more details"
 
@@ -47,7 +52,8 @@ see source code or report issues at https://github.com/nyctef/sweetiebot
                 continue
             if getattr(command, "_bot_command_hidden", False):
                 continue
-            command_name = command._bot_command_name
+            # set by the @botcmd decorator
+            command_name = command._bot_command_name  # type: ignore[attr-defined]
             docs = (getdoc(command) or "\n").splitlines()[0]
             result.append(command_name + ": " + docs)
         return prefix + "\n".join(sorted(result)) + postfix

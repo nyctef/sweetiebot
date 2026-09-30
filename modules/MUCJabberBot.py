@@ -1,14 +1,19 @@
 from modules.Message import Message
-from modules.MessageResponse import MessageResponse
-from modules.MessageProcessor import MessageProcessor
+from modules.MessageResponse import MessageResponse, CommandResult
+from modules.MessageProcessor import MessageProcessor, CommandCallback
 from modules.Presence import Presence
 from modules.RoomMember import RoomMember, RoomMemberList
 import logging
 from utils import logerrors
 from slixmpp import ClientXMPP
 from slixmpp.jid import JID
+from slixmpp.stanza import Iq
+from slixmpp.stanza import Message as MessageStanza
+from slixmpp.stanza import Presence as PresenceStanza
 import os
 from pprint import pformat
+from typing import Any, Callable, NoReturn
+import xml.etree.ElementTree as ET
 
 log = logging.getLogger(__name__)
 
@@ -18,7 +23,16 @@ class RestartException(Exception):
 
 
 class MUCJabberBot:
-    def __init__(self, jid, password, room, nick, address=()):
+    _rejoining: bool
+
+    def __init__(
+        self,
+        jid: str,
+        password: str,
+        room: str,
+        nick: str,
+        address: tuple[str, str | int] | tuple[()] = (),
+    ) -> None:
         log.info(
             "creating bot with {} {} {} {} {}".format(
                 jid, password, room, nick, address
@@ -27,8 +41,8 @@ class MUCJabberBot:
         self.nick = nick
         self.room = room
         self.jid = JID(jid)
-        self._presence_callbacks = []
-        self._message_callbacks = []
+        self._presence_callbacks: list[Callable[[Presence], None]] = []
+        self._message_callbacks: list[Callable[[Message], None]] = []
 
         bot = ClientXMPP(jid, password)
         self._bot = bot
@@ -56,9 +70,9 @@ class MUCJabberBot:
         bot.plugin["xep_0199"].enable_keepalive(5, 10)
         bot.register_plugin("xep_0071")
 
-        self.unknown_command_callback = None
+        self.unknown_command_callback: CommandCallback | None = None
 
-        def on_unknown_callback(message):
+        def on_unknown_callback(message: Message) -> CommandResult:
             log.debug("MUCJabberBot on_unknown_callback...")
             if self.unknown_command_callback is not None:
                 log.debug("...delegating to attribute")
@@ -70,21 +84,21 @@ class MUCJabberBot:
         log.info("sb connect")
         bot.connect(address=address)
 
-    def discard_invalid_ssl_cert(self, event, cert, direct):
+    def discard_invalid_ssl_cert(self, event: Any, cert: Any, direct: Any) -> None:
         """ hack: we don't have a valid cert for local testing, so ignore for now """
         return
 
-    def on_start(self, event):
+    def on_start(self, event: Any) -> None:
         log.info("sb on_start")
         self._bot.get_roster()
         self._bot.send_presence(ppriority=100)
         log.info("sb join {} as {}".format(self.room, self.nick))
         self.join_room()
 
-    def join_room(self):
+    def join_room(self) -> None:
         self._muc.join_muc(self.room, self.nick)
 
-    def on_room_joined(self, room_join_message):
+    def on_room_joined(self, room_join_message: MessageStanza) -> None:
         """Note that this event might actually be called multiple
         times due to the room name being changed. This method
         needs to be idempotent"""
@@ -92,14 +106,14 @@ class MUCJabberBot:
         self._rejoining = False
         self._bot.cancel_schedule("custom task: rejoin")
 
-    def on_disconnect(self, event):
+    def on_disconnect(self, event: Any) -> NoReturn:
         log.error("disconnected event raised, quitting so we can restart from scratch")
         # os._exit() actually nukes the process (instead of raising SystemExit
         # like sys.exit() does)
         os._exit(0)
 
     @logerrors
-    def on_message(self, message_stanza):
+    def on_message(self, message_stanza: MessageStanza) -> None:
         if message_stanza["type"] == "error":
             print("\n\nerror!\n\n")
             log.error(message_stanza)
@@ -169,7 +183,7 @@ class MUCJabberBot:
         for callback in self._message_callbacks:
             callback(parsed_message)
 
-    def _get_room_member_list(self):
+    def _get_room_member_list(self) -> RoomMemberList:
         room_details = self._muc.rooms[self.room]
         member_list = [
             self._get_room_member(nick, props)
@@ -178,11 +192,11 @@ class MUCJabberBot:
         ]  # workaround for empty member showing in list
         return RoomMemberList(member_list)
 
-    def _get_room_member(self, nick, props):
+    def _get_room_member(self, nick: str, props: dict[str, Any]) -> RoomMember:
         return RoomMember(nick, JID(props["jid"]), props["affiliation"], props["role"])
 
     @logerrors
-    def on_presence(self, presence_stanza):
+    def on_presence(self, presence_stanza: PresenceStanza) -> None:
         log.debug("creating Presence from {}".format(presence_stanza))
         muc_jid = JID(presence_stanza["from"])
         user = JID(presence_stanza["muc"]["jid"])
@@ -198,13 +212,18 @@ class MUCJabberBot:
         for callback in self._presence_callbacks:
             callback(presence)
 
-    def send_chat_message(self, message, jid):
+    def send_chat_message(self, message: str | MessageResponse, jid: JID | str) -> None:
         self.send_message(message, jid, "chat")
 
-    def send_groupchat_message(self, message):
+    def send_groupchat_message(self, message: str | MessageResponse) -> None:
         self.send_message(message, self.room, "groupchat")
 
-    def send_message(self, message, default_destination, mtype):
+    def send_message(
+        self,
+        message: str | MessageResponse,
+        default_destination: JID | str,
+        mtype: str,
+    ) -> None:
         message = MessageResponse(message, default_destination)
         self._bot.send_message(
             mto=message.destination,
@@ -213,13 +232,13 @@ class MUCJabberBot:
             mtype=mtype,
         )
 
-    def get_jid_from_nick(self, nick):
+    def get_jid_from_nick(self, nick: str | None) -> str | None:
         jid = self._muc.get_jid_property(self.room, nick, "jid")
         if jid is None:
             return None
         return JID(jid).bare
 
-    def get_nick_from_jid(self, jid):
+    def get_nick_from_jid(self, jid: JID | str) -> str | None:
         # slixmpp has a method for this but it uses full jids
         room_details = self._muc.rooms[self.room]
         log.debug("room details " + str(room_details))
@@ -227,10 +246,10 @@ class MUCJabberBot:
             if JID(props["jid"]).bare == JID(jid).bare:
                 return nick
 
-    def jid_is_in_room(self, jid):
+    def jid_is_in_room(self, jid: JID | str) -> bool:
         return self.get_nick_from_jid(jid) is not None
 
-    def load_commands_from(self, target):
+    def load_commands_from(self, target: object) -> None:
         import inspect
 
         for name, value in inspect.getmembers(target, inspect.ismethod):
@@ -239,22 +258,22 @@ class MUCJabberBot:
                 log.info("Registered command: %s" % name)
                 self.message_processor.add_command(name, value)
 
-    def on_ping_timeout(self):
+    def on_ping_timeout(self) -> NoReturn:
         log.error("ping timeout.")
         raise RestartException()
 
-    def create_iq(self, id, type, xml):
+    def create_iq(self, id: str, type: str, xml: ET.Element) -> Iq:
         iq = self._bot.make_iq(id=id, ifrom=self.jid, ito=self.room, itype=type)
         iq.set_payload(xml)
         return iq
 
-    def add_presence_handler(self, callback):
+    def add_presence_handler(self, callback: Callable[[Presence], None]) -> None:
         self._presence_callbacks.append(callback)
 
-    def add_message_handler(self, callback):
+    def add_message_handler(self, callback: Callable[[Message], None]) -> None:
         self._message_callbacks.append(callback)
 
-    def rejoin_if_kicked(self, presence):
+    def rejoin_if_kicked(self, presence: Presence) -> None:
         log.debug(presence)
         log.debug(
             "recieved presence: {} from {}".format(
@@ -271,11 +290,11 @@ class MUCJabberBot:
         else:
             log.debug("{} was kicked".format(user))
 
-    def rejoin(self):
+    def rejoin(self) -> None:
         log.warning(f"attempting a room rejoin... (self._rejoining={self._rejoining})")
         if not self._rejoining:
             return
         self.join_room()
 
-    def process(self):
+    def process(self) -> None:
         self._bot.process()

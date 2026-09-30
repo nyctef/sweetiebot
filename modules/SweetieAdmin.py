@@ -3,6 +3,10 @@ from utils import logerrors, randomstr, botcmd
 from datetime import datetime
 from slixmpp.exceptions import IqError, IqTimeout
 import xml.etree.ElementTree as ET
+from typing import Callable
+from modules.MUCJabberBot import MUCJabberBot
+from modules.Message import Message
+from modules.MessageResponse import MessageResponse
 
 log = logging.getLogger(__name__)
 
@@ -12,7 +16,7 @@ class SweetieAdmin(object):
     _ban = "ban"
     _unban = "unban"
 
-    def __init__(self, bot, chatroom):
+    def __init__(self, bot: MUCJabberBot, chatroom: str) -> None:
         self.bot = bot
         self.bot.load_commands_from(self)
         self.chatroom = chatroom
@@ -20,28 +24,28 @@ class SweetieAdmin(object):
     QUERY_NS = "http://jabber.org/protocol/muc#admin"
 
     @staticmethod
-    def query_element():
+    def query_element() -> ET.Element:
         ele = ET.Element("{" + SweetieAdmin.QUERY_NS + "}query")
         return ele
 
-    def chat(self, message):
+    def chat(self, message: str | MessageResponse) -> None:
         self.bot.send_groupchat_message(message)
 
     @botcmd(hidden=True)
-    def banlist(self, message):
+    def banlist(self, message: Message) -> str:
         """List currently-banned users"""
         return self.listbans(message)
 
     def set_affiliation(
         self,
-        jid=None,
-        nick=None,
-        atype="role",
-        value=None,
-        reason=None,
-        on_success=None,
-        on_failure=None,
-    ):
+        jid: str | None = None,
+        nick: str | None = None,
+        atype: str = "role",
+        value: str | None = None,
+        reason: str | None = None,
+        on_success: Callable[[], None] | None = None,
+        on_failure: Callable[[], None] | None = None,
+    ) -> str | None:
         """ Change room affiliation."""
         values = ("outcast", "member", "admin", "owner", "none")
         if value not in values:
@@ -92,7 +96,7 @@ class SweetieAdmin(object):
 
     @botcmd
     @logerrors
-    def listbans(self, message):
+    def listbans(self, message: Message) -> str:
         """List currently-banned users"""
         id = "banlist" + randomstr()
         query = SweetieAdmin.query_element()
@@ -117,7 +121,7 @@ class SweetieAdmin(object):
 
     @botcmd
     @logerrors
-    def ban(self, message):
+    def ban(self, message: Message) -> str:
         """[nick] [reason] Bans a user from the chat
         nick can be wrapped in quotes"""
 
@@ -130,7 +134,7 @@ class SweetieAdmin(object):
             return "A reason must be provided"
 
         full_reason = (
-            "banned by "
+            "banned by "  # type: ignore[operator]
             + message.sender_nick
             + ": ["
             + reason
@@ -145,23 +149,23 @@ class SweetieAdmin(object):
 
     @botcmd
     @logerrors
-    def unban(self, message):
+    def unban(self, message: Message) -> str:
         """[jid] Unbans a user from the chat.
         Use listbans to find jids"""
 
         jid = message.args
 
         if message.sender_can_do_admin_things():
-            log.debug("trying to unban " + jid)
+            log.debug("trying to unban " + jid)  # type: ignore[operator]
             return self.set_affiliation(jid=jid, atype="affiliation", value="none") or (
-                "cleared ban from " + jid
+                "cleared ban from " + jid  # type: ignore[operator]
             )
         else:
             return "noooooooope."
 
     @botcmd(name="kick")
     @logerrors
-    def remove(self, message):
+    def remove(self, message: Message) -> str | None:
         """[nick] [reason-optional] Kicks a user from the chat
         nick can be wrapped in quotes"""
 
@@ -183,7 +187,13 @@ class SweetieAdmin(object):
             nick=nick, atype="role", value="none", reason=reason
         )
 
-    def kick(self, nick, reason, on_success=None, on_failure=None):
+    def kick(
+        self,
+        nick: str,
+        reason: str,
+        on_success: Callable[[], None] | None = None,
+        on_failure: Callable[[], None] | None = None,
+    ) -> str | None:
         return self.set_affiliation(
             nick=nick,
             reason=reason,
@@ -195,7 +205,7 @@ class SweetieAdmin(object):
 
     @botcmd(name="kickjid")
     @logerrors
-    def remove_jid(self, message):
+    def remove_jid(self, message: Message) -> str | None:
         """[jid] [reason-optional] Kicks a user by their jid from the chat"""
 
         if not message.nick_reason:
@@ -214,7 +224,13 @@ class SweetieAdmin(object):
 
         return self.kick_jid(jid, reason)
 
-    def kick_jid(self, jid, reason, on_success=None, on_failure=None):
+    def kick_jid(
+        self,
+        jid: str,
+        reason: str,
+        on_success: Callable[[], None] | None = None,
+        on_failure: Callable[[], None] | None = None,
+    ) -> str | None:
         log.debug("finding nick for jid " + jid)
         nick = self.bot.get_nick_from_jid(jid)
         if nick is None:
@@ -231,10 +247,10 @@ class SweetieAdmin(object):
 
     @botcmd
     @logerrors
-    def sudo(self, message):
+    def sudo(self, message: Message) -> str:
         """[command] Escalate privileges"""
         return (
-            message.sender_nick
+            message.sender_nick  # type: ignore[operator]
             + " is not in the sudoers file. This "
             + "incident will be reported."
         )

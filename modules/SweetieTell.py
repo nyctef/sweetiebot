@@ -1,52 +1,62 @@
 from utils import botcmd
 import logging
+from slixmpp import JID
+from modules.FakeRedis import FakeRedis
+from modules.MUCJabberBot import MUCJabberBot
+from modules.Message import Message
+from modules.PgWrapper import PgWrapper
+from modules.Presence import Presence
 
 log = logging.getLogger(__name__)
 
 
 class TellStorageRedis(object):
-    def __init__(self, store):
+    def __init__(self, store: FakeRedis) -> None:
         self.store = store
 
-    def _dec(self, bytes):
+    def _dec(self, bytes: bytes) -> str:
         return bytes.decode("utf-8")
 
-    def get_jid_from_nick(self, nick):
+    def get_jid_from_nick(self, nick: str) -> str | None:
         result = self.store.get(f"jidfornick:{nick}")
         if result:
             return self._dec(result)
 
-    def set_jid_for_nick(self, nick, jid):
+    def set_jid_for_nick(self, nick: str, jid: JID | str) -> None:
         self.store.set(f"jidfornick:{nick}", str(jid))
 
-    def set_or_update_message(self, jid, senderjid, message):
+    def set_or_update_message(
+        self, jid: JID | str, senderjid: JID | str, message: str
+    ) -> None:
         self.store.hset(f"tell:{jid}", str(senderjid), message)
 
-    def get_existing_messages_by_sender(self, jid):
+    def get_existing_messages_by_sender(self, jid: JID | str) -> dict[str, str]:
         messages = self.store.hgetall(f"tell:{jid}")
         return {self._dec(k): self._dec(v) for (k, v) in messages.items()}
 
-    def clear_messages_for(self, jid):
+    def clear_messages_for(self, jid: JID | str) -> None:
         self.store.delete(f"tell:{jid}")
 
 
 class TellStoragePg(object):
-    def __init__(self, dbwrapper):
+    def __init__(self, dbwrapper: PgWrapper) -> None:
         self.dbwrapper = dbwrapper
 
-    def get_jid_from_nick(self, nick):
+    def get_jid_from_nick(self, nick: str) -> str | None:
         return self.dbwrapper.query_one(
             "SELECT jid from tell_jid_to_nick_mapping WHERE nick = %s", (nick,)
         )
 
-    def set_jid_for_nick(self, nick, jid):
+    def set_jid_for_nick(self, nick: str, jid: JID | str) -> None:
         self.dbwrapper.write(
             "INSERT INTO tell_jid_to_nick_mapping (nick, jid) VALUES (%s, %s) "
             "ON CONFLICT (nick) DO UPDATE SET jid = EXCLUDED.jid",
             (nick, str(jid)),
         )
 
-    def set_or_update_message(self, jid, senderjid, message):
+    def set_or_update_message(
+        self, jid: JID | str, senderjid: JID | str, message: str
+    ) -> None:
         self.dbwrapper.write(
             "INSERT INTO tell_messages_by_sender (sender_jid, receiver_jid, messages) VALUES (%s, %s, %s) "
             "ON CONFLICT (sender_jid, receiver_jid) DO UPDATE SET "
@@ -54,7 +64,7 @@ class TellStoragePg(object):
             (str(senderjid), str(jid), [message]),
         )
 
-    def get_existing_messages_by_sender(self, jid):
+    def get_existing_messages_by_sender(self, jid: JID | str) -> dict[str, str]:
         results = self.dbwrapper.query_all(
             "SELECT sender_jid, messages from tell_messages_by_sender "
             "WHERE receiver_jid = %s",
@@ -62,21 +72,23 @@ class TellStoragePg(object):
         )
         return {s: "\n".join(m) for (s, m) in results}
 
-    def clear_messages_for(self, jid):
+    def clear_messages_for(self, jid: JID | str) -> None:
         self.dbwrapper.write(
             "DELETE FROM tell_messages_by_sender WHERE receiver_jid = %s", (str(jid),)
         )
 
 
 class SweetieTell(object):
-    def __init__(self, bot, storage):
+    def __init__(
+        self, bot: MUCJabberBot, storage: TellStorageRedis | TellStoragePg
+    ) -> None:
         self.storage = storage
         self.bot = bot
         self.bot.load_commands_from(self)
         self.nicktojid = NickToJidTracker(self.bot, self.storage)
 
     @botcmd
-    def tell(self, message):
+    def tell(self, message: Message) -> str | None:
         """[user] [message] Notify a user the next time they speak in chat"""
         if message.is_pm:
             return "Sorry, you can't use !tell in a PM"
@@ -126,26 +138,28 @@ class SweetieTell(object):
             )
             return "Message received for {}".format(sendee_jid)
 
-    def get_messages_for(self, message):
+    def get_messages_for(self, message: Message) -> str | None:
         messages = self.storage.get_existing_messages_by_sender(
             message.user_jid
         ).values()
         if len(messages):
             self.storage.clear_messages_for(message.user_jid)
-            return message.sender_nick + ", " + "\n".join(messages)
+            return message.sender_nick + ", " + "\n".join(messages)  # type: ignore[operator]
 
 
 class NickToJidTracker(object):
-    def __init__(self, bot, storage):
+    def __init__(
+        self, bot: MUCJabberBot, storage: TellStorageRedis | TellStoragePg
+    ) -> None:
         self.storage = storage
         self.bot = bot
         self.bot.add_presence_handler(self.on_presence)
 
-    def on_presence(self, presence):
+    def on_presence(self, presence: Presence) -> None:
         nick = presence.muc_jid.resource
         jid = presence.user_jid.bare
         log.debug("setting jid for nick {} to {}".format(nick, jid))
         self.storage.set_jid_for_nick(nick, jid)
 
-    def get_jid_from_nick(self, nick):
+    def get_jid_from_nick(self, nick: str) -> str | None:
         return self.storage.get_jid_from_nick(nick)

@@ -2,16 +2,18 @@ import logging
 from utils import botcmd
 from datetime import datetime
 from astral import Astral
+from modules.MUCJabberBot import MUCJabberBot
+from modules.Message import Message
 
 log = logging.getLogger(__name__)
 
 
 class SweetieMoon(object):
-    def __init__(self, bot=None):
+    def __init__(self, bot: MUCJabberBot | None = None) -> None:
         if bot:
             bot.load_commands_from(self)
 
-    def phase_description(self, phase):
+    def phase_description(self, phase: float) -> str:
         case = int(phase)
         percentage = 1 - abs((2 * (phase) / 28) - 1)
         descriptions = [
@@ -47,7 +49,7 @@ class SweetieMoon(object):
         return descriptions[case].format(percentage="{:.0f}%".format(percentage * 100))
 
     @botcmd
-    def moon(self, message):
+    def moon(self, message: Message | None) -> str:
         try:
             phase = Astral().moon_phase(date=datetime.utcnow(), rtype=float)
             return self.phase_description(phase)

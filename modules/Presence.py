@@ -2,7 +2,13 @@ from slixmpp import JID
 
 
 class Presence:
-    def __init__(self, muc_jid, user_jid, presence_type, message):
+    def __init__(
+        self,
+        muc_jid: JID | str,
+        user_jid: JID | str,
+        presence_type: str | None,
+        message: str | None,
+    ) -> None:
         self.muc_jid = JID(muc_jid)
         self.user_jid = JID(user_jid)
         self.presence_type = presence_type

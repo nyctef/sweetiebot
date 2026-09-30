@@ -1,23 +1,26 @@
 from utils import logerrors, botcmd
 import random
 import logging
+from modules.MUCJabberBot import MUCJabberBot
+from modules.Message import Message
+from modules.SweetieAdmin import SweetieAdmin
 
 log = logging.getLogger(__name__)
 
 
 class SweetieRoulette(object):
-    def __init__(self, bot, admin):
+    def __init__(self, bot: MUCJabberBot, admin: SweetieAdmin) -> None:
         bot.load_commands_from(self)
         self.admin = admin
         self._spin()
 
-    def _spin(self):
+    def _spin(self) -> None:
         self.current_chamber = random.randint(0, 5)
         log.debug("chamber on " + str(self.current_chamber))
 
     @botcmd
     @logerrors
-    def spin(self, message):
+    def spin(self, message: Message) -> str:
         """Spin the barrel (see also: roulette)"""
         if message.is_pm:
             return ":lyraahem: no tampering with the gun under the table now"
@@ -26,7 +29,7 @@ class SweetieRoulette(object):
 
     @botcmd
     @logerrors
-    def roulette(self, message):
+    def roulette(self, message: Message) -> str | None:
         """Six bullets, one chamber (see also: spin)"""
         if message.is_pm:
             return ":lyraahem: suicide should be a social activity"

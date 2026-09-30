@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from datetime import datetime
 
 
-def create_message(input, is_pm=False):
+def create_message(input: str, is_pm: bool = False) -> Message:
     room_members = [
         RoomMember("Sweetiebot", "sweetiebot@jabber.org/asdf", "owner", "moderator"),
         RoomMember("test_user", "testuser@jabber.org/asdf", "none", "participant"),
@@ -24,31 +24,31 @@ def create_message(input, is_pm=False):
 
 
 class SweetieSeenTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.bot = MagicMock()
         self.bot.get_jid_from_nick = MagicMock(return_value=None)
         self.storage = SeenStorageRedis(FakeRedis())
 
         self.seen = SweetieSeen(self.bot, self.storage)
 
-    def test_can_print_several_days_ago(self):
+    def test_can_print_several_days_ago(self) -> None:
         now = datetime(2016, 4, 10, 10, 30)
         past = datetime(2016, 4, 7, 10, 30)
-        result = SweetieSeen.get_time_ago(None, now, past)
+        result = SweetieSeen.get_time_ago(None, now, past)  # type: ignore[arg-type]
         self.assertEqual("3d 0h 0m 0s ago", result)
 
-    def test_can_print_several_minutes_ago(self):
+    def test_can_print_several_minutes_ago(self) -> None:
         now = datetime(2016, 4, 10, 10, 30, 31)
         past = datetime(2016, 4, 10, 10, 27, 30)
-        result = SweetieSeen.get_time_ago(None, now, past)
+        result = SweetieSeen.get_time_ago(None, now, past)  # type: ignore[arg-type]
         self.assertEqual("0d 0h 3m 1s ago", result)
 
-    def test_returns_no_data_if_not_seen(self):
+    def test_returns_no_data_if_not_seen(self) -> None:
         response = self.seen.seen(create_message("!seen obi-wan"))
 
         self.assertEqual(response, "No records found for user 'obi-wan'")
 
-    def test_returns_last_spoke_if_spoke_set(self):
+    def test_returns_last_spoke_if_spoke_set(self) -> None:
         # TODO: this is a pretty nasty set of mock setups
         self.bot.get_jid_from_nick = MagicMock(return_value="sender@jabber.org")
         self.bot.jid_is_in_room = MagicMock(return_value=True)
@@ -59,7 +59,7 @@ class SweetieSeenTests(unittest.TestCase):
 
         self.assertRegex(response, "sender last seen speaking at ")
 
-    def test_returns_last_seen_if_seen_set(self):
+    def test_returns_last_seen_if_seen_set(self) -> None:
         # "seen" is a bit easier to satisfy, since the target doesn't need to be in the room
         presence = MagicMock()
         presence.presence_type = "unavailable"

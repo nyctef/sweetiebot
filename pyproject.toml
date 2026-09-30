@@ -24,4 +24,27 @@ slixmpp = ["setuptools"]
 dev = [
   "black>=26.5.1",
   "flake8>=7.4.1",
+  "mypy>=2.3.1",
+  "types-beautifulsoup4>=4.12.0.20250516",
+  "types-psycopg2>=2.9.21.20260911",
+  "types-pytz>=2026.4.0.20260926",
+  "types-requests>=2.31.0.6",
 ]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+# names imported into package __init__ files are the packages' public API
+implicit_reexport = true
+# functions commonly fall through to an implicit `return None`
+warn_no_return = false
+# variables are commonly reassigned with values of a different type
+allow_redefinition = true
+# slixmpp and parsed JSON responses are untyped, so many values are Any
+warn_return_any = false
+exclude = ["^\\.venv/"]
+
+[[tool.mypy.overrides]]
+# no type information published for these packages
+module = ["slixmpp.*", "slixmpp", "laboratory", "astral", "opencensus.*"]
+ignore_missing_imports = true

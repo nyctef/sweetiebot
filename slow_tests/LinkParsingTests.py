@@ -4,7 +4,7 @@ from modules.SweetieChat import SweetieChat
 
 
 class LinkParsingTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.bot = MagicMock()
         self.actions = MagicMock()
         self.sass = MagicMock()
@@ -26,11 +26,11 @@ class LinkParsingTests(unittest.TestCase):
             self.dictionary,
         )
 
-    def test_can_fetch_youtube_link(self):
+    def test_can_fetch_youtube_link(self) -> None:
         result = self.chat.get_page_titles('this is an interesting video: https://www.youtube.com/watch?v=dQw4w9WgXcQ')
         self.assertEqual('Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster) by Rick Astley', result)
 
-    def test_can_fetch_twitter_link(self):
+    def test_can_fetch_twitter_link(self) -> None:
         result = self.chat.get_page_titles(' https://twitter.com/Graham_LRR/status/1354129384509038593 ')
         self.assertEqual(
             'I don’t know how to make jokes that aren’t about Now any more '

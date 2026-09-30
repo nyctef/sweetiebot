@@ -1,5 +1,9 @@
 import psycopg2
 import logging
+from typing import Any, Callable, Mapping, Sequence, TypeVar
+
+T = TypeVar("T")
+QueryVars = Sequence[Any] | Mapping[str, Any] | None
 
 log = logging.getLogger(__name__)
 
@@ -9,40 +13,42 @@ class DatabaseConnectionError(Exception):
 
 
 class PgWrapper(object):
-    def __init__(self, pg_conn_str):
+    def __init__(self, pg_conn_str: str) -> None:
         self._pg_conn_str = pg_conn_str
         self._conn = psycopg2.connect(pg_conn_str)
 
-    def query_one(self, query, vars=None):
+    def query_one(self, query: str, vars: QueryVars = None) -> Any:
         """returns a single value or None"""
         return self.__retry_on_fail(lambda: self.__query_one_inner(query, vars))
 
-    def query_all(self, query, vars=None):
+    def query_all(self, query: str, vars: QueryVars = None) -> list[tuple[Any, ...]]:
         """returns an array of values, possibly empty"""
         return self.__retry_on_fail(lambda: self.__query_all_inner(query, vars))
 
-    def write(self, query, vars=None):
+    def write(self, query: str, vars: QueryVars = None) -> int:
         """Executes query, then commits the transaction. Returns the count of affected rows"""
         return self.__retry_on_fail(lambda: self.__write_inner(query, vars))
 
-    def __query_one_inner(self, query, vars=None):
+    def __query_one_inner(self, query: str, vars: QueryVars = None) -> Any:
         with self._conn.cursor() as cur:
             cur.execute(query, vars)
             result = cur.fetchone()
             return result[0] if result is not None else None
 
-    def __query_all_inner(self, query, vars=None):
+    def __query_all_inner(
+        self, query: str, vars: QueryVars = None
+    ) -> list[tuple[Any, ...]]:
         with self._conn.cursor() as cur:
             cur.execute(query, vars)
             return cur.fetchall()
 
-    def __write_inner(self, query, vars=None):
+    def __write_inner(self, query: str, vars: QueryVars = None) -> int:
         with self._conn.cursor() as cur:
             cur.execute(query, vars)
             cur.connection.commit()
             return cur.rowcount
 
-    def __retry_on_fail(self, action):
+    def __retry_on_fail(self, action: Callable[[], T]) -> T:
         try:
             return action()
         except psycopg2.errors.InFailedSqlTransaction:

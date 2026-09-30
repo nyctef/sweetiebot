@@ -5,6 +5,7 @@ from modules.SweetieTell import TellStoragePg, TellStorageRedis
 from modules.FakeRedis import FakeRedis
 from modules import PgWrapper
 from slixmpp import JID
+from typing import Callable
 
 pg_conn_str = getenv("SB_PG_DB", None)
 if not pg_conn_str:
@@ -12,22 +13,28 @@ if not pg_conn_str:
 
 
 class TellStorageTests(object):
-    def test_impl_is_not_none(self):
+    impl: TellStoragePg | TellStorageRedis
+    # provided by unittest.TestCase in the concrete test classes
+    assertEqual: Callable[..., None]
+    assertIsNotNone: Callable[..., None]
+    assertListEqual: Callable[..., None]
+
+    def test_impl_is_not_none(self) -> None:
         self.assertIsNotNone(self.impl)
 
-    def test_jid_from_nick_returns_none_if_not_found(self):
+    def test_jid_from_nick_returns_none_if_not_found(self) -> None:
         self.assertEqual(None, self.impl.get_jid_from_nick("not_found"))
 
-    def test_jid_from_nick_returns_result_if_found(self):
+    def test_jid_from_nick_returns_result_if_found(self) -> None:
         self.impl.set_jid_for_nick("nick1", "jid1")
         self.assertEqual("jid1", self.impl.get_jid_from_nick("nick1"))
 
-    def test_jid_from_nick_returns_latest_result(self):
+    def test_jid_from_nick_returns_latest_result(self) -> None:
         self.impl.set_jid_for_nick("nick1", "jid1")
         self.impl.set_jid_for_nick("nick1", "jid2")
         self.assertEqual("jid2", self.impl.get_jid_from_nick("nick1"))
 
-    def test_setting_single_message(self):
+    def test_setting_single_message(self) -> None:
         self.impl.set_or_update_message("jid1", "sender1", "message1")
         self.impl.set_or_update_message("other_target", "sender1", "should be ignored")
 
@@ -35,7 +42,7 @@ class TellStorageTests(object):
         self.assertEqual(msgs.get("sender1"), "message1")
         self.assertListEqual(list(msgs.values()), ["message1"])
 
-    def test_messages_should_be_replaced_instead_of_appended(self):
+    def test_messages_should_be_replaced_instead_of_appended(self) -> None:
         # This is a bit of a strange behavior for the store, but it matches
         # what the code currently expects
         self.impl.set_or_update_message("jid1", "sender1", "message2")
@@ -45,7 +52,7 @@ class TellStorageTests(object):
         self.assertEqual(msgs.get("sender1"), "message3")
         self.assertListEqual(list(msgs.values()), ["message3"])
 
-    def test_messages_for_different_receivers(self):
+    def test_messages_for_different_receivers(self) -> None:
         self.impl.set_or_update_message("receiver1", "sender1", "message4")
         self.impl.set_or_update_message("receiver2", "sender1", "message5")
 
@@ -55,7 +62,7 @@ class TellStorageTests(object):
         msgs = self.impl.get_existing_messages_by_sender("receiver2")
         self.assertListEqual(list(msgs.values()), ["message5"])
 
-    def test_clear_messages(self):
+    def test_clear_messages(self) -> None:
         self.impl.set_or_update_message("jid1", "sender1", "message2")
         self.impl.clear_messages_for("jid1")
 
@@ -63,7 +70,7 @@ class TellStorageTests(object):
         self.assertEqual(msgs.get("sender1"), None)
         self.assertListEqual(list(msgs.values()), [])
 
-    def test_handles_JIDs_rather_than_strings(self):
+    def test_handles_JIDs_rather_than_strings(self) -> None:
         self.impl.set_or_update_message(JID("jid1"), JID("sender1"), "message2")
         self.impl.set_jid_for_nick("nick", JID("jid"))
         self.impl.get_existing_messages_by_sender(JID("jid"))
@@ -71,19 +78,22 @@ class TellStorageTests(object):
 
 
 class TellStoragePgTests(TellStorageTests, unittest.TestCase):
+    dbwrapper: PgWrapper
+    impl: TellStoragePg
+
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         conn = psycopg2.connect(pg_conn_str)
         conn.autocommit = True
         cur = conn.cursor()
         cur.execute("DROP DATABASE IF EXISTS tell_storage_tests")
         cur.execute("CREATE DATABASE tell_storage_tests")
 
-        cls.dbwrapper = PgWrapper(pg_conn_str + " dbname=tell_storage_tests")
+        cls.dbwrapper = PgWrapper(pg_conn_str + " dbname=tell_storage_tests")  # type: ignore[operator]
         cls.impl = TellStoragePg(cls.dbwrapper)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         cls.dbwrapper._conn.close()
 
         conn = psycopg2.connect(pg_conn_str)
@@ -91,7 +101,7 @@ class TellStoragePgTests(TellStorageTests, unittest.TestCase):
         cur = conn.cursor()
         cur.execute("DROP DATABASE tell_storage_tests")
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.dbwrapper.write(
             # TODO: should this be able to run the sql in create_basic_tables somehow?
             "DROP TABLE IF EXISTS tell_jid_to_nick_mapping;"
@@ -104,6 +114,8 @@ class TellStoragePgTests(TellStorageTests, unittest.TestCase):
 
 
 class TellStorageRedisTests(TellStorageTests, unittest.TestCase):
+    impl: TellStorageRedis
+
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         cls.impl = TellStorageRedis(FakeRedis())

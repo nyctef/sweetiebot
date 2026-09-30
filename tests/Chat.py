@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import MagicMock
 
 
-def create_message(input, is_pm=False):
+def create_message(input: str, is_pm: bool = False) -> Message:
     room_members = [
         RoomMember("Sweetiebot", "sweetiebot@jabber.org/asdf", "owner", "moderator"),
         RoomMember("test_user", "testuser@jabber.org/asdf", "none", "participant"),
@@ -23,7 +23,7 @@ def create_message(input, is_pm=False):
 
 
 class SweetieChatTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.bot = MagicMock()
         self.actions = MagicMock()
         self.sass = MagicMock()
@@ -45,28 +45,28 @@ class SweetieChatTests(unittest.TestCase):
             self.dictionary,
         )
 
-    def test_can_choose_a_thing(self):
+    def test_can_choose_a_thing(self) -> None:
         response = self.chat.choose(create_message("!choose pizza,pie,calzone"))
         self.assertIn(response, ["pizza", "pie", "calzone"])
 
-    def test_does_not_show_permission_failed_title(self):
+    def test_does_not_show_permission_failed_title(self) -> None:
         return  # this test is a bit slow
         response = self.chat.random_chat(
             create_message("https://forum.pleaseignore.com/topic/83206/")
         )
         self.assertIsNone(response)
 
-    def test_does_not_cd_in_middle_of_word(self):
+    def test_does_not_cd_in_middle_of_word(self) -> None:
         response = self.chat.random_chat(
             create_message("you're a medic/doctor, right?")
         )
         self.assertIsNone(response)
 
-    def test_sweetiebot_yes(self):
+    def test_sweetiebot_yes(self) -> None:
         response = self.chat.random_chat(create_message("Sweetiebot no"))
         self.assertEqual("Sweetiebot yes! :sweetieglee:", response)
 
-    def test_how_x_is_y(self):
+    def test_how_x_is_y(self) -> None:
         response = self.chat.random_chat(create_message("Sweetiebot: how x is y?"))
         self.assertEqual("sender: y [74.06% x]", response)
         response2 = self.chat.random_chat(create_message("Sweetiebot: how blue is red"))
@@ -80,7 +80,7 @@ class SweetieChatTests(unittest.TestCase):
         )
         self.assertEqual("sender: silly people [11.49% totally silly]", response4)
 
-    def test_misc(self):
+    def test_misc(self) -> None:
         print(self.chat.random_chat(create_message("Sweetiebot: how do you do?")))
         print(
             self.chat.random_chat(
@@ -92,12 +92,12 @@ class SweetieChatTests(unittest.TestCase):
             self.chat.random_chat(create_message("Sweetiebot: will she ever love me"))
         )
 
-    def test_dictionary(self):
+    def test_dictionary(self) -> None:
         response = self.chat.random_chat(
             create_message("Sweetiebot: what is an idiot?")
         )
         self.assertEqual("a picture of you", response)
 
-    def test_mlyp(self):
+    def test_mlyp(self) -> None:
         response = self.chat.random_chat(create_message("Freddy Mercury is gay"))
         self.assertEqual("sender: mlyp", response)

@@ -2,10 +2,11 @@ from pprint import pformat
 import logging
 import laboratory
 import types
+from typing import Any, Callable, NoReturn
 
 
-class LoggingExperiment(laboratory.Experiment):
-    def publish(self, result):
+class LoggingExperiment(laboratory.Experiment):  # type: ignore[misc]
+    def publish(self, result: Any) -> None:
         if not result.match:
             try:
                 logging.error(f"Experiment mismatch: output from {result.candidates[0].name} did not match {result.control.name}",
@@ -22,11 +23,13 @@ class LoggingExperiment(laboratory.Experiment):
                 logging.error("Experiment mismatch!: " + pformat(result), extra={'custom_dimensions': {'exception': pformat(e)}})
 
 
-def method_missing(method_name, type_name):
+def method_missing(method_name: str, type_name: str) -> NoReturn:
     raise Exception(f"{method_name} not implemented on {type_name}")
 
 
-def make_experiment_object(control, candidate):
+def make_experiment_object(
+    control: object, candidate: object
+) -> types.SimpleNamespace:
     # inspect the control object to find the set of methods we want to experiment on
     api_methods = [
         getattr(control, a)
@@ -48,8 +51,10 @@ def make_experiment_object(control, candidate):
         )
 
         # https://stackoverflow.com/a/3431699 double function to avoid closure issues
-        def make_experiment_method(api_method, candidate_method):
-            def create_and_run_experiment(*args, **kwargs):
+        def make_experiment_method(
+            api_method: Callable[..., Any], candidate_method: Callable[..., Any]
+        ) -> Callable[..., Any]:
+            def create_and_run_experiment(*args: Any, **kwargs: Any) -> Any:
                 experiment = LoggingExperiment()
                 experiment.control(
                     api_method,

@@ -10,18 +10,20 @@ if not pg_conn_str:
 
 
 class TableListTests(unittest.TestCase):
+    dbwrapper: PgWrapper
+
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         conn = psycopg2.connect(pg_conn_str)
         conn.autocommit = True
         cur = conn.cursor()
         cur.execute("DROP DATABASE IF EXISTS table_list_tests")
         cur.execute("CREATE DATABASE table_list_tests")
 
-        cls.dbwrapper = PgWrapper(pg_conn_str + " dbname=table_list_tests")
+        cls.dbwrapper = PgWrapper(pg_conn_str + " dbname=table_list_tests")  # type: ignore[operator]
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         cls.dbwrapper._conn.close()
 
         conn = psycopg2.connect(pg_conn_str)
@@ -29,13 +31,13 @@ class TableListTests(unittest.TestCase):
         cur = conn.cursor()
         cur.execute("DROP DATABASE table_list_tests")
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.dbwrapper.write(
             "DROP TABLE IF EXISTS deowl_fails;"
             "CREATE TABLE deowl_fails(id serial PRIMARY KEY, text TEXT UNIQUE NOT NULL);"
         )
 
-    def test_loops_through_list_when_reaches_end(self):
+    def test_loops_through_list_when_reaches_end(self) -> None:
         tablelist = RandomizedList(TableList(self.dbwrapper, "deowl_fails"))
         self.dbwrapper.write("INSERT INTO deowl_fails(text) VALUES ('test1')")
 
@@ -45,14 +47,14 @@ class TableListTests(unittest.TestCase):
         self.assertEqual(value1, value2)
         self.assertIsNotNone(value2)
 
-    def test_throws_error_if_no_results_found(self):
+    def test_throws_error_if_no_results_found(self) -> None:
         """TODO: should this just return None instead?"""
         tablelist = RandomizedList(TableList(self.dbwrapper, "deowl_fails"))
 
         with self.assertRaises(Exception):
             tablelist.get_next()
 
-    def test_remembers_new_lines_added(self):
+    def test_remembers_new_lines_added(self) -> None:
         tablelist = RandomizedList(TableList(self.dbwrapper, "deowl_fails"))
 
         tablelist.add_line("this is a new line")

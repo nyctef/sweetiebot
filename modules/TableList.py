@@ -1,33 +1,36 @@
 import random
 import logging
+from modules.PgWrapper import PgWrapper
 
 log = logging.getLogger(__name__)
 
 
 class TableList(object):
-    def __init__(self, dbwrapper, table_name):
+    def __init__(self, dbwrapper: PgWrapper, table_name: str) -> None:
         self.dbwrapper = dbwrapper
         self.table_name = table_name
         self.responses = None
 
-    def add_line(self, line):
+    def add_line(self, line: str) -> None:
         sql = f"INSERT INTO {self.table_name}(text) VALUES (%s) ON CONFLICT (text) DO NOTHING"
         self.dbwrapper.write(sql, (line,))
 
-    def read_all(self):
+    def read_all(self) -> list[str]:
         results = self.dbwrapper.query_all(f"SELECT text from {self.table_name}")
         return [x[0].strip() for x in results]
 
 
 class RandomizedList(object):
-    def __init__(self, storage):
-        self.storage = storage
-        self.responses = None
+    sass_index: int
 
-    def add_line(self, line):
+    def __init__(self, storage: TableList) -> None:
+        self.storage = storage
+        self.responses: list[str] | None = None
+
+    def add_line(self, line: str) -> None:
         self.storage.add_line(line)
 
-    def get_next(self):
+    def get_next(self) -> str:
         log.debug("RandomizedList get_next")
         if not self.responses:
             log.debug("reading response list..")
