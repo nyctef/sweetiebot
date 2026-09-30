@@ -4,7 +4,12 @@ import random
 import hashlib
 from random import randint
 from utils import logerrors, botcmd
-from modules.MessageResponse import MessageResponse
+from modules.MessageResponse import MessageResponse, CommandResult
+from modules.MUCJabberBot import MUCJabberBot
+from modules.Message import Message
+from modules.SweetieDictionary import SweetieDictionary
+from modules.SweetieTell import SweetieTell
+from modules.TableList import RandomizedList
 from urllib.parse import urlparse
 
 log = logging.getLogger(__name__)
@@ -56,27 +61,37 @@ class SweetieChat(object):
     target = "<target>"
     chattiness = 0.02
 
-    def __init__(self, bot, actions, sass, chatroom, cadmusic, tell, dictionary):
+    def __init__(
+        self,
+        bot: MUCJabberBot,
+        actions: RandomizedList,
+        sass: RandomizedList,
+        chatroom: str,
+        cadmusic: RandomizedList,
+        tell: SweetieTell,
+        dictionary: SweetieDictionary,
+    ) -> None:
         self.bot = bot
         self.bot.load_commands_from(self)
         self.nickname = self.bot.nick
         self.actions = actions
-        self.sass = sass
+        # shadows the `sass` command method, which has already been registered above
+        self.sass = sass  # type: ignore[method-assign, assignment]
         self.chatroom = chatroom
         self.cadance_musics_log = cadmusic
         self.tell = tell
         self.dictionary = dictionary
 
-    def cuddle(self, message):
+    def cuddle(self, message: Message) -> str:
         log.debug("cuddle")
         if "pets" in message.message_text:
             return "/me purrs " + random.choice(self.emotes)
         action = self.actions.get_next()
-        action = action.replace("<target>", message.sender_nick)
+        action = action.replace("<target>", message.sender_nick)  # type: ignore[arg-type]
         return action + " " + random.choice(self.emotes)
 
     @logerrors
-    def get_page_titles(self, message):
+    def get_page_titles(self, message: str) -> str | None:
         matches = self.urlregex.findall(message)
         matches = [x[0] for x in matches]
         matches = list(map(self.youtube_filter, matches))
@@ -91,7 +106,7 @@ class SweetieChat(object):
             return None
         return " / ".join(results)
 
-    def get_page_title(self, url):
+    def get_page_title(self, url: str) -> str | None:
         if "oembed" in url:
             return self.get_oembed_page_title(url)
 
@@ -112,16 +127,16 @@ class SweetieChat(object):
             content = res.raw.read(100000 + 1, decode_content=True)
             if len(content) > 100000:
                 log.warning("skipping download of {} due to content length > 100000")
-                return
+                return  # type: ignore[return-value]
             if "html" not in res.headers["content-type"]:
                 log.warning("didn't get html from request, skipping")
-                return
+                return  # type: ignore[return-value]
             soup = BeautifulSoup(res.text, "html.parser")
-            return soup.title.string
+            return soup.title.string  # type: ignore[union-attr]
         except Exception as e:
             log.warning("error fetching url " + url + " : " + str(e))
 
-    def get_oembed_page_title(self, url):
+    def get_oembed_page_title(self, url: str) -> str | None:
         import json
         import requests
 
@@ -140,7 +155,7 @@ class SweetieChat(object):
         except Exception as e:
             log.warning("error fetching url " + url + " : " + str(e))
 
-    def title_filter(self, result):
+    def title_filter(self, result: str) -> bool:
         if result.strip() == "imgur: the simple image sharer":
             return False
         if result.strip() == "Imgur":
@@ -153,25 +168,25 @@ class SweetieChat(object):
             return False
         return True
 
-    def remove_extra_whitespace(self, result):
+    def remove_extra_whitespace(self, result: str) -> str:
         result = result.replace("\n", "")
         result = result.replace("\r", "")
         result = re.sub(r"\s+", " ", result)
         return result
 
-    def youtube_filter(self, link):
+    def youtube_filter(self, link: str) -> str:
         parsed = urlparse(link)
         if "youtube" in parsed.netloc.replace(".", ""):
             return "https://www.youtube.com/oembed?format=json&url=" + link
         return link
 
-    def twitter_filter(self, link):
+    def twitter_filter(self, link: str) -> str:
         parsed = urlparse(link)
         if "twitter" in parsed.netloc:
             return "https://publish.twitter.com/oembed?format=json&url=" + link
         return link
 
-    def imgur_filter(self, link):
+    def imgur_filter(self, link: str) -> str:
         imgurregex = re.compile(r"^http(s)?://i.imgur.com/([a-zA-Z0-9]*)\..*$")
         match = imgurregex.match(link)
         if match:
@@ -180,7 +195,7 @@ class SweetieChat(object):
             return replacement
         return link
 
-    def deviantart_filter(self, link):
+    def deviantart_filter(self, link: str) -> str:
         devartregex = re.compile(r"^http(s)?://\w+\.deviantart\.[\w/]+-(\w+)\.\w+$")
         match = devartregex.match(link)
         if match:
@@ -192,7 +207,7 @@ class SweetieChat(object):
             return replacement
         return link
 
-    def get_youtube_links(self, text):
+    def get_youtube_links(self, text: str) -> list[str]:
         youtuberegex = re.compile(
             r"(?:https?://)?(?:www\.)?(?:youtube|youtu)\.(?:com|be)/(?:watch\?v=|embed/|v/|[^ ]+\?v=)?(?:[^&=%\?]{11})"
         )
@@ -201,14 +216,14 @@ class SweetieChat(object):
             log.debug("found youtube links: {}".format(links))
         return links
 
-    def do_cadance_musics(self, mess):
+    def do_cadance_musics(self, mess: Message) -> None:
         if mess.user_jid == "princess_cadence@friendshipismagicsquad.com":
             for link in self.get_youtube_links(mess.message_text):
                 self.cadance_musics_log.add_line(link)
                 log.info("Added {} to cadmusic".format(link))
 
     @logerrors
-    def random_chat(self, mess):
+    def random_chat(self, mess: Message) -> CommandResult:
         """Does things"""
         log.debug("SweetieChat random chat")
         message = mess.message_text
@@ -230,9 +245,9 @@ class SweetieChat(object):
             return random_junk
 
         if is_ping:
-            return self.sass.get_next()
+            return self.sass.get_next()  # type: ignore[attr-defined]
 
-    def get_random_junk(self, mess):
+    def get_random_junk(self, mess: Message) -> CommandResult:
         message = mess.message_text
         sender = mess.sender_nick
 
@@ -241,14 +256,14 @@ class SweetieChat(object):
         #    return
 
         if re.findall(r"\bc/d\b", message):
-            return sender + ": " + random.choice(["c", "d"])
+            return sender + ": " + random.choice(["c", "d"])  # type: ignore[operator]
 
         is_ping = mess.is_ping
         if "yiff" in message.lower() and is_ping:
-            return sender + ": yiff in hell, furfag :sweetiemad:"
+            return sender + ": yiff in hell, furfag :sweetiemad:"  # type: ignore[operator]
 
         if ":lunabeh:" in message.lower() and (
-            sender == ":owl" or "luna" in sender.lower()
+            sender == ":owl" or "luna" in sender.lower()  # type: ignore[union-attr]
         ):
             self.lunabeh_count = self.lunabeh_count + 1
 
@@ -265,13 +280,13 @@ class SweetieChat(object):
 
         if mess.command == "how":
             xisyre = r"(.+?)\s+(?:is|are|was|were)\s+(.+?)\s*(?:\?)?\s*$"
-            match = re.match(xisyre, mess.args)
+            match = re.match(xisyre, mess.args)  # type: ignore[arg-type]
             if match:
                 x = match.group(1)
                 y = match.group(2)
                 percent = self.hashpercent(x + y)
                 return "{}: {} [{}% {}]".format(sender, y, percent, x)
-            if "do you do" in mess.args.lower():
+            if "do you do" in mess.args.lower():  # type: ignore[union-attr]
                 return "How do you do?"
 
             return "to be honest, I'm not sure"
@@ -279,7 +294,7 @@ class SweetieChat(object):
         if mess.command in ("will", "should", "do"):
             return self.eightball(mess)
 
-        if mess.command == "what" and mess.args.lower().startswith("is love"):
+        if mess.command == "what" and mess.args.lower().startswith("is love"):  # type: ignore[union-attr]
             link = "http://i.imgur.com/nhMLKUB.gif"
             text = "baby don't hurt me"
             return MessageResponse(
@@ -290,7 +305,7 @@ class SweetieChat(object):
 
         if mess.command == "what":
             whatisre = r"\s*(?:is|are)\s+(.+?)\s*(?:\?)?\s*$"
-            match = re.match(whatisre, mess.args)
+            match = re.match(whatisre, mess.args)  # type: ignore[arg-type]
             if match:
                 term = match.group(1)
                 return self.dictionary.get_definition(term)
@@ -301,13 +316,13 @@ class SweetieChat(object):
         if re.match(r".+is gay\s*$", message, re.IGNORECASE) or re.match(
             r"^gay$", message, re.IGNORECASE
         ):
-            return sender + ": mlyp"
+            return sender + ": mlyp"  # type: ignore[operator]
 
-    def hashpercent(self, input):
+    def hashpercent(self, input: str) -> float:
         return int(hashlib.md5(input.encode()).hexdigest(), 16) % 10001 / 100
 
     @botcmd(name="8ball")
-    def eightball(self, mess):
+    def eightball(self, mess: Message) -> str:
         if not mess.args:
             return "You need to ask something"
         chance = self.hashpercent(mess.args)
@@ -341,7 +356,7 @@ class SweetieChat(object):
         return choices[int(chance) % len(choices)]
 
     @botcmd
-    def cadmusic(self, message):
+    def cadmusic(self, message: Message) -> str:
         """Cadance Simulator 2016"""
         return "{} {} :{}:".format(
             self.cadance_musics_log.get_next(),
@@ -350,47 +365,47 @@ class SweetieChat(object):
         )
 
     @botcmd(hidden=True)
-    def quiet(self, message):
+    def quiet(self, message: Message) -> str:
         """I will only respond to pings"""
         self.chattiness = 0
         sender = message.sender_nick
-        if "rainbow" in sender.lower():
+        if "rainbow" in sender.lower():  # type: ignore[union-attr]
             return ":rdderp: okay then"
-        if "luna" in sender.lower():
+        if "luna" in sender.lower():  # type: ignore[union-attr]
             return ":lunabeh: fine"
-        if "shard" in sender.lower():
+        if "shard" in sender.lower():  # type: ignore[union-attr]
             return "I'll be quiet if you make more emotes for me :sweetiedust:"
-        if "sparkle" in sender.lower():
+        if "sparkle" in sender.lower():  # type: ignore[union-attr]
             return "Yes, my princess :sweetiepleased:"
-        if "spike" in sender.lower():
+        if "spike" in sender.lower():  # type: ignore[union-attr]
             return "Oh my! A dragon! :sweetie: Of course I'll be quiet"
-        return sender + ": Sorry! I'll be quiet"
+        return sender + ": Sorry! I'll be quiet"  # type: ignore[operator]
 
     @botcmd(name="chat", hidden=True)
-    def unquiet(self, message):
+    def unquiet(self, message: Message) -> str:
         """I will chat every once in a while"""
         self.chattiness = 0.025
-        return message.sender_nick + ": Ok, I'll start chatting again"
+        return message.sender_nick + ": Ok, I'll start chatting again"  # type: ignore[operator]
 
     @botcmd
-    def sass(self, message):
+    def sass(self, message: Message) -> str:
         """[message] Remembers some sass to say back next time it is mentioned"""
-        if len(message.args) > 400:
+        if len(message.args) > 400:  # type: ignore[arg-type]
             return "Sass too long :sweetiedust"
-        if not message.args.strip():
+        if not message.args.strip():  # type: ignore[union-attr]
             return "What do you want me to remember?"
-        if ":owl:" in message.args or message.sender_nick == ":owl":
+        if ":owl:" in message.args or message.sender_nick == ":owl":  # type: ignore[operator]
             return "No owls allowed! :sweetiedust:"
-        reply = message.sender_nick + ": I'll remember that!"
-        self.sass.add_line(message.args.replace("\n", " ").strip())
+        reply = message.sender_nick + ": I'll remember that!"  # type: ignore[operator]
+        self.sass.add_line(message.args.replace("\n", " ").strip())  # type: ignore[attr-defined, union-attr]
         return reply
 
     @botcmd
-    def choose(self, message):
+    def choose(self, message: Message) -> str:
         """[choices] Choose one of a (comma-separated) list of options"""
-        return random.choice(list(map(lambda e: e.strip(), message.args.split(","))))
+        return random.choice(list(map(lambda e: e.strip(), message.args.split(","))))  # type: ignore[union-attr]
 
     @botcmd
-    def version(self, message):
+    def version(self, message: Message) -> str:
         with open("version.txt", "r") as versiontxt:
             return " ".join(map(str.strip, versiontxt.readlines()))

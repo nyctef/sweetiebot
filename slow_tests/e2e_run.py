@@ -5,13 +5,16 @@
 import os
 
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-os.sys.path.insert(0, parentdir)
+os.sys.path.insert(0, parentdir)  # type: ignore[attr-defined]
 
 from sweetiebot import build_sweetiebot
 import slixmpp
 import queue
+import re
 from utils import logerrors
 from threading import Event
+from typing import Any
+from sweetiebot import Sweetiebot
 
 """
 
@@ -24,14 +27,14 @@ some way of logging and waiting for messages from a slixmpp bot to do tests with
 class LoggingXMPPClient:
     """ xmpp client that logs all received messages to a list on a bg thread"""
 
-    def __init__(self):
-        self.messages = []
+    def __init__(self) -> None:
+        self.messages: list[Any] = []
 
 
 class FakeXMPPUser:
     """ helper class for making assertions about the state of a chat"""
 
-    def __init__(self, timeout, username, password, nick):
+    def __init__(self, timeout: float, username: str, password: str, nick: str) -> None:
         print("creating bot..")
         self.nick = nick
         self.chatroom = "test_room@conference.jabberserver"
@@ -42,14 +45,14 @@ class FakeXMPPUser:
         self.muc = bot.plugin["xep_0045"]
         self.bot = bot
         self.timeout = timeout
-        self.messages = queue.Queue()
+        self.messages: queue.Queue[Any] = queue.Queue()
         self.has_joined_chat = Event()
         print("fake user connecting ..")
         self.bot.connect(address=("localhost", 5222))
         print(".. connected")
         self.bot.process()
 
-    def on_start(self, event):
+    def on_start(self, event: Any) -> None:
         print("fake user on_start")
         self.bot.get_roster()
         self.bot.send_presence()
@@ -57,12 +60,14 @@ class FakeXMPPUser:
         self.muc.join_muc(self.chatroom, self.nick, wait=True)
         self.has_joined_chat.set()
 
-    def send_message(self, message, html=None):
+    def send_message(self, message: str, html: str | None = None) -> None:
         self.bot.send_message(
             mto=self.chatroom, mbody=message, mhtml=html, mtype="groupchat"
         )
 
-    def has_received_message(self, message_re=None, sender=None):
+    def has_received_message(
+        self, message_re: re.Pattern[str] | None = None, sender: str | None = None
+    ) -> Any:
         return self.messages.get(True, self.timeout)
         # if message_re is not None and not message_re.match(message.message_text):
         # print('failed at re')
@@ -76,27 +81,27 @@ class FakeXMPPUser:
         # return found_message
 
     @logerrors
-    def on_message_received(self, message):
+    def on_message_received(self, message: Any) -> None:
         # print('message recieved: '+str(message))
         if message["subject"] or message["mucnick"] == "admin":
             return
         self.messages.put(message)
 
-    def check_for_messages(self):
+    def check_for_messages(self) -> None:
         pass  # self.bot.process()
 
-    def quit(self):
+    def quit(self) -> None:
         self.bot.disconnect()
 
 
-def stay_awhile_and_listen():
+def stay_awhile_and_listen() -> None:
     import time
 
     # TODO: replace any usage of this function with something that spins on a condition or actually waits for a specific message id
     time.sleep(1)
 
 
-def bot_connects_to_chat():
+def bot_connects_to_chat() -> Sweetiebot:
     import config
 
     sweet = build_sweetiebot()
@@ -104,7 +109,7 @@ def bot_connects_to_chat():
     return sweet
 
 
-def admin_connects_to_chat():
+def admin_connects_to_chat() -> FakeXMPPUser:
     import config
 
     print("connecting admin...")
@@ -116,7 +121,7 @@ def admin_connects_to_chat():
     return admin
 
 
-def test_user_connects_to_chat():
+def test_user_connects_to_chat() -> FakeXMPPUser:
     username = "normal_user@jabberserver/asdftest"
     password = "password1234"
     test_user = FakeXMPPUser(10, username, password, "test_user")
@@ -124,23 +129,23 @@ def test_user_connects_to_chat():
     return test_user
 
 
-def when_bot_is_pinged(admin):
+def when_bot_is_pinged(admin: FakeXMPPUser) -> None:
     admin.send_message("Sweetiebot: this is a ping")
 
 
-def bot_responds_with_sass(admin):
+def bot_responds_with_sass(admin: FakeXMPPUser) -> None:
     stay_awhile_and_listen()
     admin.check_for_messages()
     admin.has_received_message(sender="Sweetiebot")
 
 
-def send_and_wait(message):
+def send_and_wait(message: str) -> None:
     global admin
-    admin.send_message(message, message)
-    admin.has_received_message()
+    admin.send_message(message, message)  # type: ignore[union-attr]
+    admin.has_received_message()  # type: ignore[union-attr]
 
 
-def spam_bot_with_stuff(admin):
+def spam_bot_with_stuff(admin: FakeXMPPUser) -> None:
     send_and_wait("Sweetiebot: hElp")
     send_and_wait("Sweetiebot: confirmed c/d")
     send_and_wait('<a href="http://google.com/">google ?q=&#x192;</a>')
@@ -153,7 +158,7 @@ def spam_bot_with_stuff(admin):
     send_and_wait("Sweetiebot: seen admin")
 
 
-def test_admin(admin):
+def test_admin(admin: FakeXMPPUser) -> None:
     send_and_wait("Sweetiebot: banlist")
     send_and_wait("Sweetiebot: ban test_user for science")
     send_and_wait("Sweetiebot: listbans")
@@ -161,13 +166,13 @@ def test_admin(admin):
     send_and_wait("Sweetiebot: listbans")
 
 
-def test_lookup(admin):
+def test_lookup(admin: FakeXMPPUser) -> None:
     send_and_wait("Sweetiebot: yt pfudor")
     send_and_wait("Sweetiebot: woon")
     send_and_wait("Sweetiebot: jita tayra")
 
 
-def test_pings(admin):
+def test_pings(admin: FakeXMPPUser) -> None:
     send_and_wait("Sweetiebot: subscribe")
     send_and_wait("Sweetiebot: subscribe test_ping")
     send_and_wait("Sweetiebot: subscribe   test_ping")
@@ -181,49 +186,50 @@ def test_pings(admin):
     send_and_wait("Sweetiebot: groups")
 
 
-def bot_tries_to_kick_admin():
-    admin.send_message("Sweetiebot: kick admin")
+def bot_tries_to_kick_admin() -> None:
+    admin.send_message("Sweetiebot: kick admin")  # type: ignore[union-attr]
     stay_awhile_and_listen()
 
 
-def bot_kicks_test_user():
-    admin.send_message("Sweetiebot: kick test_user")
+def bot_kicks_test_user() -> None:
+    admin.send_message("Sweetiebot: kick test_user")  # type: ignore[union-attr]
     stay_awhile_and_listen()
     stay_awhile_and_listen()
 
 
-def bot_kicks_missing_user():
+def bot_kicks_missing_user() -> None:
     send_and_wait("Sweetiebot: kick nobody")
 
 
-def bot_kicks_missing_jid():
+def bot_kicks_missing_jid() -> None:
     send_and_wait("Sweetiebot: kickjid nobody@jabberserver")
 
 
-def bot_kicks_test_user_by_jid():
-    admin.send_message("Sweetiebot: kickjid sweetietest@jabberserver")
+def bot_kicks_test_user_by_jid() -> None:
+    admin.send_message("Sweetiebot: kickjid sweetietest@jabberserver")  # type: ignore[union-attr]
     stay_awhile_and_listen()
     stay_awhile_and_listen()
 
 
-def fake_user_disconnects(admin):
+def fake_user_disconnects(admin: FakeXMPPUser | None) -> None:
     print("trying to kill admin" + str(admin))
     if admin:
         admin.quit()
 
 
-def bot_disconnects(bot):
+def bot_disconnects(bot: Sweetiebot | None) -> None:
     print("trying to kill bot" + str(bot))
     if bot:
-        bot.bot.disconnect()
+        # MUCJabberBot has no such method
+        bot.bot.disconnect()  # type: ignore[attr-defined]
 
 
-admin = None
-sweetie = None
-test_user = None
+admin: FakeXMPPUser | None = None
+sweetie: Sweetiebot | None = None
+test_user: FakeXMPPUser | None = None
 
 
-def run_tests():
+def run_tests() -> None:
     global sweetie
     sweetie = bot_connects_to_chat()
     global admin

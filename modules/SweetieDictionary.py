@@ -2,22 +2,24 @@ import logging
 import re
 import requests
 from utils import logerrors, botcmd
+from modules.MUCJabberBot import MUCJabberBot
+from modules.Message import Message
 
 log = logging.getLogger(__name__)
 
 
 class SweetieDictionary(object):
-    def __init__(self, bot):
+    def __init__(self, bot: MUCJabberBot) -> None:
         self.bot = bot
         self.bot.load_commands_from(self)
 
     @botcmd
-    def define(self, message):
+    def define(self, message: Message) -> str:
         """[terms] Word-explainer-tron 3000"""
-        return self.get_definition(message.args)
+        return self.get_definition(message.args)  # type: ignore[arg-type]
 
     @logerrors
-    def get_definition(self, term):
+    def get_definition(self, term: str) -> str:
         # strip off any extra qualifiers
         term = re.sub(r"^((a|an|definition|of|the)\s+)+", "", term)
         if not term:

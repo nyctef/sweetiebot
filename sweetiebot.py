@@ -26,6 +26,10 @@ from modules import (
 )
 import time
 import traceback
+from types import ModuleType
+from typing import Any
+from modules.Message import Message
+from modules.MessageResponse import CommandResult
 
 
 log = logging.getLogger(__name__)
@@ -34,16 +38,16 @@ log = logging.getLogger(__name__)
 class Sweetiebot(object):
     def __init__(
         self,
-        nickname,
-        bot,
-        lookup,
-        admin,
-        chat,
-        roulette,
-        sweetiede,
-        pings,
-        moon,
-    ):
+        nickname: str,
+        bot: MUCJabberBot,
+        lookup: SweetieLookup,
+        admin: SweetieAdmin,
+        chat: SweetieChat,
+        roulette: SweetieRoulette,
+        sweetiede: SweetieDe,
+        pings: SweetiePings,
+        moon: SweetieMoon,
+    ) -> None:
         self.nickname = nickname
         self.bot = bot
         log.debug("setting unknown_command_callback on " + str(self.bot))
@@ -56,15 +60,17 @@ class Sweetiebot(object):
         self.pings = pings
         self.moon = moon
 
-    def unknown_command(self, message):
+    def unknown_command(self, message: Message) -> CommandResult:
         log.debug("Sweetiebot unknown_command")
         return self.chat.random_chat(message)
 
-    def process(self):
+    def process(self) -> None:
         self.bot.process()
 
 
-def build_sweetiebot(config=None):
+# config is a config module, or None to use the default one. It's typed as Any
+# because mypy doesn't treat the `import config` below as narrowing it
+def build_sweetiebot(config: Any = None) -> Sweetiebot:
     if config is None:
         import config
     resource = config.nickname + randomstr()
@@ -115,7 +121,7 @@ def build_sweetiebot(config=None):
     return sweet
 
 
-def setup_logging(config):
+def setup_logging(config: ModuleType) -> None:
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.DEBUG)
     root_logger.handlers = []

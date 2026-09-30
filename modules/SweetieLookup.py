@@ -8,6 +8,9 @@ import re
 from utils import logerrors, botcmd
 from random import randint
 from modules.MessageResponse import MessageResponse
+from modules.MUCJabberBot import MUCJabberBot
+from modules.Message import Message
+from typing import Any, Mapping
 
 log = logging.getLogger(__name__)
 
@@ -16,17 +19,18 @@ class SweetieLookup(object):
 
     id_dic = {"": ""}
 
-    def __init__(self, bot):
+    def __init__(self, bot: MUCJabberBot) -> None:
         self.bot = bot
         self.bot.load_commands_from(self)
 
-    def get_sender_username(self, mess):
-        return self.bot.get_sender_username(mess)
+    def get_sender_username(self, mess: Message) -> Any:
+        # MUCJabberBot has no such method
+        return self.bot.get_sender_username(mess)  # type: ignore[attr-defined]
 
-    def chat(self, message):
+    def chat(self, message: str | MessageResponse) -> None:
         self.bot.send_groupchat_message(message)
 
-    def ross(self):
+    def ross(self) -> str:
         return random.choice(
             [
                 "In painting, you have unlimited power. You have the ability to move mountains. You can bend rivers. But when I get home, the only thing I have power over is the garbage",
@@ -51,24 +55,24 @@ class SweetieLookup(object):
 
     @botcmd
     @logerrors
-    def argue(self, message):
+    def argue(self, message: Message) -> str:
         """Get angry"""
         return self.ross()
 
     @botcmd
     @logerrors
-    def rant(self, message):
+    def rant(self, message: Message) -> str:
         """Rage at the dying of the light"""
         return self.ross()
 
     class Bunch:
-        def __init__(self, **kw): setattr(self, "__dict__", kw)
-        def __getattr__(self, name): return None
+        def __init__(self, **kw: Any) -> None: setattr(self, "__dict__", kw)
+        def __getattr__(self, name: str) -> Any: return None
 
-    def dice_error(self, message, *args):
+    def dice_error(self, message: str, *args: object) -> "SweetieLookup.Bunch":
         return SweetieLookup.Bunch(error=message.format(*args))
 
-    def parse_dice(self, dice_spec):
+    def parse_dice(self, dice_spec: str) -> "SweetieLookup.Bunch":
         # scrap whitespace
         dice_spec = re.sub(r"\s+", "", dice_spec, re.UNICODE)
 
@@ -127,7 +131,8 @@ class SweetieLookup(object):
                 elif modifier == "!":
                     explode = True
                 else:
-                    raise "unknown modifier"
+                    # raises a TypeError, which is handled below
+                    raise "unknown modifier"  # type: ignore[misc]
 
             return SweetieLookup.Bunch(
                 dice=dice,
@@ -143,10 +148,10 @@ class SweetieLookup(object):
         return SweetieLookup.Bunch(dice=dice, sides=sides)
 
     @botcmd
-    def roll(self, message):
+    def roll(self, message: Message) -> str:
         """[eg 5d20] Roll some dice"""
         try:
-            dice_spec = self.parse_dice(message.args)
+            dice_spec = self.parse_dice(message.args)  # type: ignore[arg-type]
             if dice_spec.error:
                 return dice_spec.error
             dice = dice_spec.dice
@@ -200,24 +205,24 @@ class SweetieLookup(object):
         return roll_list
 
     class ExplodingDice:
-        def __init__(self, initialValue):
+        def __init__(self, initialValue: int) -> None:
             self.rolls = [int(initialValue)]
 
-        def last_roll(self):
+        def last_roll(self) -> int:
             return self.rolls[-1]
 
-        def add_roll(self, roll):
+        def add_roll(self, roll: int) -> "SweetieLookup.ExplodingDice":
             self.rolls.append(int(roll))
             return self
 
-        def sum(self):
+        def sum(self) -> int:
             return sum(self.rolls)
 
-    def explode_dice(self, rolls, sides):
+    def explode_dice(self, rolls: list[int], sides: int) -> list[int]:
         sides = int(sides)
         rolls = list(map(SweetieLookup.ExplodingDice, rolls))
-        def should_explode(r): return r.last_roll() == sides
-        def add_roll(r, n): return r.add_roll(n)
+        def should_explode(r: SweetieLookup.ExplodingDice) -> bool: return r.last_roll() == sides
+        def add_roll(r: SweetieLookup.ExplodingDice, n: int) -> SweetieLookup.ExplodingDice: return r.add_roll(n)
         unexploded_rolls = list(rolls)
         while any(unexploded_rolls):
             unexploded_rolls = list(filter(should_explode, unexploded_rolls))
@@ -226,14 +231,14 @@ class SweetieLookup(object):
 
         return list(map(lambda x: x.sum(), rolls))
 
-    def get_rolls(self, dice=1, sides=6):
+    def get_rolls(self, dice: int = 1, sides: int = 6) -> list[int]:
         try:
             return [randint(1, sides) for i in range(dice)]
         except Exception:
             return []
 
     @botcmd
-    def date(self, message):
+    def date(self, message: Message) -> str:
         """Returns the current datetime in a bunch of timezones"""
         now = datetime.now(pytz.utc)
         usptz = pytz.timezone("US/Pacific")
@@ -249,7 +254,9 @@ class SweetieLookup(object):
         return ("\n" + "\n".join(dates)).replace("UTC", "EVE")
 
     @logerrors
-    def random_reddit_link(self, subreddit, domain_filter=None):
+    def random_reddit_link(
+        self, subreddit: str, domain_filter: tuple[str, ...] | None = None
+    ) -> MessageResponse:
         luna_data = self.get(
             "http://www.reddit.com/r/{}/new.json?limit=100".format(subreddit)
         )
@@ -270,7 +277,7 @@ class SweetieLookup(object):
 
     @botcmd
     @logerrors
-    def ferret(self, message):
+    def ferret(self, message: Message) -> MessageResponse | str:
         """Ferret!"""
         return self.random_reddit_link(
             "ferret", ("imgur.com", "i.imgur.com", "youtu.be", "i.redd.it")
@@ -278,7 +285,7 @@ class SweetieLookup(object):
 
     @botcmd
     @logerrors
-    def woon(self, message):
+    def woon(self, message: Message) -> MessageResponse:
         """loona woona"""
         luna_data = self.get("http://www.reddit.com/r/princessluna/new.json?limit=100")
         if luna_data is None:
@@ -299,7 +306,7 @@ class SweetieLookup(object):
         plain = "{} [ {} ]".format(text, link)
         return MessageResponse(plain, None, html=html)
 
-    def get_children_of_type(self, reddit_data, kind):
+    def get_children_of_type(self, reddit_data: Any, kind: str) -> list[Any]:
         if type(reddit_data) is dict:
             return self.get_children_from_listing(reddit_data, kind)
 
@@ -309,14 +316,14 @@ class SweetieLookup(object):
                 result.append(child)
         return result
 
-    def get_children_from_listing(self, listing_data, kind):
+    def get_children_from_listing(self, listing_data: Any, kind: str) -> list[Any]:
         result = []
         for child in listing_data["data"]["children"]:
             if child["kind"] == kind:
                 result.append(child)
         return result
 
-    def get(self, url, extra_headers={}):
+    def get(self, url: str, extra_headers: Mapping[str, str] = {}) -> str | None:
         try:
             headers = {"user-agent": "sweetiebot", "cache-control": "no-cache"}
             headers.update(extra_headers)

@@ -1,8 +1,9 @@
 import random
 from fnmatch import fnmatch
+from typing import Any, ValuesView
 
 
-def enc(string):
+def enc(string: str | bytes) -> bytes:
     # redis actually stores bytes, not strings
     if isinstance(string, bytes):
         return string
@@ -10,33 +11,34 @@ def enc(string):
 
 
 class FakeRedis(object):
-    def __init__(self):
-        self.data = {}
+    def __init__(self) -> None:
+        # values are bytes (plain keys), lists of bytes (sets) or dicts (hashes)
+        self.data: dict[bytes, Any] = {}
 
-    def set(self, key, value):
+    def set(self, key: str | bytes, value: str | bytes) -> None:
         key = enc(key)
         value = enc(value)
         self.data[key] = value
 
-    def get(self, key):
+    def get(self, key: str | bytes) -> bytes | None:
         key = enc(key)
         if key not in self.data:
             return None
         return self.data[key]
 
-    def keys(self, pattern):
+    def keys(self, pattern: str) -> list[bytes]:
         return [
             x for x in list(self.data.keys()) if fnmatch(x.decode("utf-8"), pattern)
         ]
 
-    def srandmember(self, key):
+    def srandmember(self, key: str | bytes) -> bytes | None:
         key = enc(key)
         try:
             return random.choice(self.data[key])
         except KeyError:
             return None
 
-    def sadd(self, key, value):
+    def sadd(self, key: str | bytes, value: str | bytes) -> int:
         key = enc(key)
         value = enc(value)
         if key in self.data:
@@ -47,13 +49,13 @@ class FakeRedis(object):
         self.data[key] = [value]
         return 1
 
-    def smembers(self, key):
+    def smembers(self, key: str | bytes) -> list[bytes]:
         key = enc(key)
         if key in self.data:
             return self.data[key]
         return []
 
-    def srem(self, key, value):
+    def srem(self, key: str | bytes, value: str | bytes) -> int | None:
         key = enc(key)
         value = enc(value)
         if key in self.data:
@@ -61,11 +63,11 @@ class FakeRedis(object):
                 self.data[key].remove(value)
                 return 1
 
-    def scard(self, key):
+    def scard(self, key: str | bytes) -> int:
         key = enc(key)
         return len(self.data[key])
 
-    def hincrby(self, key, field, increment):
+    def hincrby(self, key: str | bytes, field: str | bytes, increment: int) -> None:
         key = enc(key)
         field = enc(field)
         if key not in self.data:
@@ -76,7 +78,7 @@ class FakeRedis(object):
         hash[field] += increment
         # print(key, '=', field, hash[field])
 
-    def hset(self, key, field, value):
+    def hset(self, key: str | bytes, field: str | bytes, value: str | bytes) -> None:
         key = enc(key)
         field = enc(field)
         value = enc(value)
@@ -85,22 +87,22 @@ class FakeRedis(object):
         hash = self.data[key]
         hash[field] = value
 
-    def hgetall(self, key):
+    def hgetall(self, key: str | bytes) -> dict[bytes, Any]:
         key = enc(key)
         if key not in self.data:
             self.data[key] = {}
         return self.data[key]
 
-    def hvals(self, key):
+    def hvals(self, key: str | bytes) -> ValuesView[Any]:
         key = enc(key)
         if key not in self.data:
             self.data[key] = {}
         return self.data[key].values()
 
-    def exists(self, key):
+    def exists(self, key: str | bytes) -> bool:
         key = enc(key)
         return key in self.data
 
-    def delete(self, key):
+    def delete(self, key: str | bytes) -> None:
         key = enc(key)
         del self.data[key]

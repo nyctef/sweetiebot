@@ -4,6 +4,7 @@ import psycopg2
 from modules.SweetiePings import PingStoragePg, PingStorageRedis
 from modules.FakeRedis import FakeRedis
 from modules import PgWrapper
+from typing import Callable
 
 pg_conn_str = getenv("SB_PG_DB", None)
 if not pg_conn_str:
@@ -11,16 +12,22 @@ if not pg_conn_str:
 
 
 class PingStorageTests(object):
-    def test_returns_empty_members_list(self):
+    impl: PingStoragePg | PingStorageRedis
+    # provided by unittest.TestCase in the concrete test classes
+    assertListEqual: Callable[..., None]
+    assertTrue: Callable[..., None]
+    assertFalse: Callable[..., None]
+
+    def test_returns_empty_members_list(self) -> None:
         result = self.impl.get_ping_group_members("empty_group")
         self.assertListEqual([], result)
 
-    def test_returns_members_list_containing_member(self):
+    def test_returns_members_list_containing_member(self) -> None:
         self.impl.add_ping_group_member("group", "member1")
         result = self.impl.get_ping_group_members("group")
         self.assertListEqual(["member1"], result)
 
-    def test_adding_group_member_is_idempotent(self):
+    def test_adding_group_member_is_idempotent(self) -> None:
         v1 = self.impl.add_ping_group_member("group", "member1")
         v2 = self.impl.add_ping_group_member("group", "member1")
         self.assertTrue(v1)
@@ -28,7 +35,7 @@ class PingStorageTests(object):
         result = self.impl.get_ping_group_members("group")
         self.assertListEqual(["member1"], result)
 
-    def test_removing_group_member(self):
+    def test_removing_group_member(self) -> None:
         self.impl.add_ping_group_member("evil_horde", "adora")
         self.impl.add_ping_group_member("evil_horde", "catra")
         self.impl.remove_ping_group_member("evil_horde", "adora")
@@ -36,13 +43,13 @@ class PingStorageTests(object):
         result = self.impl.get_ping_group_members("evil_horde")
         self.assertListEqual(["catra"], result)
 
-    def test_removing_group_member_from_empty_group_does_nothing(self):
+    def test_removing_group_member_from_empty_group_does_nothing(self) -> None:
         v1 = self.impl.remove_ping_group_member("group", "member1")
         self.assertFalse(v1)
         result = self.impl.get_ping_group_members("group")
         self.assertListEqual([], result)
 
-    def test_listing_groups(self):
+    def test_listing_groups(self) -> None:
         result = self.impl.get_ping_group_list()
         self.assertListEqual([], result)
 
@@ -53,14 +60,14 @@ class PingStorageTests(object):
         result = self.impl.get_ping_group_list()
         self.assertListEqual([("人間", 1), ("獣人", 2)], result)
 
-    def test_listing_groups_ignores_empty_groups(self):
+    def test_listing_groups_ignores_empty_groups(self) -> None:
         self.impl.add_ping_group_member("evil horde", "catra")
         self.impl.remove_ping_group_member("evil horde", "catra")
 
         result = self.impl.get_ping_group_list()
         self.assertListEqual([], result)
 
-    def test_get_groups_for_member(self):
+    def test_get_groups_for_member(self) -> None:
         self.impl.add_ping_group_member("人間", "みちる")
         self.impl.add_ping_group_member("獣人", "みちる")
 
@@ -69,19 +76,22 @@ class PingStorageTests(object):
 
 
 class PingStoragePgTests(PingStorageTests, unittest.TestCase):
+    dbwrapper: PgWrapper
+    impl: PingStoragePg
+
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         conn = psycopg2.connect(pg_conn_str)
         conn.autocommit = True
         cur = conn.cursor()
         cur.execute("DROP DATABASE IF EXISTS ping_storage_tests")
         cur.execute("CREATE DATABASE ping_storage_tests")
 
-        cls.dbwrapper = PgWrapper(pg_conn_str + " dbname=ping_storage_tests")
+        cls.dbwrapper = PgWrapper(pg_conn_str + " dbname=ping_storage_tests")  # type: ignore[operator]
         cls.impl = PingStoragePg(cls.dbwrapper)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         cls.dbwrapper._conn.close()
 
         conn = psycopg2.connect(pg_conn_str)
@@ -89,7 +99,7 @@ class PingStoragePgTests(PingStorageTests, unittest.TestCase):
         cur = conn.cursor()
         cur.execute("DROP DATABASE ping_storage_tests")
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.dbwrapper.write(
             # TODO: should this be able to run the sql in create_basic_tables somehow?
             "DROP TABLE IF EXISTS ping_group_memberships;"
@@ -102,5 +112,5 @@ class PingStoragePgTests(PingStorageTests, unittest.TestCase):
 
 
 class PingStorageRedisTests(PingStorageTests, unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.impl = PingStorageRedis(FakeRedis())

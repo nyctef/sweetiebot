@@ -5,12 +5,18 @@ import logging
 from collections import namedtuple
 import laboratory
 from pprint import pformat
+from typing import Any
+from modules.FakeRedis import FakeRedis
+from modules.MUCJabberBot import MUCJabberBot
+from modules.Message import Message
+from modules.PgWrapper import PgWrapper
+from modules.Presence import Presence
 
 log = logging.getLogger(__name__)
 
 
-class LoggingExperiment(laboratory.Experiment):
-    def publish(self, result):
+class LoggingExperiment(laboratory.Experiment):  # type: ignore[misc]
+    def publish(self, result: Any) -> None:
         if not result.match:
             logging.error("Result mismatch!: " + pformat(result))
 
@@ -19,11 +25,11 @@ SeenResult = namedtuple("SeenResult", ["seen", "spoke"])
 
 
 class SeenStorageRedis:
-    def __init__(self, store):
+    def __init__(self, store: FakeRedis) -> None:
         self.store = store
         self.date_format = "%Y-%m-%d %H:%M"
 
-    def _set(self, prefix, name, response):
+    def _set(self, prefix: str, name: str | None, response: str | None) -> None:
         if name is None or response is None:
             # TODO: find out why we hit this branch
             log.warning("skipping setting {} to {}".format(name, response))
@@ -31,28 +37,28 @@ class SeenStorageRedis:
         log.debug("setting {} {} to {}".format(prefix, name, response))
         self.store.set(prefix + ":" + name, response)
 
-    def _parse(self, bytes):
+    def _parse(self, bytes: bytes | None) -> datetime | None:
         if bytes is None:
             return None
         return datetime.strptime(bytes.decode(), self.date_format)
 
-    def set_last_seen_time(self, target, time):
+    def set_last_seen_time(self, target: str | None, time: datetime) -> None:
         self._set("seen", target, time.strftime(self.date_format))
 
-    def set_last_spoke_time(self, target, time):
+    def set_last_spoke_time(self, target: str | None, time: datetime) -> None:
         self._set("spoke", target, time.strftime(self.date_format))
 
-    def get_seen(self, target):
+    def get_seen(self, target: str) -> SeenResult:
         seen = self.store.get("seen:" + target)
         spoke = self.store.get("spoke:" + target)
         return SeenResult(self._parse(seen), self._parse(spoke))
 
 
 class SeenStoragePg:
-    def __init__(self, dbwrapper):
+    def __init__(self, dbwrapper: PgWrapper) -> None:
         self.dbwrapper = dbwrapper
 
-    def set_last_seen_time(self, target, time):
+    def set_last_seen_time(self, target: str | None, time: datetime | None) -> None:
         if target is None or time is None:
             # TODO: find out why we hit this branch
             log.warning("skipping setting seen {} to {}".format(target, time))
@@ -65,7 +71,7 @@ class SeenStoragePg:
             (target, time),
         )
 
-    def set_last_spoke_time(self, target, time):
+    def set_last_spoke_time(self, target: str | None, time: datetime | None) -> None:
         if target is None or time is None:
             # TODO: find out why we hit this branch
             log.warning("skipping setting spoke {} to {}".format(target, time))
@@ -78,7 +84,7 @@ class SeenStoragePg:
             (target, time),
         )
 
-    def get_seen(self, target):
+    def get_seen(self, target: str) -> SeenResult:
         result = self.dbwrapper.query_all(
             "SELECT seen, spoke from seen_records " "WHERE target = %s", (target,)
         )
@@ -96,14 +102,16 @@ class SeenStoragePg:
 
 
 class SweetieSeen:
-    def __init__(self, bot, storage):
+    def __init__(
+        self, bot: MUCJabberBot, storage: SeenStorageRedis | SeenStoragePg
+    ) -> None:
         self.bot = bot
         self.storage = storage
         self.bot.add_presence_handler(self.on_presence)
         self.bot.add_message_handler(self.on_message)
         self.bot.load_commands_from(self)
 
-    def on_presence(self, presence):
+    def on_presence(self, presence: Presence) -> None:
         log.debug(
             "recieved presence: {} from {}".format(
                 presence.presence_type, presence.user_jid
@@ -116,7 +124,7 @@ class SweetieSeen:
             self.storage.set_last_seen_time(user, datetime.now(timezone.utc))
             self.storage.set_last_seen_time(nickname, datetime.now(timezone.utc))
 
-    def on_message(self, message):
+    def on_message(self, message: Message) -> None:
         if message.is_pm:
             return
 
@@ -127,7 +135,7 @@ class SweetieSeen:
 
     @botcmd
     @logerrors
-    def seen(self, message):
+    def seen(self, message: Message) -> str:
         """[nick/jid] Report when a user was last seen"""
 
         # TODO: I'm not totally convinced about the logic around jidtarget/
@@ -136,7 +144,7 @@ class SweetieSeen:
         jidtarget = JID(self.bot.get_jid_from_nick(args)).bare
         target = jidtarget or args
 
-        result = self.storage.get_seen(target)
+        result = self.storage.get_seen(target)  # type: ignore[arg-type]
         seen = result.seen
         spoke = result.spoke
 
@@ -151,7 +159,7 @@ class SweetieSeen:
         else:
             return "No records found for user '{}'".format(args)
 
-    def get_time_ago(self, now, past):
+    def get_time_ago(self, now: datetime, past: datetime) -> str:
         td = now - past
         if td.total_seconds() < 0:
             return "in the future"

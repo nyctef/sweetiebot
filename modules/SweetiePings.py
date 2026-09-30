@@ -1,28 +1,33 @@
 from utils import logerrors, botcmd
 from datetime import datetime
 from slixmpp.jid import JID
+from typing import Any
+from modules.FakeRedis import FakeRedis
+from modules.MUCJabberBot import MUCJabberBot
+from modules.Message import Message
+from modules.PgWrapper import PgWrapper
 
 
 class PingStorageRedis(object):
-    def __init__(self, store):
+    def __init__(self, store: FakeRedis) -> None:
         self.store = store
 
-    def get_ping_group_members(self, group):
+    def get_ping_group_members(self, group: str) -> list[str]:
         return [x.decode() for x in self.store.smembers(f"ping:{group}")]
 
-    def add_ping_group_member(self, group, member):
+    def add_ping_group_member(self, group: str, member: str) -> int:
         return self.store.sadd(f"ping:{group}", str(member))
 
-    def remove_ping_group_member(self, group, member):
+    def remove_ping_group_member(self, group: str, member: str) -> int | None:
         return self.store.srem(f"ping:{group}", str(member))
 
-    def get_ping_group_list(self):
+    def get_ping_group_list(self) -> list[tuple[str, int]]:
         group_names = [x.decode() for x in self.store.keys("ping:*")]
         groups = [(x, self.store.scard(x)) for x in group_names]
         groups = [(x[len("ping:"):], count) for (x, count) in groups]
         return [(group, count) for (group, count) in groups if count > 0]
 
-    def get_ping_groups_for_member(self, member):
+    def get_ping_groups_for_member(self, member: str) -> list[str]:
         result = []
         for group in self.store.keys("ping:*"):
             group_members = self.store.smembers(group)
@@ -34,17 +39,17 @@ class PingStorageRedis(object):
 
 
 class PingStoragePg(object):
-    def __init__(self, dbwrapper):
+    def __init__(self, dbwrapper: PgWrapper) -> None:
         self.dbwrapper = dbwrapper
 
-    def get_ping_group_members(self, group):
+    def get_ping_group_members(self, group: str) -> list[str]:
         results = self.dbwrapper.query_all(
             "SELECT member_jid FROM ping_group_memberships WHERE group_name = %s",
             (group,),
         )
         return [x[0] for x in results]
 
-    def add_ping_group_member(self, group, member):
+    def add_ping_group_member(self, group: str, member: str) -> bool:
         affected_rows = self.dbwrapper.write(
             "INSERT INTO ping_group_memberships (group_name, member_jid) "
             "VALUES (%s, %s) ON CONFLICT DO NOTHING;",
@@ -52,7 +57,7 @@ class PingStoragePg(object):
         )
         return affected_rows > 0
 
-    def remove_ping_group_member(self, group, member):
+    def remove_ping_group_member(self, group: str, member: str) -> bool:
         affected_rows = self.dbwrapper.write(
             "DELETE FROM ping_group_memberships "
             "WHERE group_name = %s AND member_jid = %s",
@@ -60,13 +65,13 @@ class PingStoragePg(object):
         )
         return affected_rows > 0
 
-    def get_ping_group_list(self):
+    def get_ping_group_list(self) -> list[tuple[Any, ...]]:
         return self.dbwrapper.query_all(
             "SELECT group_name, COUNT(member_jid) FROM ping_group_memberships "
             "GROUP BY group_name ORDER BY group_name"
         )
 
-    def get_ping_groups_for_member(self, member):
+    def get_ping_groups_for_member(self, member: str) -> list[str]:
         results = self.dbwrapper.query_all(
             "SELECT DISTINCT group_name FROM ping_group_memberships "
             "WHERE member_jid = %s",
@@ -76,19 +81,21 @@ class PingStoragePg(object):
 
 
 class SweetiePings:
-    def __init__(self, bot, storage):
+    def __init__(
+        self, bot: MUCJabberBot, storage: PingStorageRedis | PingStoragePg
+    ) -> None:
         bot.load_commands_from(self)
         self.bot = bot
         self.storage = storage
 
-    def key(self, group):
+    def key(self, group: str) -> str:
         return "ping:" + group
 
     @botcmd
     @logerrors
-    def ping(self, message):
+    def ping(self, message: Message) -> str:
         """[group] [message] Ping users in a group"""
-        split = message.args.split(None, 1)
+        split = message.args.split(None, 1)  # type: ignore[union-attr]
         if len(split) != 2:
             return "Usage: ping group_name message"
         group = split[0]
@@ -109,7 +116,7 @@ class SweetiePings:
 
     @botcmd
     @logerrors
-    def subscribe(self, message):
+    def subscribe(self, message: Message) -> str:
         """[group] Add yourself to a pingable group"""
         group = message.args
         if not group or group.isspace():
@@ -125,7 +132,7 @@ class SweetiePings:
 
     @botcmd
     @logerrors
-    def unsubscribe(self, message):
+    def unsubscribe(self, message: Message) -> str:
         """[group] Remove yourself from a pingable group"""
         group = message.args
         if not group or group.isspace():
@@ -141,7 +148,7 @@ class SweetiePings:
 
     @botcmd
     @logerrors
-    def groups(self, message):
+    def groups(self, message: Message) -> str:
         """List available groups for pings"""
         result = []
         for (group, count) in self.storage.get_ping_group_list():
@@ -151,7 +158,7 @@ class SweetiePings:
 
     @botcmd
     @logerrors
-    def users(self, message):
+    def users(self, message: Message) -> str:
         """[group] Lists users currently in a pingable group"""
         if not message.args:
             return "Usage: users group_name"
@@ -167,7 +174,7 @@ class SweetiePings:
 
     @botcmd
     @logerrors
-    def mygroups(self, message):
+    def mygroups(self, message: Message) -> str:
         """List pingable groups that you are currently subscribed to"""
         jid = message.user_jid
         if not jid:
@@ -185,25 +192,25 @@ class SweetiePings:
 
     # aliases:
     @botcmd(hidden=True)
-    def group(self, message):
+    def group(self, message: Message) -> str:
         return self.users(message)
 
     @botcmd(hidden=True)
-    def subs(self, message):
+    def subs(self, message: Message) -> str:
         return self.mygroups(message)
 
     @botcmd(hidden=True)
-    def mysubs(self, message):
+    def mysubs(self, message: Message) -> str:
         return self.mygroups(message)
 
     @botcmd(hidden=True)
-    def subscriptions(self, message):
+    def subscriptions(self, message: Message) -> str:
         return self.mygroups(message)
 
     @botcmd(hidden=True)
-    def unsub(self, message):
+    def unsub(self, message: Message) -> str:
         return self.unsubscribe(message)
 
     @botcmd(hidden=True)
-    def sub(self, message):
+    def sub(self, message: Message) -> str:
         return self.subscribe(message)
