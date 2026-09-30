@@ -19,3 +19,9 @@ package = false
 [tool.uv.extra-build-dependencies]
 # legacy sdists with no declared build backend; setuptools is needed to build their wheels
 slixmpp = ["setuptools"]
+
+[dependency-groups]
+dev = [
+  "black>=26.5.1",
+  "flake8>=7.4.1",
+]

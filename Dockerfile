@@ -1,18 +1,18 @@
-FROM python:3.8
+FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim
 
-RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-ENV PIP_DISABLE_PIP_VERSION_CHECK=1
-ENV PIP_NO_CACHE_DIR=1
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
+ENV UV_NO_DEV=1
 
-# only copy pipfile first so that we can cache the pip install step
-COPY Pipfile Pipfile.lock /usr/src/app/
-RUN pip install pipenv && pipenv install --deploy --ignore-pipfile
+# only copy the dependency manifests first so that we can cache the install step
+COPY pyproject.toml uv.lock /usr/src/app/
+RUN uv sync --locked
 
 # now copy everything else
 COPY . /usr/src/app/
 
 RUN echo -n ' | Image built at' `date` >> version.txt
 
-ENTRYPOINT ["pipenv", "run", "python", "/usr/src/app/sweetiebot.py"]
+ENTRYPOINT ["uv", "run", "--no-sync", "python", "/usr/src/app/sweetiebot.py"]

@@ -1,10 +1,8 @@
 
-quick start:
+quick start (requires [uv](https://docs.astral.sh/uv/)):
 
 ```powershell
-pipenv --python 3.8
-pipenv install --dev
-pipenv shell
+uv sync
 ./run-tests.ps1
 
 docker run -d --name sbpostgres -e POSTGRES_PASSWORD=password1234 -p 5432:5432 postgres:11
@@ -13,7 +11,7 @@ $env:SB_PG_DB="host=localhost user=postgres password=password1234"
 ./run-slow-tests.ps1
 ./run-e2e-tests.ps1
 
-python sweetiebot.py
+uv run python sweetiebot.py
 ```
 
 ## Configuration
@@ -52,5 +50,3 @@ Log in as `normal_user@jabberserver` / `password1234` on `localhost:5222` and jo
 Redis is dead in production, but lives on in the tests, since the `FakeRedis` class is a handy in-memory storage layer for unit tests to depend on.
 - eg unit tests in `tests/Pings.py` depends on `PingStorageRedis(FakeRedis())`
 - then `slow_tests/PingStorageTests.py` tries to prove that `PingStorageRedis` behaves the same as `PingStoragePg`, so that the unit tests are also valid in the real code.
-
-The instructions for running with `pipenv` above should probably be replaced with `uv`

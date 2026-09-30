@@ -1,4 +1,4 @@
-env
+.venv
 tests
 __pycache__
 .gitignore

@@ -1,2 +1,2 @@
-pipenv run python slow_tests/e2e_run.py
+uv run python slow_tests/e2e_run.py
 
