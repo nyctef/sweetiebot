@@ -4,7 +4,7 @@ version = "9.1"
 requires-python = "==3.11.*"
 dependencies = [
   "astral==1.6",
-  "beautifulsoup4==4.6.0",
+  "beautifulsoup4>=4.13",
   "requests==2.20.0",
   "pytz>=2016.4",
   "psycopg2-binary>=2.9.9",
